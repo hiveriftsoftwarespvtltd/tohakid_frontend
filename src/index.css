@@ -1,0 +1,117 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&family=Playfair+Display:ital,wght@0,500;0,600;1,400;1,500;1,600&display=swap');
+@import "tailwindcss";
+
+:root {
+  --primary-brand: #D81B60;
+  --primary-pink: #D81B60;
+  --deep-pink: #C2185B;
+  --lavender: #D9B8E8;
+  --soft-purple: #B66CC5;
+  --warm-yellow: #F5D77A;
+  --peach: #F6C8B5;
+  --powder-blue: #C7E4F2;
+  --bg-main: #FFFDFC;
+  --text-dark: #1E293B;
+  --text-subtitle: #334155;
+  --text-muted: #64748B;
+}
+
+* {
+  font-family: 'Roboto', sans-serif;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: 'Roboto', sans-serif;
+  background-color: var(--bg-main);
+  color: var(--text-dark);
+  font-size: 0.95rem;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+h1, h2, h3, h4, h5, h6, .font-heading {
+  font-family: 'Roboto', sans-serif;
+  letter-spacing: -0.01em;
+}
+
+/* Upgraded Typography Rules for Small Text Legibility Across Desktop */
+.text-\[9px\], 
+.text-\[10px\] {
+  font-size: 0.75rem !important; /* 12px minimum for badge & micro text */
+  letter-spacing: 0.02em;
+}
+
+.text-\[11px\] {
+  font-size: 0.8125rem !important; /* 13px */
+  line-height: 1.45;
+}
+
+.text-xs {
+  font-size: 0.875rem !important; /* 14px */
+  line-height: 1.5;
+}
+
+.text-sm {
+  font-size: 0.95rem !important; /* 15.2px */
+  line-height: 1.5;
+}
+
+.text-base {
+  font-size: 1.05rem !important; /* 16.8px */
+  line-height: 1.6;
+}
+
+/* Custom Utilities & Animations */
+@layer utilities {
+  .bg-tohay-pink { background-color: var(--primary-pink); }
+  .bg-tohay-deeppink { background-color: var(--deep-pink); }
+  .bg-tohay-lavender { background-color: var(--lavender); }
+  .bg-tohay-yellow { background-color: var(--warm-yellow); }
+  .bg-tohay-peach { background-color: var(--peach); }
+  .bg-tohay-blue { background-color: var(--powder-blue); }
+  
+  .text-tohay-deeppink { color: var(--deep-pink); }
+  .text-tohay-purple { color: var(--soft-purple); }
+  .border-tohay-pink { border-color: var(--primary-pink); }
+
+  .glass-card {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(233, 166, 197, 0.2);
+  }
+}
+
+/* Smooth Horizontal Scrollbar */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Subtle Pulsing Badge */
+@keyframes pulse-subtle {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.92; transform: scale(1.03); }
+}
+
+.animate-pulse-subtle {
+  animation: pulse-subtle 2.5s infinite ease-in-out;
+}
+
+/* Global 1600px Desktop Container Width */
+.max-w-7xl,
+.max-w-5xl,
+.max-w-4xl {
+  max-width: 1600px !important;
+}
+
+
