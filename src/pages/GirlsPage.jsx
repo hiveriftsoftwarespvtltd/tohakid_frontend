@@ -7,12 +7,20 @@ import ProductFilterSidebar from '../components/ProductFilterSidebar';
 import { usePageBanner } from '../utils/usePageBanner';
 import { isCategoryMatch, isSubcategoryMatch, isAgeMatch, isColorMatch } from '../utils/filterUtils';
 import bb from '../assets/bb.png';
+import girlssMobileImg from '../assets/girlss.png';
 
 const ITEMS_PER_PAGE = 9;
 
 export default function GirlsPage() {
   const { products, categoriesList } = useShop();
-  const heroBanner = usePageBanner('Girls Category Top Banner', 'Girls Collection', 'Elegant. Vibrant. Crafted for your little princess.', bb);
+  const heroBanner = usePageBanner(
+    'Girls Category Top Banner',
+    'Girls Collection',
+    'Elegant. Vibrant. Crafted for your little princess.',
+    bb,
+    '/girls',
+    girlssMobileImg
+  );
   const [searchParams] = useSearchParams();
   const selectedSubcatParam = searchParams.get('subcategory') || '';
 
@@ -122,12 +130,18 @@ export default function GirlsPage() {
       </div>
 
       {/* Hero Banner Section */}
-      <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden border border-pink-200/60 shadow-md h-[320px] sm:h-[370px] md:h-[420px] lg:h-[460px] bg-[#FFF5F7] select-none">
-        <img
-          src={heroBanner.image}
-          alt={heroBanner.title}
-          className="absolute inset-0 w-full h-full object-cover object-center"
-        />
+      <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden border border-pink-200/60 shadow-md aspect-square sm:aspect-auto sm:h-[370px] md:h-[420px] lg:h-[460px] bg-[#FFF5F7] select-none">
+        <picture className="absolute inset-0 w-full h-full">
+          <source
+            media="(max-width: 640px)"
+            srcSet={heroBanner.mobileImage || girlssMobileImg}
+          />
+          <img
+            src={heroBanner.image}
+            alt={heroBanner.title}
+            className="absolute inset-0 w-full h-full object-cover object-center"
+          />
+        </picture>
       </div>
 
       {/* Dynamic Girls Collections Chips Bar from MongoDB Atlas */}
