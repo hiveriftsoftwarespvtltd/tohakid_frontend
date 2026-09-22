@@ -1135,7 +1135,7 @@ export const faqs = [
     id: 4,
     category: 'Payment & COD',
     q: 'Is Cash on Delivery (COD) available?',
-    a: 'Yes! Cash on Delivery (COD) is available on all pin codes across India. Plus get an Extra 5% OFF on Prepaid orders with code PREPAIDS.'
+    a: 'Yes! Cash on Delivery (COD) is available on all pin codes across India.'
   },
   {
     id: 5,

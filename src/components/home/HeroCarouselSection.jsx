@@ -144,7 +144,7 @@ export default function HeroCarouselSection() {
 
     const timer = setInterval(() => {
       nextSlide();
-    }, 3000);
+    }, 4000);
 
     return () => clearInterval(timer);
   }, [totalSlides, isHovered, nextSlide]);

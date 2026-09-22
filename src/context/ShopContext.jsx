@@ -410,7 +410,6 @@ export const ShopProvider = ({ children }) => {
     }
 
     const builtInMap = {
-      PREPAIDS: { type: 'PERCENTAGE', value: 5 },
       TOHAY10: { type: 'PERCENTAGE', value: 10 },
       WELCOME10: { type: 'PERCENTAGE', value: 10 },
       FESTIVE15: { type: 'PERCENTAGE', value: 15 },

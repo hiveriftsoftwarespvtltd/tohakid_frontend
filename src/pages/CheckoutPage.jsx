@@ -450,7 +450,7 @@ export default function CheckoutPage() {
                 <span>
                   {discountType === 'FIXED' || discountType === 'Fixed Amount'
                     ? `Fixed Promo Discount`
-                    : `Prepaid Discount (${discountPercent}%)`}
+                    : `Coupon Discount (${discountPercent}%)`}
                 </span>
                 <span className="font-mono">-₹{discountAmount.toLocaleString()}</span>
               </div>

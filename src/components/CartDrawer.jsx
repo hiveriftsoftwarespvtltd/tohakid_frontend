@@ -345,7 +345,7 @@ export default function CartDrawer() {
                       <div className="relative flex-1">
                         <input
                           type="text"
-                          placeholder="Coupon Code (e.g. PREPAIDS)"
+                          placeholder="Coupon Code (e.g. TOHAY10)"
                           value={inputCoupon}
                           onChange={(e) => setInputCoupon(e.target.value)}
                           className="w-full pl-8 pr-3 py-2.5 text-xs bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:bg-white focus:border-pink-500 uppercase font-mono font-bold"
@@ -377,7 +377,7 @@ export default function CartDrawer() {
                     {discountAmount > 0 && (
                       <div className="flex justify-between text-emerald-600 font-semibold">
                         <span>
-                          {isFixedDiscount ? `Coupon Discount` : `Prepaid Discount (${discountPercent}%)`}
+                          {isFixedDiscount ? `Coupon Discount` : `Coupon Discount (${discountPercent}%)`}
                         </span>
                         <span className="font-mono">-₹{discountAmount.toLocaleString()}</span>
                       </div>

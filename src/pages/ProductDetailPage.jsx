@@ -370,14 +370,6 @@ export default function ProductDetailPage() {
             <span className="text-[10px] sm:text-[11px] text-gray-500 ml-auto block">Inclusive of all taxes</span>
           </div>
 
-          {/* Prepaid Offer Banner */}
-          <div className="p-2.5 sm:p-3 bg-gradient-to-r from-amber-50 to-pink-50 rounded-xl border border-amber-200/80 text-[11px] sm:text-xs flex items-center gap-2">
-            <Tag className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-pink-600 shrink-0" />
-            <div className="text-gray-800 leading-tight">
-              <strong>Prepaid Offer:</strong> Extra 5% OFF on Prepaid Orders. Use Coupon Code: <strong className="bg-pink-200 text-pink-900 px-1.5 py-0.5 rounded font-mono font-bold">PREPAIDS</strong>
-            </div>
-          </div>
-
           {/* Size Selection */}
           {!product.isSiblingSet ? (
             <div className="space-y-2">
