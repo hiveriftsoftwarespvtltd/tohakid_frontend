@@ -20,6 +20,7 @@ import CollectionsPage from './pages/CollectionsPage';
 import SalePage from './pages/SalePage';
 import ProductDetailPage from './pages/ProductDetailPage';
 import WishlistPage from './pages/WishlistPage';
+import CartPage from './pages/CartPage';
 import CheckoutPage from './pages/CheckoutPage';
 import TrackOrderPage from './pages/TrackOrderPage';
 import AboutPage from './pages/AboutPage';
@@ -180,6 +181,7 @@ export default function App() {
             {/* <Route path="/sale" element={<SalePage />} /> */}
             <Route path="/product/:id" element={<ProductDetailPage />} />
             <Route path="/wishlist" element={<WishlistPage />} />
+            <Route path="/cart" element={<CartPage />} />
             <Route path="/checkout" element={<CheckoutPage />} />
             <Route
               path="/profile"

@@ -6,13 +6,13 @@ import ProductCard from '../components/ProductCard';
 import ProductFilterSidebar from '../components/ProductFilterSidebar';
 import { usePageBanner } from '../utils/usePageBanner';
 import { isCategoryMatch, isSubcategoryMatch, isAgeMatch, isColorMatch } from '../utils/filterUtils';
-import p8 from '../assets/p8.png';
+import dd from '../assets/dd.png';
 
 const ITEMS_PER_PAGE = 9;
 
 export default function SiblingsPage() {
   const { products, categoriesList } = useShop();
-  const heroBanner = usePageBanner('Siblings Header Banner', 'Sibling Sets', 'Twice the charm. Perfect matching ethnic sets.', p8);
+  const heroBanner = usePageBanner('Siblings Header Banner', 'Sibling Sets', 'Twice the charm. Perfect matching ethnic sets.', dd);
 
   const [sortOption, setSortOption] = useState('newest');
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
@@ -106,44 +106,12 @@ export default function SiblingsPage() {
       </nav>
 
       {/* Siblings Purple Banner */}
-      <div className="relative rounded-3xl overflow-hidden border border-purple-200/60 shadow-2xs min-h-[260px] sm:min-h-[320px] flex items-center bg-[#F3E5F5]">
+      <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden border border-purple-200/60 shadow-md h-[320px] sm:h-[370px] md:h-[420px] lg:h-[460px] bg-[#F3E5F5] select-none">
         <img
           src={heroBanner.image}
           alt={heroBanner.title}
-          className="absolute inset-0 w-full h-full object-cover object-top opacity-90"
+          className="absolute inset-0 w-full h-full object-cover object-center"
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-[#F3E5F5] via-[#F3E5F5]/95 to-transparent w-full md:w-3/5" />
-
-        <div className="relative z-10 p-6 sm:p-8 md:p-12 max-w-xl space-y-4">
-          <h1 className="font-sans font-bold md:font-extrabold text-4xl sm:text-5xl md:text-6xl text-[#1E293B] tracking-tight leading-tight">
-            {heroBanner.title}
-          </h1>
-          <div className="space-y-1 text-xs sm:text-sm md:text-base leading-relaxed">
-            <p className="font-bold text-[#334155]">{heroBanner.subtitle}</p>
-            <p className="text-[#64748B]">Coordination outfits for brothers, sisters & twins.</p>
-          </div>
-          
-          <div className="pt-3 flex flex-wrap items-center gap-3">
-            <button
-              onClick={() => {
-                if (siblingSubcategories.length > 0) {
-                  setFilters((prev) => ({ ...prev, subcategories: [siblingSubcategories[0]] }));
-                } else {
-                  resetFilters();
-                }
-              }}
-              className="bg-[#8E24AA] hover:bg-[#7B1FA2] text-white font-bold text-xs uppercase tracking-wider px-6 py-3 rounded-lg shadow-2xs transition-all transform hover:-translate-y-0.5 cursor-pointer"
-            >
-              {siblingSubcategories[0] ? siblingSubcategories[0].toUpperCase() : 'SIBLING SETS'}
-            </button>
-            <button
-              onClick={() => resetFilters()}
-              className="bg-white hover:bg-gray-50 text-[#1E293B] font-bold text-xs uppercase tracking-wider px-6 py-3 rounded-lg border border-[#CBD5E1] shadow-2xs transition-all transform hover:-translate-y-0.5 cursor-pointer"
-            >
-              EXPLORE ALL SIBLINGS
-            </button>
-          </div>
-        </div>
       </div>
 
       {/* Dynamic Sibling Sets & Collections Chips Bar */}

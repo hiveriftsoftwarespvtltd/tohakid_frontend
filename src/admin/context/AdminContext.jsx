@@ -198,6 +198,32 @@ export const AdminProvider = ({ children }) => {
 
   // --- CRUD ACTIONS WITH API SYNC ---
 
+  const sanitizeProductPayload = (prod) => {
+    if (!prod || typeof prod !== 'object') return prod;
+    const clean = { ...prod };
+    if (clean.price !== undefined && clean.price !== null) {
+      clean.price = Number(clean.price) || 0;
+    }
+    if (clean.mrp !== undefined && clean.mrp !== null && clean.mrp !== '') {
+      clean.mrp = Number(clean.mrp) || clean.price || 0;
+    } else if (clean.mrp === '') {
+      delete clean.mrp;
+    }
+    if (clean.stock !== undefined && clean.stock !== null && clean.stock !== '') {
+      clean.stock = Number(clean.stock) || 0;
+    }
+    if (Array.isArray(clean.sizeVariants)) {
+      clean.sizeVariants = clean.sizeVariants.map((v) => ({
+        ...v,
+        price: Number(v.price) || clean.price || 0,
+        mrp: v.mrp !== undefined && v.mrp !== '' ? (Number(v.mrp) || clean.mrp || 0) : (clean.mrp || clean.price || 0),
+        stock: v.stock !== undefined && v.stock !== '' ? (Number(v.stock) || 0) : 10,
+        isAvailable: v.isAvailable !== false,
+      }));
+    }
+    return clean;
+  };
+
   // Products
   const addProduct = async (newProd) => {
     if (!localStorage.getItem('tohay_admin_token') && !localStorage.getItem('tohay_access_token')) {
@@ -215,7 +241,8 @@ export const AdminProvider = ({ children }) => {
     }
 
     try {
-      const res = await productService.createProduct(newProd);
+      const sanitized = sanitizeProductPayload(newProd);
+      const res = await productService.createProduct(sanitized);
       const createdItem = res?.data || res;
       if (createdItem) {
         setProductsList((prev) => [createdItem, ...prev]);
@@ -246,7 +273,8 @@ export const AdminProvider = ({ children }) => {
     }
 
     try {
-      const res = await productService.updateProduct(id, updatedFields);
+      const sanitized = sanitizeProductPayload(updatedFields);
+      const res = await productService.updateProduct(id, sanitized);
       const updatedItem = res?.data || res;
       if (updatedItem) {
         setProductsList((prev) => prev.map((p) => (p.id === id || p._id === id ? updatedItem : p)));

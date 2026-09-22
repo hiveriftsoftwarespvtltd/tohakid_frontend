@@ -19,7 +19,7 @@ export default function AdminProductForm() {
     const files = Array.from(e.target.files || []);
     if (files.length === 0) return;
 
-    showToast('Compressing & uploading image to Cloudinary...');
+    showToast('Compressing & uploading image...');
 
     for (const file of files) {
       if (!file.type.startsWith('image/')) continue;
@@ -45,7 +45,7 @@ export default function AdminProductForm() {
     }
 
     if (e.target) e.target.value = '';
-    showToast('Image uploaded to Cloudinary successfully!');
+    showToast('Image uploaded successfully!');
   };
 
 
@@ -301,7 +301,34 @@ export default function AdminProductForm() {
     }
 
     const payload = { ...formData };
+
+    // Convert numeric fields to real numbers
+    payload.price = Number(payload.price) || 0;
+    if (payload.mrp !== '' && payload.mrp !== null && payload.mrp !== undefined) {
+      payload.mrp = Number(payload.mrp) || payload.price;
+    } else {
+      payload.mrp = payload.price;
+    }
+    if (payload.stock !== '' && payload.stock !== null && payload.stock !== undefined) {
+      payload.stock = Number(payload.stock) || 0;
+    } else {
+      payload.stock = 10;
+    }
+    if (payload.costPrice !== '' && payload.costPrice !== null && payload.costPrice !== undefined) {
+      payload.costPrice = Number(payload.costPrice) || 0;
+    }
+    if (payload.lowStockThreshold !== '' && payload.lowStockThreshold !== null && payload.lowStockThreshold !== undefined) {
+      payload.lowStockThreshold = Number(payload.lowStockThreshold) || 5;
+    }
+
     if (Array.isArray(payload.sizeVariants) && payload.sizeVariants.length > 0) {
+      payload.sizeVariants = payload.sizeVariants.map((v) => ({
+        ...v,
+        price: Number(v.price) || payload.price || 0,
+        mrp: v.mrp !== undefined && v.mrp !== '' ? (Number(v.mrp) || payload.mrp || 0) : (payload.mrp || payload.price || 0),
+        stock: v.stock !== undefined && v.stock !== '' ? (Number(v.stock) || 0) : 10,
+        isAvailable: v.isAvailable !== false,
+      }));
       payload.sizes = payload.sizeVariants.map((v) => v.size);
       const prices = payload.sizeVariants.map((v) => Number(v.price)).filter((p) => !isNaN(p) && p > 0);
       if (prices.length > 0 && (!payload.price || payload.price === 0)) {

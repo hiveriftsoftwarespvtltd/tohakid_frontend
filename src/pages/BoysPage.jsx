@@ -6,13 +6,13 @@ import ProductCard from '../components/ProductCard';
 import ProductFilterSidebar from '../components/ProductFilterSidebar';
 import { usePageBanner } from '../utils/usePageBanner';
 import { isCategoryMatch, isSubcategoryMatch, isAgeMatch, isColorMatch } from '../utils/filterUtils';
-import boyshero from '../assets/boyshero.png';
+import aa from '../assets/aa.png';
 
 const ITEMS_PER_PAGE = 9;
 
 export default function BoysPage() {
   const { products, categoriesList } = useShop();
-  const heroBanner = usePageBanner('Boys Category Top Banner', 'Boys Collection', 'Smart. Stylish. Made for every celebration.', boyshero);
+  const heroBanner = usePageBanner('Boys Category Top Banner', 'Boys Collection', 'Smart. Stylish. Made for every celebration.', aa);
   const [searchParams] = useSearchParams();
   const selectedSubcatParam = searchParams.get('subcategory') || '';
 
@@ -122,38 +122,12 @@ export default function BoysPage() {
       </nav>
 
       {/* Boys Hero Banner */}
-      <div className="relative rounded-3xl overflow-hidden border border-pink-200/60 shadow-2xs min-h-[260px] sm:min-h-[320px] flex items-center bg-[#FFF5F7]">
+      <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden border border-pink-200/60 shadow-md h-[320px] sm:h-[370px] md:h-[420px] lg:h-[460px] bg-[#FFF5F7] select-none">
         <img
           src={heroBanner.image}
           alt={heroBanner.title}
-          className="absolute inset-0 w-full h-full object-cover object-right"
+          className="absolute inset-0 w-full h-full object-cover object-center"
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-[#FFF5F7] via-[#FFF5F7]/95 to-transparent w-full md:w-3/5" />
-
-        <div className="relative z-10 p-6 sm:p-8 md:p-12 max-w-xl space-y-4">
-          <h1 className="font-sans font-bold md:font-extrabold text-4xl sm:text-5xl md:text-6xl text-[#1E293B] tracking-tight leading-tight">
-            {heroBanner.title}
-          </h1>
-          <div className="space-y-1 text-xs sm:text-sm md:text-base leading-relaxed">
-            <p className="font-bold text-[#334155]">{heroBanner.subtitle}</p>
-            <p className="text-[#64748B]">Comfortable ethnic wear for your little champs.</p>
-          </div>
-          
-          <div className="pt-3 flex flex-wrap items-center gap-3">
-            <button
-              onClick={() => handleSubcatTabClick('Kurta Pyjama Sets')}
-              className="bg-[#D81B60] hover:bg-[#C2185B] text-white font-bold text-xs uppercase tracking-wider px-6 py-3 rounded-lg shadow-2xs transition-all transform hover:-translate-y-0.5 cursor-pointer"
-            >
-              KURTA PYJAMA SETS
-            </button>
-            <button
-              onClick={() => handleSubcatTabClick('Sherwani Sets')}
-              className="bg-white hover:bg-gray-50 text-[#1E293B] font-bold text-xs uppercase tracking-wider px-6 py-3 rounded-lg border border-[#CBD5E1] shadow-2xs transition-all transform hover:-translate-y-0.5 cursor-pointer"
-            >
-              SHERWANI SETS
-            </button>
-          </div>
-        </div>
       </div>
 
       {/* Dynamic Boys Collections Chips Bar from MongoDB Atlas */}

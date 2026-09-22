@@ -143,7 +143,7 @@ export default function ShopByAgePage() {
         <span className="text-[#D81B60] font-bold">Shop by Age</span>
       </nav>
 
-      <div className="relative rounded-3xl overflow-hidden border border-pink-200/60 shadow-2xs min-h-[260px] sm:min-h-[300px] md:min-h-[340px] flex items-center bg-[#FFF0F5]">
+      <div className="relative rounded-3xl overflow-hidden border border-pink-200/60 shadow-2xs h-[320px] sm:h-[370px] md:h-[420px] lg:h-[460px] flex items-center bg-[#FFF0F5]">
         <img
           src={heroBanner.image}
           alt={heroBanner.title}

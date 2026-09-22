@@ -472,11 +472,6 @@ export default function AdminProducts() {
                       alt={viewProduct.name}
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                     />
-                    {viewProduct.isSale && (
-                      <span className="absolute top-3 left-3 bg-rose-600 text-white text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full shadow-md">
-                        On Sale
-                      </span>
-                    )}
                   </div>
 
                   {/* Thumbnail Gallery */}

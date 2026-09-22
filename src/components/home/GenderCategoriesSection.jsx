@@ -17,7 +17,7 @@ export default function GenderCategoriesSection() {
         <div className="flex items-center gap-3">
           <span className="w-1.5 h-7 bg-[#D81B60] rounded-full inline-block" />
           <h2 className="font-heading font-extrabold text-2xl md:text-3xl text-gray-900 tracking-tight">
-            Shop by Gender
+            Shop by Collection
           </h2>
         </div>
       </div>

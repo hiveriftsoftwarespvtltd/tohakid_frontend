@@ -9,17 +9,17 @@ export default function Logo({
   align = 'center',
   taglineClassName = '' 
 }) {
-  // Upgraded image height presets for a more prominent, premium brand presence
+  // Compact, sleek image height presets to maximize screen space for products
   const sizeClasses = {
-    small: 'h-11 sm:h-12 md:h-14',
-    normal: 'h-16 sm:h-20 md:h-24 lg:h-28',
-    large: 'h-24 sm:h-28 md:h-32 lg:h-36'
+    small: 'h-7 sm:h-8 md:h-9',
+    normal: 'h-9 sm:h-11 md:h-12 lg:h-13',
+    large: 'h-14 sm:h-16 md:h-20 lg:h-24'
   };
 
   const taglineSizeClasses = {
-    small: 'text-[10px] sm:text-[11px] tracking-wide',
-    normal: 'text-xs sm:text-[13px] md:text-sm tracking-wider',
-    large: 'text-sm sm:text-base md:text-lg tracking-widest'
+    small: 'text-[7.5px] sm:text-[8.5px] tracking-wide',
+    normal: 'text-[9px] sm:text-[10px] md:text-[10.5px] tracking-wider',
+    large: 'text-xs sm:text-sm md:text-base tracking-widest'
   };
 
   const alignClasses = align === 'start' 

@@ -174,38 +174,28 @@ export default function ThreeDCarousel({ items = [], autoPlay = true, interval =
                     className="w-full h-full object-cover rounded-t-3xl transition-transform duration-700 ease-out group-hover:scale-105 will-change-transform"
                   />
 
-                  {/* Left & Right Image Navigation Buttons directly on Image */}
-                  <button
-                    type="button"
-                    onClick={handlePrevCardImage}
-                    className="absolute left-2.5 top-1/2 -translate-y-1/2 w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white/95 hover:bg-white text-[#D81B60] shadow-md flex items-center justify-center transition-all z-20 cursor-pointer hover:scale-110 border border-pink-100/90 active:scale-95"
-                    aria-label="Previous Image"
-                  >
-                    <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5 stroke-[2.5]" />
-                  </button>
+                  {/* Left & Right Image Navigation Buttons directly on Image (Only on hover if multiple images) */}
+                  {itemImages.length > 1 && (
+                    <>
+                      <button
+                        type="button"
+                        onClick={handlePrevCardImage}
+                        className="opacity-0 group-hover:opacity-100 absolute left-2.5 top-1/2 -translate-y-1/2 w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white/95 hover:bg-white text-[#D81B60] shadow-md flex items-center justify-center transition-all z-20 cursor-pointer hover:scale-110 border border-pink-100/90 active:scale-95"
+                        aria-label="Previous Image"
+                      >
+                        <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5 stroke-[2.5]" />
+                      </button>
 
-                  <button
-                    type="button"
-                    onClick={handleNextCardImage}
-                    className="absolute right-2.5 top-1/2 -translate-y-1/2 w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white/95 hover:bg-white text-[#D81B60] shadow-md flex items-center justify-center transition-all z-20 cursor-pointer hover:scale-110 border border-pink-100/90 active:scale-95"
-                    aria-label="Next Image"
-                  >
-                    <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 stroke-[2.5]" />
-                  </button>
-
-                  {/* Badges */}
-                  <div className="absolute top-3 left-3 flex flex-col gap-1 z-10">
-                    {item.isNew && (
-                      <span className="bg-[#D81B60] text-white text-[9px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider shadow-2xs">
-                        NEW 3D
-                      </span>
-                    )}
-                    {item.isSale && (
-                      <span className="bg-amber-500 text-white text-[9px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider shadow-2xs">
-                        SALE
-                      </span>
-                    )}
-                  </div>
+                      <button
+                        type="button"
+                        onClick={handleNextCardImage}
+                        className="opacity-0 group-hover:opacity-100 absolute right-2.5 top-1/2 -translate-y-1/2 w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white/95 hover:bg-white text-[#D81B60] shadow-md flex items-center justify-center transition-all z-20 cursor-pointer hover:scale-110 border border-pink-100/90 active:scale-95"
+                        aria-label="Next Image"
+                      >
+                        <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 stroke-[2.5]" />
+                      </button>
+                    </>
+                  )}
 
                   {/* Wishlist Button */}
                   <button
@@ -221,35 +211,6 @@ export default function ThreeDCarousel({ items = [], autoPlay = true, interval =
                   >
                     <Heart className={`w-4 h-4 ${isWishlisted ? 'fill-white' : ''}`} />
                   </button>
-
-                  {/* Overlay Action Buttons (Active Central Card Only) */}
-                  {isCenter && (
-                    <div className="absolute inset-x-0 bottom-0 p-3 bg-gradient-to-t from-black/70 via-black/30 to-transparent flex items-center justify-center gap-2 transition-all">
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          addToCart(item, item.sizes ? item.sizes[0] : '2-4Y');
-                        }}
-                        className="flex-1 py-2 px-3 bg-[#D81B60] hover:bg-[#C2185B] text-white font-extrabold text-[11px] uppercase tracking-wider rounded-xl shadow-md flex items-center justify-center gap-1.5 transition-all cursor-pointer"
-                      >
-                        <ShoppingBag className="w-3.5 h-3.5" />
-                        <span>Add To Cart</span>
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          navigate(`/product/${item.id || item._id}`);
-                        }}
-                        className="p-2 bg-white/90 hover:bg-white text-gray-900 rounded-xl shadow-md transition-all cursor-pointer"
-                        title="Quick View"
-                      >
-                        <Eye className="w-4 h-4" />
-                      </button>
-                    </div>
-                  )}
                 </div>
 
                 {/* Card Text & Pricing Info */}

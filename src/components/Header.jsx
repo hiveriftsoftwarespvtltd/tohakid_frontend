@@ -84,9 +84,9 @@ export default function Header() {
   return (
     <header className={`sticky top-0 bg-white border-b border-gray-100 shadow-2xs font-sans transition-all ${mobileMenuOpen ? 'z-50' : 'z-40'}`}>
 
-      {/* 2. MAIN HEADER ROW (Search | Centered Prominent Logo | Utilities) */}
-      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-10 py-4">
-        <div className="grid grid-cols-3 items-center gap-4">
+      {/* 2. MAIN HEADER ROW (Search | Centered Sleek Logo | Utilities) */}
+      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-10 py-1.5 sm:py-2">
+        <div className="grid grid-cols-3 items-center gap-2 sm:gap-4">
 
           {/* LEFT: Clean Minimal Search Icon / Expandable Input & Mobile Menu Toggle */}
           <div className="flex items-center gap-2 sm:gap-3">
@@ -278,18 +278,18 @@ export default function Header() {
         </div>
       )}
 
-      {/* 3. REDESIGNED LUXURY PRIMARY NAVIGATION BAR (Segmented Capsule Track - No Extra Buttons) */}
-      <nav className="hidden lg:block border-t border-b border-pink-100/70 bg-gradient-to-r from-white via-[#FFF9FA] to-white py-2.5 shadow-2xs">
+      {/* 3. SLIM & SLEEK PRIMARY NAVIGATION BAR */}
+      <nav className="hidden lg:block border-t border-b border-pink-100/60 bg-gradient-to-r from-white via-[#FFF9FA] to-white py-1 shadow-2xs">
         <div className="max-w-[1600px] mx-auto px-4 flex items-center justify-center">
-          <div className="inline-flex items-center gap-1.5 p-1 bg-[#FFF0F4]/70 backdrop-blur-md rounded-full border border-pink-200/60 shadow-inner">
+          <div className="inline-flex items-center gap-1 p-0.5 bg-[#FFF0F4]/60 backdrop-blur-md rounded-full border border-pink-200/50">
             {navLinks.map((link) => (
               <NavLink
                 key={link.name}
                 to={link.path}
                 className={({ isActive }) =>
-                  `relative px-6 py-2 rounded-full inline-flex items-center justify-center text-[12px] font-black uppercase tracking-[0.14em] transition-all duration-300 ${
+                  `relative px-4 py-1.5 rounded-full inline-flex items-center justify-center text-[11px] font-extrabold uppercase tracking-[0.12em] transition-all duration-300 ${
                     isActive
-                      ? 'bg-gradient-to-r from-[#D81B60] to-[#E91E63] text-white shadow-md shadow-pink-500/25 scale-[1.02]'
+                      ? 'bg-gradient-to-r from-[#D81B60] to-[#E91E63] text-white shadow-xs scale-[1.02]'
                       : 'text-gray-700 hover:text-[#D81B60] hover:bg-white/90'
                   }`
                 }

@@ -285,20 +285,6 @@ export default function ProductDetailPage() {
               <span>{zoomPos.isHovered ? 'Hovering & Zooming Fabric' : 'Click for Fullscreen Zoom'}</span>
             </div>
 
-            {/* Badges */}
-            <div className="absolute top-2.5 left-2.5 sm:top-4 sm:left-4 flex flex-col gap-1 z-10 pointer-events-none">
-              {product.isNew && (
-                <span className="bg-pink-600 text-white text-[9px] sm:text-[10px] font-black uppercase px-2 py-0.5 rounded-full shadow-xs">
-                  NEW ARRIVAL
-                </span>
-              )}
-              {discountPercent > 0 && (
-                <span className="bg-amber-400 text-gray-900 text-[9px] sm:text-[10px] font-black uppercase px-2 py-0.5 rounded-full shadow-xs">
-                  SAVE {discountPercent}%
-                </span>
-              )}
-            </div>
-
             {/* Left Image Navigation Arrow Button */}
             <button
               type="button"

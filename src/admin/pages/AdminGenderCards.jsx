@@ -97,22 +97,23 @@ export default function AdminGenderCards() {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    // 1. INSTANT Preview (0ms)
+    const localUrl = URL.createObjectURL(file);
+    setCardForm((prev) => ({ ...prev, imageUrl: localUrl }));
     setIsUploading(true);
+
+    // 2. Upload in background
     try {
       const res = await uploadService.uploadImage(file);
       if (res?.data?.url) {
         setCardForm((prev) => ({ ...prev, imageUrl: res.data.url }));
         showToast('Card image uploaded successfully!');
       } else {
-        const localUrl = URL.createObjectURL(file);
-        setCardForm((prev) => ({ ...prev, imageUrl: localUrl }));
         showToast('Card image attached!');
       }
     } catch (err) {
-      console.warn('Upload failed, using preview:', err);
-      const localUrl = URL.createObjectURL(file);
-      setCardForm((prev) => ({ ...prev, imageUrl: localUrl }));
-      showToast('Card image attached!');
+      console.warn('Upload failed, kept preview:', err);
+      showToast('Card image attached locally!');
     } finally {
       setIsUploading(false);
     }
@@ -120,6 +121,12 @@ export default function AdminGenderCards() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    if (isUploading) {
+      showToast('Please wait! Image is currently uploading...');
+      return;
+    }
+
     if (!cardForm.title.trim()) {
       showToast('Please enter card title.');
       return;
@@ -160,10 +167,10 @@ export default function AdminGenderCards() {
         <div>
           <h1 className="font-heading font-extrabold text-2xl text-gray-900 flex items-center gap-2">
             <Sparkles className="w-6 h-6 text-[#D81B60]" />
-            <span>Category & Gender Cards Manager</span>
+            <span>Kids Collections Cards Manager</span>
           </h1>
           <p className="text-xs text-gray-500 font-semibold">
-            Manage Shop by Gender promo cards (Girls, Boys, Siblings) with full fallback image support
+            Manage Collections promo cards (Girls, Boys, Siblings) with full fallback image support
           </p>
         </div>
       </div>
@@ -245,22 +252,27 @@ export default function AdminGenderCards() {
           <div className="fixed inset-0 bg-black/60 backdrop-blur-xs" onClick={() => setShowModal(false)} />
           <form
             onSubmit={handleSubmit}
-            className="relative bg-white rounded-3xl p-6 sm:p-8 max-w-lg w-full z-10 shadow-2xl border border-pink-100 space-y-4 max-h-[90vh] overflow-y-auto"
+            className="relative bg-white rounded-3xl p-6 sm:p-8 max-w-xl w-full z-10 shadow-2xl border border-pink-100 space-y-4 max-h-[90vh] overflow-y-auto"
           >
             <div className="flex items-center justify-between border-b border-gray-100 pb-3">
-              <h3 className="font-heading font-extrabold text-lg text-gray-900">
-                Customize {editingCard.slot.name}
-              </h3>
+              <div>
+                <h3 className="font-heading font-extrabold text-lg text-gray-900">
+                  Customize {editingCard.slot.name}
+                </h3>
+                <p className="text-xs text-gray-500 font-medium">
+                  Update title, promotional copy, link and background image
+                </p>
+              </div>
               <button
                 type="button"
                 onClick={() => setShowModal(false)}
-                className="p-1 rounded-full text-gray-400 hover:text-gray-600"
+                className="p-1.5 rounded-full text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <div className="space-y-3">
+            <div className="space-y-3.5">
               <div>
                 <label className="text-[11px] font-extrabold uppercase text-gray-600 tracking-wider">
                   Card Main Title
@@ -288,7 +300,7 @@ export default function AdminGenderCards() {
                 />
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-pink-50/50 p-3 rounded-2xl border border-pink-100">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-pink-50/50 p-3.5 rounded-2xl border border-pink-100">
                 <div>
                   <label className="text-[10px] font-extrabold uppercase text-pink-700 tracking-wider">
                     Button Label Text
@@ -317,43 +329,65 @@ export default function AdminGenderCards() {
               </div>
 
               {/* Image Upload Area */}
-              <div>
-                <label className="text-[11px] font-extrabold uppercase text-gray-600 tracking-wider flex justify-between items-center mb-1">
+              <div className="space-y-2">
+                <label className="text-[11px] font-extrabold uppercase text-gray-700 tracking-wider flex justify-between items-center">
                   <span>Card Background Image</span>
-                  <span className="text-[10px] text-pink-600 font-bold">Upload File or URL</span>
+                  <span className="text-[10px] font-extrabold text-[#D81B60] bg-pink-100 px-2 py-0.5 rounded-full">Cloud Storage</span>
                 </label>
 
-                <div className="space-y-2">
-                  <div
-                    onClick={() => fileInputRef.current?.click()}
-                    className="p-4 border-2 border-dashed border-pink-200 hover:border-pink-500 rounded-2xl bg-pink-50/40 hover:bg-pink-50/80 text-center cursor-pointer transition-all flex flex-col items-center justify-center gap-1.5"
-                  >
-                    <Upload className={`w-5 h-5 text-[#D81B60] ${isUploading ? 'animate-bounce' : ''}`} />
-                    <span className="text-xs font-bold text-gray-800">
-                      {isUploading ? 'Uploading Image to Server...' : 'Click to Upload Custom Image File'}
-                    </span>
-                    <span className="text-[10px] text-gray-500">Supports JPG, PNG, WEBP (Max 5MB)</span>
-                  </div>
+                <div
+                  onClick={() => fileInputRef.current?.click()}
+                  className="p-3.5 border-2 border-dashed border-pink-200 hover:border-pink-500 rounded-2xl bg-pink-50/40 hover:bg-pink-50/80 text-center cursor-pointer transition-all flex flex-col items-center justify-center gap-1"
+                >
+                  <Upload className={`w-4 h-4 text-[#D81B60] ${isUploading ? 'animate-bounce' : ''}`} />
+                  <span className="text-xs font-bold text-gray-800">
+                    {isUploading ? 'Uploading image...' : 'Click to Upload Card Image File'}
+                  </span>
+                  <span className="text-[9px] text-gray-500">Supports JPG, PNG, WEBP (Max 5MB)</span>
+                </div>
 
-                  {/* Active Preview */}
-                  <div className="relative rounded-2xl overflow-hidden border border-gray-200 bg-gray-50 p-1">
+                {/* Active Preview */}
+                <div className="space-y-2">
+                  <div className="relative rounded-2xl overflow-hidden border border-gray-200 bg-gray-50 shadow-xs">
                     <img
                       src={cardForm.imageUrl ? formatImageUrl(cardForm.imageUrl) : editingCard.slot.defaultImage}
                       alt="Preview"
-                      className="w-full h-32 object-cover rounded-xl"
+                      className="w-full h-36 object-cover rounded-xl"
                     />
-                    <div className="absolute top-2 right-2 bg-black/60 text-white text-[10px] font-bold px-2 py-0.5 rounded-md">
-                      {cardForm.imageUrl ? 'Custom Uploaded' : 'Storefront Default Fallback'}
+                    <div className="absolute top-2 right-2 flex items-center gap-1 bg-black/75 backdrop-blur-xs text-white text-[10px] font-bold px-2 py-0.5 rounded-md shadow-xs">
+                      {isUploading ? (
+                        <span className="text-amber-300 flex items-center gap-1">
+                          <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping" />
+                          Uploading image...
+                        </span>
+                      ) : cardForm.imageUrl ? (
+                        <span className="text-emerald-400">Uploaded ✓</span>
+                      ) : (
+                        <span className="text-gray-300">Default Image</span>
+                      )}
                     </div>
                   </div>
 
-                  <input
-                    type="text"
-                    placeholder="Or enter Image URL (e.g. https://...)"
-                    value={cardForm.imageUrl}
-                    onChange={(e) => setCardForm({ ...cardForm, imageUrl: e.target.value })}
-                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs font-semibold focus:bg-white focus:border-pink-500 outline-none"
-                  />
+                  {cardForm.imageUrl && (
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        className="flex-1 py-1.5 px-3 bg-white hover:bg-pink-50 border border-pink-200 rounded-lg text-xs font-bold text-[#D81B60] transition-all text-center cursor-pointer flex items-center justify-center gap-1.5"
+                      >
+                        <Upload className="w-3.5 h-3.5" />
+                        Change Image
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setCardForm(prev => ({ ...prev, imageUrl: '' }))}
+                        className="py-1.5 px-3 bg-white hover:bg-red-50 border border-red-200 rounded-lg text-xs font-bold text-red-600 transition-all cursor-pointer flex items-center justify-center gap-1"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                        Reset
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -382,9 +416,21 @@ export default function AdminGenderCards() {
               </button>
               <button
                 type="submit"
-                className="flex-1 py-2.5 bg-[#D81B60] text-white font-extrabold text-xs rounded-xl shadow-xs hover:bg-[#C2185B] cursor-pointer"
+                disabled={isUploading}
+                className={`flex-1 py-2.5 font-extrabold text-xs rounded-xl shadow-xs transition-all flex items-center justify-center gap-2 ${
+                  isUploading
+                    ? 'bg-gray-400 text-white cursor-not-allowed opacity-80'
+                    : 'bg-[#D81B60] text-white hover:bg-[#C2185B] cursor-pointer'
+                }`}
               >
-                Save Card Changes
+                {isUploading ? (
+                  <>
+                    <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    <span>Uploading image... Please wait</span>
+                  </>
+                ) : (
+                  'Save Card Changes'
+                )}
               </button>
             </div>
           </form>

@@ -68,7 +68,7 @@ export default function AdminSidebar() {
       items: [
         { name: 'Coupons & Discounts', path: '/admin/marketing/coupons', icon: Ticket },
         { name: 'Hero Banners & Sliders', path: '/admin/marketing/banners', icon: LayoutTemplate },
-        { name: 'Category & Gender Cards', path: '/admin/marketing/gender-cards', icon: Sparkles },
+        { name: 'Kids Collections Cards', path: '/admin/marketing/gender-cards', icon: Sparkles },
         { name: 'Shop by Age Cards', path: '/admin/marketing/age-cards', icon: FolderTree },
         { name: 'Occasion Promo Cards', path: '/admin/marketing/occasion-cards', icon: Award },
         { name: 'Shop by Collection Cards', path: '/admin/marketing/collection-cards', icon: FolderTree },
