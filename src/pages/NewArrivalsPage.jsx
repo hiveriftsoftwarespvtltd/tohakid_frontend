@@ -7,12 +7,20 @@ import ProductFilterSidebar from '../components/ProductFilterSidebar';
 import { usePageBanner } from '../utils/usePageBanner';
 import { isSubcategoryMatch, isAgeMatch, isColorMatch } from '../utils/filterUtils';
 import cc from '../assets/cc.png';
+import newArrivalsMobileImg from '../assets/newarrives.png';
 
 const ITEMS_PER_PAGE = 9;
 
 export default function NewArrivalsPage() {
   const { products } = useShop();
-  const heroBanner = usePageBanner('New Arrivals Hero Banner', 'New Arrivals', 'Fresh Styles. Premium Craftsmanship.', cc);
+  const heroBanner = usePageBanner(
+    'New Arrivals Hero Banner',
+    'New Arrivals',
+    'Fresh Styles. Premium Craftsmanship.',
+    cc,
+    '/new-arrivals',
+    newArrivalsMobileImg
+  );
   const [searchParams] = useSearchParams();
   const searchQueryParam = searchParams.get('search') || '';
 
@@ -130,12 +138,18 @@ export default function NewArrivalsPage() {
       </div>
 
       {/* Hero Banner */}
-      <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden border border-pink-200/60 shadow-md h-[320px] sm:h-[370px] md:h-[420px] lg:h-[460px] bg-[#FFF5F7] select-none">
-        <img
-          src={heroBanner.image}
-          alt={heroBanner.title}
-          className="absolute inset-0 w-full h-full object-cover object-center"
-        />
+      <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden border border-pink-200/60 shadow-md aspect-square sm:aspect-auto sm:h-[370px] md:h-[420px] lg:h-[460px] bg-[#FFF5F7] select-none">
+        <picture className="absolute inset-0 w-full h-full">
+          <source
+            media="(max-width: 640px)"
+            srcSet={heroBanner.mobileImage || newArrivalsMobileImg}
+          />
+          <img
+            src={heroBanner.image}
+            alt={heroBanner.title}
+            className="absolute inset-0 w-full h-full object-cover object-center"
+          />
+        </picture>
       </div>
 
       {/* Main Listing Grid Header (Count & Sort) */}
