@@ -83,7 +83,7 @@ export default function HeroCarouselSection() {
   return (
     <section className="relative max-w-[1600px] mx-auto px-3 sm:px-4 pt-2 sm:pt-4">
       <div
-        className="relative rounded-2xl sm:rounded-3xl overflow-hidden border border-pink-200/60 shadow-md h-[320px] sm:h-[370px] md:h-[430px] lg:h-[480px] bg-[#FFF5F7] select-none"
+        className="relative rounded-2xl sm:rounded-3xl overflow-hidden border border-pink-200/60 shadow-md aspect-square sm:aspect-auto min-h-[380px] sm:min-h-0 sm:h-[440px] md:h-[500px] lg:h-[540px] xl:h-[560px] bg-[#FFF5F7] select-none"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
