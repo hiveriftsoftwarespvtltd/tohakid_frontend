@@ -67,13 +67,34 @@ export default function HeroCarouselSection() {
     setCurrentSlide((prev) => (prev === 0 ? totalSlides - 1 : prev - 1));
   }, [totalSlides]);
 
-  // Auto-slide every 4.5 seconds when not hovered
+  const touchStartX = React.useRef(0);
+  const touchEndX = React.useRef(0);
+
+  const handleTouchStart = (e) => {
+    touchStartX.current = e.touches[0].clientX;
+  };
+
+  const handleTouchMove = (e) => {
+    touchEndX.current = e.touches[0].clientX;
+  };
+
+  const handleTouchEnd = () => {
+    const diff = touchStartX.current - touchEndX.current;
+    if (Math.abs(diff) > 45 && touchEndX.current !== 0) {
+      if (diff > 0) nextSlide();
+      else prevSlide();
+    }
+    touchStartX.current = 0;
+    touchEndX.current = 0;
+  };
+
+  // Auto-slide every 4.0 seconds when not hovered
   useEffect(() => {
     if (totalSlides <= 1 || isHovered) return;
 
     const timer = setInterval(() => {
       nextSlide();
-    }, 4500);
+    }, 4000);
 
     return () => clearInterval(timer);
   }, [totalSlides, isHovered, nextSlide]);
@@ -86,18 +107,29 @@ export default function HeroCarouselSection() {
         className="relative rounded-2xl sm:rounded-3xl overflow-hidden border border-pink-200/60 shadow-md aspect-square sm:aspect-auto min-h-[380px] sm:min-h-0 sm:h-[440px] md:h-[500px] lg:h-[540px] xl:h-[560px] bg-[#FFF5F7] select-none"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
       >
-        {/* Slides rendering with clean, clear images (NO text overlaid on images) */}
+        {/* Slides rendering with smooth, seamless translational slide animation */}
         {heroSlides.map((slide, idx) => {
-          const isActive = idx === currentSlide;
+          let offset = idx - currentSlide;
+          if (offset > totalSlides / 2) offset -= totalSlides;
+          if (offset < -totalSlides / 2) offset += totalSlides;
+          const isVisible = Math.abs(offset) <= 1;
           const targetLink = slide.link || slide.btnPrimaryLink || '/collections';
+
           return (
             <div
               key={slide.id || idx}
               onClick={() => navigate(targetLink)}
-              className={`absolute inset-0 transition-opacity duration-700 ease-in-out cursor-pointer ${
-                isActive ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'
-              }`}
+              style={{
+                transform: `translate3d(${offset * 100}%, 0, 0)`,
+                transition: isVisible ? 'transform 850ms cubic-bezier(0.22, 1, 0.36, 1)' : 'none',
+                visibility: isVisible ? 'visible' : 'hidden',
+                zIndex: offset === 0 ? 10 : 5,
+              }}
+              className="absolute inset-0 w-full h-full cursor-pointer will-change-transform"
             >
               {/* Responsive Slide Banner Image (Serves Mobile Image on Phone Screens) */}
               <picture className="absolute inset-0 w-full h-full">
@@ -110,9 +142,7 @@ export default function HeroCarouselSection() {
                 <img
                   src={slide.image || aa}
                   alt={slide.title || 'Brand Hero Banner'}
-                  className={`absolute inset-0 w-full h-full object-cover object-center transition-transform duration-1000 ease-out ${
-                    isActive ? 'scale-100' : 'scale-105'
-                  }`}
+                  className="absolute inset-0 w-full h-full object-cover object-center pointer-events-none"
                 />
               </picture>
             </div>
@@ -126,7 +156,7 @@ export default function HeroCarouselSection() {
             e.stopPropagation();
             prevSlide();
           }}
-          className="absolute left-2 sm:left-4 md:left-6 top-1/2 -translate-y-1/2 w-8 h-8 sm:w-10 sm:h-10 md:w-11 md:h-11 rounded-full bg-white/90 hover:bg-white shadow-md text-[#D81B60] flex items-center justify-center transition-all z-20 hover:scale-110 border border-pink-100 cursor-pointer"
+          className="absolute left-2.5 sm:left-4 md:left-6 top-1/2 -translate-y-1/2 w-8 h-8 sm:w-10 sm:h-10 md:w-11 md:h-11 rounded-full bg-white/95 hover:bg-white shadow-md text-[#D81B60] flex items-center justify-center transition-all z-20 hover:scale-110 border border-pink-100 cursor-pointer active:scale-95"
           aria-label="Previous Slide"
         >
           <ChevronLeft className="w-5 h-5 md:w-6 md:h-6 stroke-[2.5]" />
@@ -139,7 +169,7 @@ export default function HeroCarouselSection() {
             e.stopPropagation();
             nextSlide();
           }}
-          className="absolute right-2 sm:right-4 md:right-6 top-1/2 -translate-y-1/2 w-8 h-8 sm:w-10 sm:h-10 md:w-11 md:h-11 rounded-full bg-white/90 hover:bg-white shadow-md text-[#D81B60] flex items-center justify-center transition-all z-20 hover:scale-110 border border-pink-100 cursor-pointer"
+          className="absolute right-2.5 sm:right-4 md:right-6 top-1/2 -translate-y-1/2 w-8 h-8 sm:w-10 sm:h-10 md:w-11 md:h-11 rounded-full bg-white/95 hover:bg-white shadow-md text-[#D81B60] flex items-center justify-center transition-all z-20 hover:scale-110 border border-pink-100 cursor-pointer active:scale-95"
           aria-label="Next Slide"
         >
           <ChevronRight className="w-5 h-5 md:w-6 md:h-6 stroke-[2.5]" />
