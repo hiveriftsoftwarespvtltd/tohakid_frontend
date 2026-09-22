@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react';
 import { useShop } from '../../context/ShopContext';
@@ -11,7 +11,6 @@ import dd from '../../assets/dd.png';
 export default function HeroCarouselSection() {
   const navigate = useNavigate();
   const { banners } = useShop();
-  const [currentSlide, setCurrentSlide] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
 
   const defaultHeroSlides = [
@@ -59,16 +58,67 @@ export default function HeroCarouselSection() {
 
   const totalSlides = heroSlides.length;
 
+  // Clone first and last slide for seamless infinite loop (no rewind jerk)
+  const extendedSlides = React.useMemo(() => {
+    if (totalSlides <= 1) return heroSlides;
+    return [heroSlides[totalSlides - 1], ...heroSlides, heroSlides[0]];
+  }, [heroSlides, totalSlides]);
+
+  const [currentIndex, setCurrentIndex] = useState(1);
+  const [isTransitioning, setIsTransitioning] = useState(true);
+  const isMovingRef = useRef(false);
+
   const nextSlide = useCallback(() => {
-    setCurrentSlide((prev) => (prev + 1) % totalSlides);
+    if (isMovingRef.current || totalSlides <= 1) return;
+    isMovingRef.current = true;
+    setIsTransitioning(true);
+    setCurrentIndex((prev) => prev + 1);
   }, [totalSlides]);
 
   const prevSlide = useCallback(() => {
-    setCurrentSlide((prev) => (prev === 0 ? totalSlides - 1 : prev - 1));
+    if (isMovingRef.current || totalSlides <= 1) return;
+    isMovingRef.current = true;
+    setIsTransitioning(true);
+    setCurrentIndex((prev) => prev - 1);
   }, [totalSlides]);
 
-  const touchStartX = React.useRef(0);
-  const touchEndX = React.useRef(0);
+  const handleTransitionEnd = (e) => {
+    // Only handle transition of the track itself, not bubbling from children
+    if (e.target !== e.currentTarget) return;
+    isMovingRef.current = false;
+    if (currentIndex === totalSlides + 1) {
+      setIsTransitioning(false);
+      setCurrentIndex(1);
+    } else if (currentIndex === 0) {
+      setIsTransitioning(false);
+      setCurrentIndex(totalSlides);
+    }
+  };
+
+  // Re-enable transition after teleporting back to clone
+  useEffect(() => {
+    if (!isTransitioning) {
+      const id = requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          setIsTransitioning(true);
+        });
+      });
+      return () => cancelAnimationFrame(id);
+    }
+  }, [isTransitioning]);
+
+  // Safety fallback to unlock sliding if transitionend is missed (e.g. background tab)
+  useEffect(() => {
+    if (isMovingRef.current) {
+      const timer = setTimeout(() => {
+        isMovingRef.current = false;
+      }, 850);
+      return () => clearTimeout(timer);
+    }
+  }, [currentIndex]);
+
+  const touchStartX = useRef(0);
+  const touchEndX = useRef(0);
 
   const handleTouchStart = (e) => {
     touchStartX.current = e.touches[0].clientX;
@@ -94,12 +144,14 @@ export default function HeroCarouselSection() {
 
     const timer = setInterval(() => {
       nextSlide();
-    }, 4000);
+    }, 3000);
 
     return () => clearInterval(timer);
   }, [totalSlides, isHovered, nextSlide]);
 
   if (!heroSlides || heroSlides.length === 0) return null;
+
+  const activeDot = (currentIndex - 1 + totalSlides) % totalSlides;
 
   return (
     <section className="relative max-w-[1600px] mx-auto px-3 sm:px-4 pt-2 sm:pt-4">
@@ -111,43 +163,44 @@ export default function HeroCarouselSection() {
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
       >
-        {/* Slides rendering with smooth, seamless translational slide animation */}
-        {heroSlides.map((slide, idx) => {
-          let offset = idx - currentSlide;
-          if (offset > totalSlides / 2) offset -= totalSlides;
-          if (offset < -totalSlides / 2) offset += totalSlides;
-          const isVisible = Math.abs(offset) <= 1;
-          const targetLink = slide.link || slide.btnPrimaryLink || '/collections';
-
-          return (
-            <div
-              key={slide.id || idx}
-              onClick={() => navigate(targetLink)}
-              style={{
-                transform: `translate3d(${offset * 100}%, 0, 0)`,
-                transition: isVisible ? 'transform 850ms cubic-bezier(0.22, 1, 0.36, 1)' : 'none',
-                visibility: isVisible ? 'visible' : 'hidden',
-                zIndex: offset === 0 ? 10 : 5,
-              }}
-              className="absolute inset-0 w-full h-full cursor-pointer will-change-transform"
-            >
-              {/* Responsive Slide Banner Image (Serves Mobile Image on Phone Screens) */}
-              <picture className="absolute inset-0 w-full h-full">
-                {slide.mobileImage && (
-                  <source
-                    media="(max-width: 640px)"
-                    srcSet={slide.mobileImage}
+        {/* Continuous track with hardware-accelerated transform translation */}
+        <div
+          className="flex w-full h-full"
+          onTransitionEnd={handleTransitionEnd}
+          style={{
+            transform: `translate3d(-${currentIndex * 100}%, 0, 0)`,
+            transition: isTransitioning ? 'transform 750ms cubic-bezier(0.25, 1, 0.5, 1)' : 'none',
+            willChange: 'transform',
+            backfaceVisibility: 'hidden',
+            WebkitBackfaceVisibility: 'hidden',
+          }}
+        >
+          {extendedSlides.map((slide, idx) => {
+            const targetLink = slide.link || slide.btnPrimaryLink || '/collections';
+            return (
+              <div
+                key={idx}
+                onClick={() => navigate(targetLink)}
+                className="w-full h-full shrink-0 relative cursor-pointer"
+              >
+                {/* Responsive Slide Banner Image (Serves Mobile Image on Phone Screens) */}
+                <picture className="absolute inset-0 w-full h-full">
+                  {slide.mobileImage && (
+                    <source
+                      media="(max-width: 640px)"
+                      srcSet={slide.mobileImage}
+                    />
+                  )}
+                  <img
+                    src={slide.image || aa}
+                    alt={slide.title || 'Brand Hero Banner'}
+                    className="absolute inset-0 w-full h-full object-cover object-center pointer-events-none select-none"
                   />
-                )}
-                <img
-                  src={slide.image || aa}
-                  alt={slide.title || 'Brand Hero Banner'}
-                  className="absolute inset-0 w-full h-full object-cover object-center pointer-events-none"
-                />
-              </picture>
-            </div>
-          );
-        })}
+                </picture>
+              </div>
+            );
+          })}
+        </div>
 
         {/* Left Navigation Circular Arrow Button */}
         <button
@@ -183,10 +236,13 @@ export default function HeroCarouselSection() {
               type="button"
               onClick={(e) => {
                 e.stopPropagation();
-                setCurrentSlide(idx);
+                if (isMovingRef.current) return;
+                isMovingRef.current = true;
+                setIsTransitioning(true);
+                setCurrentIndex(idx + 1);
               }}
               className={`rounded-full transition-all duration-300 cursor-pointer ${
-                currentSlide === idx
+                activeDot === idx
                   ? 'w-6 sm:w-8 h-2 sm:h-2.5 bg-[#D81B60] shadow-xs'
                   : 'w-2 h-2 sm:w-2.5 sm:h-2.5 bg-white/90 hover:bg-white border border-black/15 shadow-xs'
               }`}
