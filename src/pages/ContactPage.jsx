@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ChevronRight, Phone, Mail, MapPin, Send, MessageCircle, Clock, ChevronDown, CheckCircle2, PackageCheck } from 'lucide-react';
+import { ChevronRight, Phone, Mail, Truck, Send, MessageCircle, Clock, ChevronDown, CheckCircle2, PackageCheck } from 'lucide-react';
 import { useShop } from '../context/ShopContext';
 import { usePageBanner } from '../utils/usePageBanner';
 import arrivehero from '../assets/arrivehero.png';
@@ -136,30 +136,28 @@ export default function ContactPage() {
           </a>
         </div>
 
-        {/* Card 3: Design Studio */}
+        {/* Card 3: Pan-India Online Delivery */}
         <div className="bg-white p-6 rounded-3xl border border-pink-100 shadow-2xs hover:shadow-md transition-all space-y-4 flex flex-col justify-between">
           <div className="space-y-3">
             <div className="w-12 h-12 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center shrink-0 shadow-2xs">
-              <MapPin className="w-6 h-6" />
+              <Truck className="w-6 h-6" />
             </div>
             <div>
-              <h3 className="font-sans font-extrabold text-lg text-gray-900">Visit Our Studio</h3>
-              <p className="text-xs text-gray-500 mt-1">Experience our fabrics in person</p>
+              <h3 className="font-sans font-extrabold text-lg text-gray-900">Pan-India Delivery</h3>
+              <p className="text-xs text-gray-500 mt-1">Direct to your doorstep</p>
             </div>
             <div className="pt-1 text-xs text-gray-600 font-medium leading-relaxed">
-              <span className="font-extrabold text-gray-900 block">Tohay Kids Design Studio</span>
-              <span>Sector 18, Gurugram, Haryana 122008</span>
+              <span className="font-extrabold text-gray-900 block">Express Doorstep Shipping</span>
+              <span>Delivering across 28,000+ pin codes all over India</span>
             </div>
           </div>
-          <a
-            href="https://maps.google.com"
-            target="_blank"
-            rel="noreferrer"
+          <Link
+            to="/track-order"
             className="w-full bg-gray-900 hover:bg-black text-white font-extrabold text-xs uppercase tracking-wider py-3 rounded-xl flex items-center justify-center gap-2 shadow-2xs transition-colors"
           >
-            <MapPin className="w-4 h-4" />
-            <span>Get Directions</span>
-          </a>
+            <Truck className="w-4 h-4" />
+            <span>Track Your Order</span>
+          </Link>
         </div>
       </div>
 

@@ -57,7 +57,7 @@ export const AdminProvider = ({ children }) => {
     supportPhone: '+91 98765 43210',
     currencySymbol: '₹',
     currencyCode: 'INR',
-    address: 'Plot 42, Textile Hub, Sector 62, Noida, UP 201301',
+    address: '',
     freeShippingThreshold: 1499,
     standardShippingFee: 99,
     gstTaxRate: 5,
