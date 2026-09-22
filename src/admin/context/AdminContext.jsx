@@ -6,7 +6,6 @@ import {
   adminOrdersData as seedOrders,
   adminCustomersData as seedCustomers,
   adminReviewsData as seedReviews,
-  adminCouponsData as seedCoupons,
   adminReturnsData as seedReturns,
   adminBannersData as seedBanners,
   adminTransactionsData as seedTransactions,

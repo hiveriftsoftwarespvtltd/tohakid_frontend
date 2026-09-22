@@ -9,6 +9,7 @@ import { orderService } from '../services/orderService';
 import { userService } from '../services/userService';
 import { bannerService } from '../services/bannerService';
 import { categoryService } from '../services/categoryService';
+import { couponService } from '../services/couponService';
 import { categoriesList as fallbackCategories } from '../data/products';
 import { enrichProductWithVariants } from '../utils/variantStorage';
 
@@ -391,44 +392,38 @@ export const ShopProvider = ({ children }) => {
     const cleanCode = code.trim().toUpperCase();
 
     try {
-      if (isLoggedIn) {
-        const res = await cartService.applyCoupon(cleanCode);
-        if (res?.data) {
-          setCouponCode(cleanCode);
-          const dType = res.data.discountType || 'PERCENTAGE';
-          const dVal = res.data.discountValue ?? res.data.discountPercent ?? 10;
-          setDiscountType(dType);
-          setDiscountValue(dVal);
-          setDiscountPercent(dType === 'PERCENTAGE' ? dVal : 0);
-          const msg = dType === 'FIXED' || dType === 'Fixed Amount' ? `₹${dVal} OFF` : `${dVal}% OFF`;
-          showToast(`Coupon "${cleanCode}" applied! ${msg}`);
-          return { success: true, message: `Coupon "${cleanCode}" applied!` };
+      // Validate against database via backend API
+      const valRes = await couponService.validateCoupon(cleanCode, cartSubtotal);
+      if (valRes?.data) {
+        const couponData = valRes.data;
+        const dType = couponData.type || 'PERCENTAGE';
+        const dVal = couponData.value ?? 0;
+
+        if (isLoggedIn) {
+          try {
+            await cartService.applyCoupon(cleanCode);
+          } catch (e) {
+            // Logged-in cart sync
+          }
         }
+
+        setCouponCode(couponData.code || cleanCode);
+        setDiscountType(dType);
+        setDiscountValue(dVal);
+        setDiscountPercent(dType === 'PERCENTAGE' ? dVal : 0);
+
+        const msg = dType === 'FIXED' || dType === 'Fixed Amount' ? `₹${dVal} OFF` : `${dVal}% OFF`;
+        showToast(`Coupon "${cleanCode}" applied! ${msg}`);
+        return { success: true, message: `Coupon "${cleanCode}" applied! ${msg}` };
       }
     } catch (err) {
-      console.warn('Backend coupon apply fallback:', err);
+      const errMsg = err?.response?.data?.message || err?.message || 'Invalid or expired coupon code';
+      showToast(errMsg);
+      return { success: false, message: errMsg };
     }
 
-    const builtInMap = {
-      TOHAY10: { type: 'PERCENTAGE', value: 10 },
-      WELCOME10: { type: 'PERCENTAGE', value: 10 },
-      FESTIVE15: { type: 'PERCENTAGE', value: 15 },
-      EXTRA5: { type: 'PERCENTAGE', value: 5 },
-      TOHAY20: { type: 'PERCENTAGE', value: 20 },
-      FIRST10: { type: 'PERCENTAGE', value: 10 },
-      SAVE10: { type: 'PERCENTAGE', value: 10 },
-      SAVE100: { type: 'FIXED', value: 100 },
-      SAIF100: { type: 'FIXED', value: 100 },
-    };
-
-    const c = builtInMap[cleanCode] || { type: 'PERCENTAGE', value: 10 };
-    setCouponCode(cleanCode);
-    setDiscountType(c.type);
-    setDiscountValue(c.value);
-    setDiscountPercent(c.type === 'PERCENTAGE' ? c.value : 0);
-    const msg = c.type === 'FIXED' || c.type === 'Fixed Amount' ? `₹${c.value} OFF` : `${c.value}% OFF`;
-    showToast(`Coupon "${cleanCode}" applied! ${msg}`);
-    return { success: true, message: `Coupon "${cleanCode}" applied!` };
+    showToast('Invalid or expired coupon code');
+    return { success: false, message: 'Invalid or expired coupon code' };
   };
 
   const removeCoupon = async () => {

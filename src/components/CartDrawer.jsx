@@ -345,7 +345,7 @@ export default function CartDrawer() {
                       <div className="relative flex-1">
                         <input
                           type="text"
-                          placeholder="Coupon Code (e.g. TOHAY10)"
+                          placeholder="Enter Coupon Code"
                           value={inputCoupon}
                           onChange={(e) => setInputCoupon(e.target.value)}
                           className="w-full pl-8 pr-3 py-2.5 text-xs bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:bg-white focus:border-pink-500 uppercase font-mono font-bold"
