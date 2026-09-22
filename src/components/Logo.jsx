@@ -31,17 +31,17 @@ export default function Logo({
   return (
     <Link 
       to="/" 
-      className={`inline-flex flex-col justify-center group cursor-pointer bg-white ${alignClasses} ${className}`} 
+      className={`inline-flex flex-col justify-center group cursor-pointer ${alignClasses} ${className}`} 
       aria-label="TOHAY KIDS Home"
     >
       <img
         src={logoImg}
         alt="Tohay Kids Logo"
-        className={`object-contain bg-white transition-transform duration-300 group-hover:scale-105 ${sizeClasses[size] || sizeClasses.normal}`}
+        className={`object-contain transition-transform duration-300 group-hover:scale-105 ${sizeClasses[size] || sizeClasses.normal}`}
       />
       {showTagline && (
         <span
-          className={`font-serif italic font-medium text-[#C2185B] group-hover:text-[#D81B60] transition-colors duration-300 mt-1 select-none whitespace-nowrap leading-tight bg-white ${taglineSizeClasses[size] || taglineSizeClasses.normal} ${taglineClassName}`}
+          className={`font-serif italic font-bold text-[#C2185B] group-hover:text-[#D81B60] transition-colors duration-300 mt-0.5 select-none whitespace-nowrap leading-tight ${taglineSizeClasses[size] || taglineSizeClasses.normal} ${taglineClassName}`}
           style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
         >
           Elegance for Little Dreamers
