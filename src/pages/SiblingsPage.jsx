@@ -7,12 +7,20 @@ import ProductFilterSidebar from '../components/ProductFilterSidebar';
 import { usePageBanner } from '../utils/usePageBanner';
 import { isCategoryMatch, isSubcategoryMatch, isAgeMatch, isColorMatch } from '../utils/filterUtils';
 import dd from '../assets/dd.png';
+import sibblingsMobileImg from '../assets/sibblingss.png';
 
 const ITEMS_PER_PAGE = 9;
 
 export default function SiblingsPage() {
   const { products, categoriesList } = useShop();
-  const heroBanner = usePageBanner('Siblings Header Banner', 'Sibling Sets', 'Twice the charm. Perfect matching ethnic sets.', dd);
+  const heroBanner = usePageBanner(
+    'Siblings Header Banner',
+    'Sibling Sets',
+    'Twice the charm. Perfect matching ethnic sets.',
+    dd,
+    '/siblings',
+    sibblingsMobileImg
+  );
 
   const [sortOption, setSortOption] = useState('newest');
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
@@ -106,12 +114,18 @@ export default function SiblingsPage() {
       </nav>
 
       {/* Siblings Purple Banner */}
-      <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden border border-purple-200/60 shadow-md h-[320px] sm:h-[370px] md:h-[420px] lg:h-[460px] bg-[#F3E5F5] select-none">
-        <img
-          src={heroBanner.image}
-          alt={heroBanner.title}
-          className="absolute inset-0 w-full h-full object-cover object-center"
-        />
+      <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden border border-purple-200/60 shadow-md aspect-square sm:aspect-auto sm:h-[370px] md:h-[420px] lg:h-[460px] bg-[#F3E5F5] select-none">
+        <picture className="absolute inset-0 w-full h-full">
+          <source
+            media="(max-width: 640px)"
+            srcSet={heroBanner.mobileImage || sibblingsMobileImg}
+          />
+          <img
+            src={heroBanner.image}
+            alt={heroBanner.title}
+            className="absolute inset-0 w-full h-full object-cover object-center"
+          />
+        </picture>
       </div>
 
       {/* Dynamic Sibling Sets & Collections Chips Bar */}
