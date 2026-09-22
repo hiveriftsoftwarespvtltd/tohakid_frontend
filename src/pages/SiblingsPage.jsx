@@ -114,7 +114,7 @@ export default function SiblingsPage() {
       </nav>
 
       {/* Siblings Purple Banner */}
-      <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden border border-purple-200/60 shadow-md aspect-square sm:aspect-auto sm:h-[370px] md:h-[420px] lg:h-[460px] bg-[#F3E5F5] select-none">
+      <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden border border-purple-200/60 shadow-md aspect-square sm:aspect-auto min-h-[380px] sm:min-h-0 sm:h-[440px] md:h-[500px] lg:h-[540px] xl:h-[560px] bg-[#F3E5F5] select-none">
         <picture className="absolute inset-0 w-full h-full">
           <source
             media="(max-width: 640px)"

@@ -130,7 +130,7 @@ export default function GirlsPage() {
       </div>
 
       {/* Hero Banner Section */}
-      <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden border border-pink-200/60 shadow-md aspect-square sm:aspect-auto sm:h-[370px] md:h-[420px] lg:h-[460px] bg-[#FFF5F7] select-none">
+      <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden border border-pink-200/60 shadow-md aspect-square sm:aspect-auto min-h-[380px] sm:min-h-0 sm:h-[440px] md:h-[500px] lg:h-[540px] xl:h-[560px] bg-[#FFF5F7] select-none">
         <picture className="absolute inset-0 w-full h-full">
           <source
             media="(max-width: 640px)"
