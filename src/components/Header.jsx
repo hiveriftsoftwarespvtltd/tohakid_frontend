@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import {
   Search, Heart, ShoppingBag, User, Menu, X,
-  ChevronRight, Sparkles, MessageCircle, Truck
+  ChevronRight
 } from 'lucide-react';
 import { useShop } from '../context/ShopContext';
 import Logo from './Logo';
@@ -104,38 +104,7 @@ export default function Header() {
   return (
     <header className={`sticky top-0 shadow-sm font-sans transition-all ${mobileMenuOpen ? 'z-50' : 'z-40'}`}>
 
-      {/* 1. TOP COLORFUL FESTIVE ANNOUNCEMENT RIBBON */}
-      <div className="bg-gradient-to-r from-[#D81B60] via-[#8E24AA] to-[#F59E0B] text-white text-[10.5px] sm:text-[11px] font-bold py-1.5 px-4 shadow-2xs">
-        <div className="max-w-[1600px] mx-auto flex items-center justify-between">
-          {/* Left Feature */}
-          <div className="hidden sm:flex items-center gap-1.5">
-            <Sparkles className="w-3.5 h-3.5 text-yellow-200 animate-pulse" />
-            <span className="tracking-wide">Handcrafted Indian Festive Wear for Kids</span>
-          </div>
-
-          {/* Center Callout */}
-          <div className="flex-1 sm:flex-initial text-center font-extrabold tracking-wide">
-            ✨ FREE Express Shipping on Orders Above ₹1499 ✨
-          </div>
-
-          {/* Right Links */}
-          <div className="hidden md:flex items-center gap-4 text-[10.5px]">
-            <Link to="/track-order" className="hover:underline opacity-95 hover:opacity-100 flex items-center gap-1">
-              <Truck className="w-3 h-3" /> Track Order
-            </Link>
-            <a
-              href="https://wa.me/919876543210"
-              target="_blank"
-              rel="noreferrer"
-              className="hover:underline opacity-95 hover:opacity-100 flex items-center gap-1 text-yellow-200 font-extrabold"
-            >
-              <MessageCircle className="w-3 h-3" /> WhatsApp Help
-            </a>
-          </div>
-        </div>
-      </div>
-
-      {/* 2. MAIN HEADER ROW (Search | Centered Sleek Logo | Utilities) */}
+      {/* MAIN HEADER ROW (Search | Centered Sleek Logo | Utilities) */}
       <div className="bg-gradient-to-r from-[#FFF4F7] via-[#FFF9FB] to-[#FFF7EE] border-b border-pink-200/70 shadow-2xs backdrop-blur-md">
         <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-10 py-2 sm:py-2.5">
           <div className="grid grid-cols-3 items-center gap-2 sm:gap-4">
@@ -241,11 +210,9 @@ export default function Header() {
               </Link>
             </div>
 
-            {/* CENTER: Prominent Centered TOHAY KIDS Logo with Crisp Showcase Card */}
+            {/* CENTER: Prominent Centered TOHAY KIDS Logo */}
             <div className="flex justify-center text-center">
-              <div className="bg-white/95 hover:bg-white px-3 sm:px-6 py-1 sm:py-1.5 rounded-2xl shadow-xs hover:shadow-sm border border-pink-200/80 hover:border-pink-300 transition-all">
-                <Logo size="normal" />
-              </div>
+              <Logo size="normal" />
             </div>
 
             {/* RIGHT: Wishlist & Cart Actions */}
@@ -366,7 +333,7 @@ export default function Header() {
           <div className="fixed inset-y-0 left-0 max-w-xs w-full h-full max-h-dvh bg-white shadow-2xl flex flex-col z-50">
             {/* Drawer Header with Vibrant Gradient */}
             <div className="p-4 border-b border-pink-200 flex items-center justify-between bg-gradient-to-r from-[#FFF0F5] via-[#FFF5F8] to-[#FFFBEB] shrink-0">
-              <div onClick={() => setMobileMenuOpen(false)} className="bg-white/95 px-3 py-1 rounded-xl shadow-2xs border border-pink-200/70">
+              <div onClick={() => setMobileMenuOpen(false)}>
                 <Logo size="small" align="start" />
               </div>
               <button
