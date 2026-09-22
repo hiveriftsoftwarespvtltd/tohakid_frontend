@@ -3,14 +3,22 @@ import { Link } from 'react-router-dom';
 import { ChevronRight, Award, Feather, ShieldCheck, Truck, Users, ShoppingBag, Star, Heart, Smile, RefreshCw, Lock, Clock, CheckCircle2 } from 'lucide-react';
 import { useShop } from '../context/ShopContext';
 import { usePageBanner } from '../utils/usePageBanner';
-import arrivehero from '../assets/arrivehero.png';
+import cc from '../assets/cc.png';
+import newArrivalsMobileImg from '../assets/newarrives.png';
 import three from '../assets/three.png';
 import p5 from '../assets/p5.png';
 import p7 from '../assets/p7.png';
 import p8 from '../assets/p8.png';
 
 export default function AboutPage() {
-  const heroBanner = usePageBanner('About Us Hero Banner', 'About Us', 'Made for little celebrations, crafted with love.', arrivehero);
+  const heroBanner = usePageBanner(
+    'About Us Hero Banner',
+    'About Us',
+    'Made for little celebrations, crafted with love.',
+    cc,
+    '/about-us',
+    newArrivalsMobileImg
+  );
   return (
     <div className="max-w-[1600px] mx-auto px-4 py-6 space-y-12">
       {/* Breadcrumb */}
@@ -21,31 +29,18 @@ export default function AboutPage() {
       </nav>
 
       {/* 1. Top Hero Header Banner */}
-      <div className="relative rounded-3xl overflow-hidden border border-pink-200/60 shadow-2xs min-h-[260px] sm:min-h-[300px] md:min-h-[340px] flex items-center bg-[#FFF0F5]">
-        {/* Background Image */}
-        <img
-          src={heroBanner.image}
-          alt={heroBanner.title}
-          className="absolute inset-0 w-full h-full object-cover object-right"
-        />
-
-        {/* Soft Left Side Gradient Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-r from-[#FFF0F5] via-[#FFF0F5]/95 to-transparent w-full md:w-3/5" />
-
-        {/* Left Text Overlay */}
-        <div className="relative z-10 p-6 sm:p-8 md:p-12 max-w-xl space-y-3">
-          <h1 className="font-sans font-bold md:font-extrabold text-4xl sm:text-5xl md:text-6xl text-[#1E293B] tracking-tight leading-none">
-            {heroBanner.title}
-          </h1>
-          <p className="text-xs sm:text-sm md:text-base text-[#64748B] font-medium leading-relaxed pt-1">
-            {heroBanner.subtitle}
-          </p>
-          <div className="flex items-center gap-2 text-[#D81B60] opacity-60 pt-1">
-            <div className="w-8 h-0.5 bg-[#D81B60] rounded-full" />
-            <Heart className="w-3.5 h-3.5 text-[#D81B60]" />
-            <div className="w-8 h-0.5 bg-[#D81B60] rounded-full" />
-          </div>
-        </div>
+      <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden border border-pink-200/60 shadow-md aspect-square sm:aspect-auto min-h-[380px] sm:min-h-0 sm:h-[440px] md:h-[500px] lg:h-[540px] xl:h-[560px] bg-[#FFF5F7] select-none">
+        <picture className="absolute inset-0 w-full h-full">
+          <source
+            media="(max-width: 640px)"
+            srcSet={heroBanner.mobileImage || newArrivalsMobileImg}
+          />
+          <img
+            src={heroBanner.image}
+            alt={heroBanner.title}
+            className="absolute inset-0 w-full h-full object-cover object-center"
+          />
+        </picture>
       </div>
 
       {/* 2. Our Story Section */}
