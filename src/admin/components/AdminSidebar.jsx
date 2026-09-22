@@ -73,8 +73,7 @@ export default function AdminSidebar() {
         { name: 'Occasion Promo Cards', path: '/admin/marketing/occasion-cards', icon: Award },
         { name: 'Shop by Collection Cards', path: '/admin/marketing/collection-cards', icon: FolderTree },
         { name: 'Celebration Edit Banner', path: '/admin/marketing/celebration-edit', icon: Sparkles },
-        { name: 'Social & Lookbook Gallery', path: '/admin/marketing/instagram-gallery', icon: Camera },
-        { name: 'Prepaid Offer & Timer', path: '/admin/marketing/prepaid-offer', icon: Tag }
+        { name: 'Social & Lookbook Gallery', path: '/admin/marketing/instagram-gallery', icon: Camera }
       ]
     },
     {
