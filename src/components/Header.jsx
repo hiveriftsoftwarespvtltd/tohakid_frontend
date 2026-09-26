@@ -1,15 +1,16 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import {
   Search, Heart, ShoppingBag, User, Menu, X,
-  ChevronRight, Truck, Sparkles, HelpCircle, Phone, Info, LogOut
+  ChevronRight, ChevronDown, Truck, Sparkles, HelpCircle, Phone, Info, LogOut
 } from 'lucide-react';
 import { useShop } from '../context/ShopContext';
 import Logo from './Logo';
 
 export default function Header() {
-  const { wishlist, totalCartItems, searchQuery, setSearchQuery, setIsCartOpen, products, isLoggedIn, user, logoutUser } = useShop();
+  const { wishlist, totalCartItems, searchQuery, setSearchQuery, setIsCartOpen, products, isLoggedIn, user, logoutUser, categoriesList } = useShop();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [expandedCatId, setExpandedCatId] = useState(null);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchFocused, setSearchFocused] = useState(false);
   const searchContainerRef = useRef(null);
@@ -55,33 +56,107 @@ export default function Header() {
     }
   }, [mobileMenuOpen]);
 
-  // Primary Navigation items with brand-matching colorful themes
-  const navLinks = [
-    {
-      name: 'NEW ARRIVALS',
-      path: '/new-arrivals',
-      activeClass: 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-xs',
-      hoverClass: 'hover:text-amber-800 hover:bg-amber-100/60',
-    },
-    {
-      name: 'BOYS',
-      path: '/boys',
-      activeClass: 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-xs',
-      hoverClass: 'hover:text-blue-800 hover:bg-blue-100/60',
-    },
-    {
-      name: 'GIRLS',
-      path: '/girls',
-      activeClass: 'bg-gradient-to-r from-[#D81B60] to-[#E91E63] text-white shadow-xs',
-      hoverClass: 'hover:text-pink-800 hover:bg-pink-100/60',
-    },
-    {
-      name: 'SIBLINGS',
-      path: '/siblings',
-      activeClass: 'bg-gradient-to-r from-[#8E24AA] to-[#AB47BC] text-white shadow-xs',
-      hoverClass: 'hover:text-purple-800 hover:bg-purple-100/60',
-    },
-  ];
+  // Dynamic Category Links derived from Categories API (with subcategories support)
+  const dynamicCategories = useMemo(() => {
+    if (Array.isArray(categoriesList) && categoriesList.length > 0) {
+      return categoriesList
+        .filter((c) => c.status !== 'Inactive')
+        .map((cat) => {
+          const slug = (cat.slug || '').toLowerCase().trim();
+          const name = (cat.name || '').trim();
+          let path = `/${slug}`;
+          let theme = {
+            activeClass: 'bg-gradient-to-r from-[#D81B60] to-[#E91E63] text-white shadow-xs',
+            hoverClass: 'hover:text-pink-800 hover:bg-pink-100/60',
+            badgeBg: 'bg-pink-100 text-[#D81B60]',
+          };
+
+          if (slug === 'boys' || name.toLowerCase().includes('boy')) {
+            path = '/boys';
+            theme = {
+              activeClass: 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-xs',
+              hoverClass: 'hover:text-blue-800 hover:bg-blue-100/60',
+              badgeBg: 'bg-blue-100 text-blue-700',
+            };
+          } else if (slug === 'girls' || name.toLowerCase().includes('girl')) {
+            path = '/girls';
+            theme = {
+              activeClass: 'bg-gradient-to-r from-[#D81B60] to-[#E91E63] text-white shadow-xs',
+              hoverClass: 'hover:text-pink-800 hover:bg-pink-100/60',
+              badgeBg: 'bg-pink-100 text-pink-700',
+            };
+          } else if (slug === 'siblings' || name.toLowerCase().includes('sibling')) {
+            path = '/siblings';
+            theme = {
+              activeClass: 'bg-gradient-to-r from-[#8E24AA] to-[#AB47BC] text-white shadow-xs',
+              hoverClass: 'hover:text-purple-800 hover:bg-purple-100/60',
+              badgeBg: 'bg-purple-100 text-purple-700',
+            };
+          } else if (slug === 'new-arrivals' || name.toLowerCase().includes('new')) {
+            path = '/new-arrivals';
+            theme = {
+              activeClass: 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-xs',
+              hoverClass: 'hover:text-amber-800 hover:bg-amber-100/60',
+              badgeBg: 'bg-amber-100 text-amber-700',
+            };
+          }
+
+          const rawSubs = Array.isArray(cat.subcategories) ? cat.subcategories : [];
+          const subcategories = rawSubs
+            .map((s) => (typeof s === 'string' ? s : s?.name))
+            .filter(Boolean);
+
+          return {
+            id: cat.id || cat._id || slug,
+            name: name,
+            displayName: name.toUpperCase(),
+            path,
+            slug,
+            subcategories,
+            ...theme,
+          };
+        });
+    }
+
+    return [
+      {
+        id: 'new-arrivals',
+        name: 'New Arrivals',
+        displayName: 'NEW ARRIVALS',
+        path: '/new-arrivals',
+        subcategories: [],
+        activeClass: 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-xs',
+        hoverClass: 'hover:text-amber-800 hover:bg-amber-100/60',
+      },
+      {
+        id: 'boys',
+        name: 'Boys',
+        displayName: 'BOYS',
+        path: '/boys',
+        subcategories: ['Kurta Pjama set'],
+        activeClass: 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-xs',
+        hoverClass: 'hover:text-blue-800 hover:bg-blue-100/60',
+      },
+      {
+        id: 'girls',
+        name: 'Girls',
+        displayName: 'GIRLS',
+        path: '/girls',
+        subcategories: ['Angrakha Set', 'Sharara Set', 'Dhoti Set', 'Pant Set', 'Salwar'],
+        activeClass: 'bg-gradient-to-r from-[#D81B60] to-[#E91E63] text-white shadow-xs',
+        hoverClass: 'hover:text-pink-800 hover:bg-pink-100/60',
+      },
+      {
+        id: 'siblings',
+        name: 'Siblings',
+        displayName: 'SIBLINGS',
+        path: '/siblings',
+        subcategories: ['DHOTI SET', 'Kurta Pjama set', 'PANT SET', 'Lehenga Choli', 'salwar'],
+        activeClass: 'bg-gradient-to-r from-[#8E24AA] to-[#AB47BC] text-white shadow-xs',
+        hoverClass: 'hover:text-purple-800 hover:bg-purple-100/60',
+      },
+    ];
+  }, [categoriesList]);
 
   // Live search suggestions
   const searchResults = searchQuery.trim().length > 1
@@ -292,9 +367,9 @@ export default function Header() {
       <nav className="hidden lg:block border-t border-b border-pink-200/60 bg-gradient-to-r from-[#FFF0F5]/90 via-[#FDF4FF]/85 to-[#FFFBEB]/90 py-1.5 shadow-2xs backdrop-blur-md">
         <div className="max-w-[1600px] mx-auto px-4 flex items-center justify-center">
           <div className="inline-flex items-center gap-2 p-1 bg-white/90 backdrop-blur-md rounded-full border border-pink-200/80 shadow-xs">
-            {navLinks.map((link) => (
+            {dynamicCategories.map((link) => (
               <NavLink
-                key={link.name}
+                key={link.id || link.name}
                 to={link.path}
                 className={({ isActive }) =>
                   `relative px-4 py-1.5 rounded-full inline-flex items-center justify-center text-[11px] font-extrabold uppercase tracking-[0.12em] transition-all duration-300 ${
@@ -399,32 +474,76 @@ export default function Header() {
                 )}
               </div>
 
-              {/* 2. SHOPPING CATEGORIES */}
+              {/* 2. SHOPPING CATEGORIES (Loaded dynamically from Category API) */}
               <div className="space-y-1.5">
                 <p className="text-[10px] font-black uppercase tracking-wider text-gray-400 px-1">
                   Shopping Categories
                 </p>
 
-                {/* Primary Category Links with Colorful Tags */}
-                {navLinks.map((link) => (
-                  <NavLink
-                    key={link.name}
-                    to={link.path}
-                    onClick={() => setMobileMenuOpen(false)}
-                    className={({ isActive }) =>
-                      `flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold uppercase transition-all ${
-                        isActive
-                          ? `${link.activeClass}`
-                          : `text-gray-800 ${link.hoverClass} border border-pink-100/60 bg-gray-50/50 hover:bg-pink-50/40`
-                      }`
-                    }
-                  >
-                    <span>{link.name}</span>
-                    <ChevronRight className="w-4 h-4 opacity-70" />
-                  </NavLink>
-                ))}
+                {/* Categories from API with subcategories dropdown */}
+                {dynamicCategories.map((cat) => {
+                  const hasSubs = cat.subcategories && cat.subcategories.length > 0;
+                  const isExpanded = expandedCatId === cat.id;
 
-                {/* Additional Categories */}
+                  return (
+                    <div
+                      key={cat.id || cat.name}
+                      className="rounded-xl border border-pink-100/60 bg-gray-50/50 overflow-hidden transition-all"
+                    >
+                      <div className="flex items-center justify-between">
+                        <NavLink
+                          to={cat.path}
+                          onClick={() => setMobileMenuOpen(false)}
+                          className={({ isActive }) =>
+                            `flex-1 flex items-center justify-between px-3.5 py-2.5 text-xs font-bold uppercase transition-all ${
+                              isActive
+                                ? `${cat.activeClass}`
+                                : `text-gray-800 ${cat.hoverClass} hover:bg-pink-50/40`
+                            }`
+                          }
+                        >
+                          <span>{cat.displayName || cat.name}</span>
+                          {!hasSubs && <ChevronRight className="w-4 h-4 opacity-60" />}
+                        </NavLink>
+
+                        {hasSubs && (
+                          <button
+                            type="button"
+                            onClick={() => setExpandedCatId(isExpanded ? null : cat.id)}
+                            className="px-3 py-2.5 text-gray-500 hover:text-[#D81B60] hover:bg-pink-100/50 transition-colors border-l border-pink-100/60 cursor-pointer flex items-center justify-center"
+                            aria-label={`Toggle ${cat.name} subcategories`}
+                            title="View Subcategories"
+                          >
+                            <ChevronDown
+                              className={`w-4 h-4 transition-transform duration-200 ${
+                                isExpanded ? 'rotate-180 text-[#D81B60]' : ''
+                              }`}
+                            />
+                          </button>
+                        )}
+                      </div>
+
+                      {/* Expandable Subcategories List from API */}
+                      {hasSubs && isExpanded && (
+                        <div className="bg-white/95 border-t border-pink-100/60 px-3 py-2 space-y-1 animate-fadeIn">
+                          {cat.subcategories.map((sub, sIdx) => (
+                            <Link
+                              key={sIdx}
+                              to={`${cat.path}?subcategory=${encodeURIComponent(sub)}`}
+                              onClick={() => setMobileMenuOpen(false)}
+                              className="flex items-center justify-between px-3 py-1.5 rounded-lg text-[11px] font-semibold text-gray-600 hover:text-[#D81B60] hover:bg-pink-50/60 transition-colors"
+                            >
+                              <span>{sub}</span>
+                              <ChevronRight className="w-3 h-3 text-gray-400" />
+                            </Link>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+
+                {/* Additional Non-Gender Categories */}
                 <NavLink
                   to="/shop-by-age"
                   onClick={() => setMobileMenuOpen(false)}
@@ -441,18 +560,6 @@ export default function Header() {
                 >
                   <span>ALL COLLECTIONS</span>
                   <ChevronRight className="w-4 h-4 text-gray-400" />
-                </NavLink>
-
-                <NavLink
-                  to="/sale"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-black text-rose-600 bg-rose-50/50 hover:bg-rose-100/60 border border-rose-200 transition-all uppercase"
-                >
-                  <span className="flex items-center gap-1.5">
-                    <Sparkles className="w-3.5 h-3.5 text-rose-500" />
-                    <span>SALE & FESTIVE OFFERS</span>
-                  </span>
-                  <span className="bg-rose-500 text-white text-[9px] px-2 py-0.5 rounded-full font-bold">HOT</span>
                 </NavLink>
               </div>
 
