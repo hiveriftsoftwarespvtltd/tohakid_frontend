@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { 
-  Star, Heart, ShoppingBag, Truck, ShieldCheck, RefreshCw, 
+import {
+  Star, Heart, ShoppingBag, Truck, ShieldCheck, RefreshCw,
   Ruler, Share2, Check, MapPin, ChevronRight, Tag, Info,
   ZoomIn, ZoomOut, Maximize2, X, ChevronLeft
 } from 'lucide-react';
@@ -30,7 +30,7 @@ export default function ProductDetailPage() {
             setRemoteProduct(res.data);
           }
         })
-        .catch(() => {});
+        .catch(() => { });
     }
 
     const handleUpdate = () => {
@@ -250,9 +250,8 @@ export default function ProductDetailPage() {
                 key={idx}
                 type="button"
                 onClick={() => handleSelectImage(idx)}
-                className={`w-13 h-16 sm:w-16 sm:h-20 rounded-lg sm:rounded-xl overflow-hidden border-2 transition-all shrink-0 cursor-pointer ${
-                  activeImage === idx ? 'border-pink-600 ring-2 ring-pink-200 scale-102' : 'border-gray-200 opacity-70 hover:opacity-100'
-                }`}
+                className={`w-13 h-16 sm:w-16 sm:h-20 rounded-lg sm:rounded-xl overflow-hidden border-2 transition-all shrink-0 cursor-pointer ${activeImage === idx ? 'border-pink-600 ring-2 ring-pink-200 scale-102' : 'border-gray-200 opacity-70 hover:opacity-100'
+                  }`}
               >
                 <img src={img} alt={`${product.name} view ${idx + 1}`} className="w-full h-full object-cover object-top" />
               </button>
@@ -401,13 +400,12 @@ export default function ProductDetailPage() {
                       type="button"
                       onClick={() => inStock && setSelectedSize(sz)}
                       disabled={!inStock}
-                      className={`min-w-[44px] sm:min-w-[50px] h-9 sm:h-10 px-3 rounded-xl text-xs font-bold transition-all relative flex items-center justify-center select-none ${
-                        selectedSize === sz
+                      className={`min-w-[44px] sm:min-w-[50px] h-9 sm:h-10 px-3 rounded-xl text-xs font-bold transition-all relative flex items-center justify-center select-none ${selectedSize === sz
                           ? 'bg-[#D81B60] text-white shadow-md ring-2 ring-pink-300 font-extrabold scale-105 cursor-pointer'
                           : inStock
                             ? 'bg-white text-gray-800 border border-gray-200 hover:border-pink-300 hover:bg-pink-50/40 hover:text-[#D81B60] cursor-pointer'
                             : 'bg-gray-100 text-gray-400 border border-dashed border-gray-300 cursor-not-allowed opacity-60'
-                      }`}
+                        }`}
                       title={!inStock ? `${sz} (Out of stock)` : sz}
                     >
                       <span className={!inStock ? 'line-through text-gray-400' : ''}>{sz}</span>
@@ -485,11 +483,10 @@ export default function ProductDetailPage() {
                 type="button"
                 onClick={handleAddToCart}
                 disabled={!isCurrentSizeAvailable}
-                className={`flex-1 font-extrabold py-3 sm:py-3.5 px-4 sm:px-6 rounded-xl sm:rounded-2xl text-xs sm:text-sm flex items-center justify-center gap-2 shadow-sm transition-all ${
-                  isCurrentSizeAvailable
+                className={`flex-1 font-extrabold py-3 sm:py-3.5 px-4 sm:px-6 rounded-xl sm:rounded-2xl text-xs sm:text-sm flex items-center justify-center gap-2 shadow-sm transition-all ${isCurrentSizeAvailable
                     ? 'bg-pink-600 hover:bg-pink-700 text-white cursor-pointer hover:shadow-md active:scale-98'
                     : 'bg-gray-200 text-gray-400 cursor-not-allowed shadow-none'
-                }`}
+                  }`}
               >
                 <ShoppingBag className="w-4 h-4" />
                 <span>{isCurrentSizeAvailable ? 'Add to Bag' : 'Out of Stock'}</span>
@@ -500,11 +497,10 @@ export default function ProductDetailPage() {
               type="button"
               onClick={handleBuyNow}
               disabled={!isCurrentSizeAvailable}
-              className={`w-full font-extrabold py-3 sm:py-3.5 px-4 sm:px-6 rounded-xl sm:rounded-2xl text-xs sm:text-sm transition-all shadow-sm ${
-                isCurrentSizeAvailable
+              className={`w-full font-extrabold py-3 sm:py-3.5 px-4 sm:px-6 rounded-xl sm:rounded-2xl text-xs sm:text-sm transition-all shadow-sm ${isCurrentSizeAvailable
                   ? 'bg-gray-900 hover:bg-black text-white cursor-pointer active:scale-98'
                   : 'bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed'
-              }`}
+                }`}
             >
               {isCurrentSizeAvailable ? 'Buy Now (Express Checkout)' : 'Unavailable in this Size'}
             </button>
@@ -573,17 +569,15 @@ export default function ProductDetailPage() {
         <div className="flex border-b border-gray-200 gap-6 sm:gap-8 text-xs sm:text-sm font-bold">
           <button
             onClick={() => setActiveTab('description')}
-            className={`pb-2.5 sm:pb-3 transition-colors border-b-2 cursor-pointer ${
-              activeTab === 'description' ? 'border-pink-600 text-pink-600 font-extrabold' : 'border-transparent text-gray-500'
-            }`}
+            className={`pb-2.5 sm:pb-3 transition-colors border-b-2 cursor-pointer ${activeTab === 'description' ? 'border-pink-600 text-pink-600 font-extrabold' : 'border-transparent text-gray-500'
+              }`}
           >
             Product Details
           </button>
           <button
             onClick={() => setActiveTab('fabric')}
-            className={`pb-2.5 sm:pb-3 transition-colors border-b-2 cursor-pointer ${
-              activeTab === 'fabric' ? 'border-pink-600 text-pink-600 font-extrabold' : 'border-transparent text-gray-500'
-            }`}
+            className={`pb-2.5 sm:pb-3 transition-colors border-b-2 cursor-pointer ${activeTab === 'fabric' ? 'border-pink-600 text-pink-600 font-extrabold' : 'border-transparent text-gray-500'
+              }`}
           >
             Fabric & Care
           </button>
@@ -621,11 +615,16 @@ export default function ProductDetailPage() {
       )}
 
       {/* Size Guide Modal */}
-      <SizeGuideModal isOpen={isSizeGuideOpen} onClose={() => setIsSizeGuideOpen(false)} />
+      <SizeGuideModal
+        isOpen={isSizeGuideOpen}
+        onClose={() => setIsSizeGuideOpen(false)}
+        category={product?.category || 'Alia Kurti with Afgani'}
+        product={product}
+      />
 
       {/* Fullscreen Lightbox Image Zoom Modal */}
       {isZoomModalOpen && (
-        <div 
+        <div
           onClick={(e) => {
             if (e.target === e.currentTarget) setIsZoomModalOpen(false);
           }}
@@ -727,9 +726,8 @@ export default function ProductDetailPage() {
                   key={idx}
                   type="button"
                   onClick={() => setActiveImage(idx)}
-                  className={`w-10 h-13 sm:w-12 sm:h-14 rounded-lg overflow-hidden border-2 transition-all shrink-0 cursor-pointer ${
-                    activeImage === idx ? 'border-pink-500 ring-2 ring-pink-400 scale-105' : 'border-gray-700 opacity-60 hover:opacity-100'
-                  }`}
+                  className={`w-10 h-13 sm:w-12 sm:h-14 rounded-lg overflow-hidden border-2 transition-all shrink-0 cursor-pointer ${activeImage === idx ? 'border-pink-500 ring-2 ring-pink-400 scale-105' : 'border-gray-700 opacity-60 hover:opacity-100'
+                    }`}
                 >
                   <img src={formatImageUrl(img)} alt={`Thumbnail ${idx + 1}`} className="w-full h-full object-cover object-top" />
                 </button>

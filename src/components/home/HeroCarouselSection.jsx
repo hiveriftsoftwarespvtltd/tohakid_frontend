@@ -36,14 +36,13 @@ export default function HeroCarouselSection() {
     }
   ];
 
-  // Dynamically resolve banners from Database or fallback to default
+  // Dynamically resolve banners strictly for Hero Carousel (never include Gender/Promo cards)
   const apiHeroBanners = Array.isArray(banners)
     ? banners.filter(
         (b) =>
           (b.status === 'Active' || !b.status) &&
           (b.placement === 'Homepage Main Hero Carousel' ||
-            b.position === 'Hero Slider' ||
-            !b.placement)
+            (!b.placement && b.position === 'Hero Slider'))
       )
     : (banners?.hero || []);
 
@@ -156,7 +155,7 @@ export default function HeroCarouselSection() {
   return (
     <section className="relative max-w-[1600px] mx-auto px-3 sm:px-4 pt-2 sm:pt-4">
       <div
-        className="relative rounded-2xl sm:rounded-3xl overflow-hidden border border-pink-200/60 shadow-md aspect-square sm:aspect-auto min-h-[380px] sm:min-h-0 sm:h-[440px] md:h-[500px] lg:h-[540px] xl:h-[560px] bg-[#FFF5F7] select-none"
+        className="relative rounded-2xl sm:rounded-3xl overflow-hidden border border-pink-100/80 shadow-md aspect-square sm:aspect-auto sm:h-[440px] md:h-[500px] lg:h-[540px] xl:h-[560px] bg-[#FAF8F5] select-none"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
         onTouchStart={handleTouchStart}
@@ -175,16 +174,13 @@ export default function HeroCarouselSection() {
             WebkitBackfaceVisibility: 'hidden',
           }}
         >
-          {extendedSlides.map((slide, idx) => {
-            const targetLink = slide.link || slide.btnPrimaryLink || '/collections';
-            return (
-              <div
-                key={idx}
-                onClick={() => navigate(targetLink)}
-                className="w-full h-full shrink-0 relative cursor-pointer"
-              >
-                {/* Responsive Slide Banner Image (Serves Mobile Image on Phone Screens) */}
-                <picture className="absolute inset-0 w-full h-full">
+          {extendedSlides.map((slide, idx) => (
+            <div
+              key={idx}
+              className="w-full h-full shrink-0 relative select-none"
+            >
+              {/* Responsive Slide Banner Image (Serves Mobile Image on Phone Screens) */}
+              <picture className="block absolute inset-0 w-full h-full">
                   {slide.mobileImage && (
                     <source
                       media="(max-width: 640px)"
@@ -194,12 +190,13 @@ export default function HeroCarouselSection() {
                   <img
                     src={slide.image || aa}
                     alt={slide.title || 'Brand Hero Banner'}
-                    className="absolute inset-0 w-full h-full object-cover object-center pointer-events-none select-none"
+                    loading={idx === 1 ? 'eager' : 'lazy'}
+                    decoding="async"
+                    className="w-full h-full object-cover object-center pointer-events-none select-none"
                   />
                 </picture>
               </div>
-            );
-          })}
+          ))}
         </div>
 
         {/* Left Navigation Circular Arrow Button */}
@@ -253,44 +250,44 @@ export default function HeroCarouselSection() {
       </div>
 
       {/* Three Fixed Navigation Boxes at the bottom of the banner: “Girls”, “Boys”, and “Siblings” */}
-      <div className="flex justify-center pt-1 sm:pt-2">
+      <div className="flex justify-center pt-2 sm:pt-3">
         <div className="grid grid-cols-3 gap-2.5 sm:gap-4 md:gap-6 w-full max-w-xs sm:max-w-md md:max-w-lg">
           {/* Box 1: Girls */}
           <Link
             to="/girls"
-            className="group/box flex items-center justify-center py-2.5 sm:py-3.5 px-3 sm:px-6 rounded-xl sm:rounded-2xl bg-white hover:bg-pink-50/50 text-gray-900 shadow-sm hover:shadow-md border border-pink-200/80 hover:border-[#D81B60] transition-all duration-300 hover:scale-102 active:scale-95 text-center cursor-pointer"
+            className="group/box flex items-center justify-center py-2.5 sm:py-3.5 px-3 sm:px-6 rounded-xl sm:rounded-2xl bg-gradient-to-r from-[#D81B60] via-[#E91E63] to-[#EC407A] text-white shadow-md shadow-pink-500/25 hover:shadow-lg hover:shadow-pink-500/40 border border-pink-300/30 transition-all duration-300 hover:scale-105 active:scale-95 text-center cursor-pointer"
           >
             <div className="flex items-center gap-1.5 sm:gap-2">
-              <span className="font-heading font-extrabold text-xs sm:text-sm md:text-base tracking-wider uppercase text-gray-900 group-hover/box:text-[#D81B60] transition-colors whitespace-nowrap leading-none">
+              <span className="font-heading font-extrabold text-xs sm:text-sm md:text-base tracking-wider uppercase text-white whitespace-nowrap leading-none drop-shadow-xs">
                 Girls
               </span>
-              <ArrowRight className="w-3.5 h-3.5 text-[#D81B60] opacity-0 -translate-x-1 group-hover/box:opacity-100 group-hover/box:translate-x-0 transition-all duration-200 hidden sm:inline-block" />
+              <ArrowRight className="w-3.5 h-3.5 text-white/90 -translate-x-1 group-hover/box:translate-x-0.5 transition-all duration-200 hidden sm:inline-block" />
             </div>
           </Link>
 
           {/* Box 2: Boys */}
           <Link
             to="/boys"
-            className="group/box flex items-center justify-center py-2.5 sm:py-3.5 px-3 sm:px-6 rounded-xl sm:rounded-2xl bg-white hover:bg-amber-50/50 text-gray-900 shadow-sm hover:shadow-md border border-amber-200/80 hover:border-amber-500 transition-all duration-300 hover:scale-102 active:scale-95 text-center cursor-pointer"
+            className="group/box flex items-center justify-center py-2.5 sm:py-3.5 px-3 sm:px-6 rounded-xl sm:rounded-2xl bg-gradient-to-r from-[#0284C7] via-[#0EA5E9] to-[#38BDF8] text-white shadow-md shadow-sky-500/25 hover:shadow-lg hover:shadow-sky-500/40 border border-sky-300/30 transition-all duration-300 hover:scale-105 active:scale-95 text-center cursor-pointer"
           >
             <div className="flex items-center gap-1.5 sm:gap-2">
-              <span className="font-heading font-extrabold text-xs sm:text-sm md:text-base tracking-wider uppercase text-gray-900 group-hover/box:text-amber-700 transition-colors whitespace-nowrap leading-none">
+              <span className="font-heading font-extrabold text-xs sm:text-sm md:text-base tracking-wider uppercase text-white whitespace-nowrap leading-none drop-shadow-xs">
                 Boys
               </span>
-              <ArrowRight className="w-3.5 h-3.5 text-amber-700 opacity-0 -translate-x-1 group-hover/box:opacity-100 group-hover/box:translate-x-0 transition-all duration-200 hidden sm:inline-block" />
+              <ArrowRight className="w-3.5 h-3.5 text-white/90 -translate-x-1 group-hover/box:translate-x-0.5 transition-all duration-200 hidden sm:inline-block" />
             </div>
           </Link>
 
           {/* Box 3: Siblings */}
           <Link
             to="/siblings"
-            className="group/box flex items-center justify-center py-2.5 sm:py-3.5 px-3 sm:px-6 rounded-xl sm:rounded-2xl bg-white hover:bg-purple-50/50 text-gray-900 shadow-sm hover:shadow-md border border-purple-200/80 hover:border-purple-500 transition-all duration-300 hover:scale-102 active:scale-95 text-center cursor-pointer"
+            className="group/box flex items-center justify-center py-2.5 sm:py-3.5 px-3 sm:px-6 rounded-xl sm:rounded-2xl bg-gradient-to-r from-[#8E24AA] via-[#9C27B0] to-[#BA68C8] text-white shadow-md shadow-purple-500/25 hover:shadow-lg hover:shadow-purple-500/40 border border-purple-300/30 transition-all duration-300 hover:scale-105 active:scale-95 text-center cursor-pointer"
           >
             <div className="flex items-center gap-1.5 sm:gap-2">
-              <span className="font-heading font-extrabold text-xs sm:text-sm md:text-base tracking-wider uppercase text-gray-900 group-hover/box:text-[#8E24AA] transition-colors whitespace-nowrap leading-none">
+              <span className="font-heading font-extrabold text-xs sm:text-sm md:text-base tracking-wider uppercase text-white whitespace-nowrap leading-none drop-shadow-xs">
                 Siblings
               </span>
-              <ArrowRight className="w-3.5 h-3.5 text-[#8E24AA] opacity-0 -translate-x-1 group-hover/box:opacity-100 group-hover/box:translate-x-0 transition-all duration-200 hidden sm:inline-block" />
+              <ArrowRight className="w-3.5 h-3.5 text-white/90 -translate-x-1 group-hover/box:translate-x-0.5 transition-all duration-200 hidden sm:inline-block" />
             </div>
           </Link>
         </div>

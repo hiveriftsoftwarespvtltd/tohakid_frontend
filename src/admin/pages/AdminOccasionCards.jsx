@@ -125,6 +125,8 @@ export default function AdminOccasionCards() {
 
     const payload = {
       ...cardForm,
+      position: 'Occasion Card',
+      placement: editingCard?.slot?.slotKey || cardForm.placement,
       image: cardForm.imageUrl,
       imageUrl: cardForm.imageUrl,
       link: cardForm.btnPrimaryLink

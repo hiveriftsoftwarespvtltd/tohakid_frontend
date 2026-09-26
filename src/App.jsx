@@ -1,6 +1,7 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, useLocation, Navigate, Outlet } from 'react-router-dom';
 import { ShopProvider, useShop } from './context/ShopContext';
+import TohayLoader from './components/TohayLoader';
 
 // Store Layout Components
 import Header from './components/Header';
@@ -105,8 +106,11 @@ function ToastBanner() {
 
 // Storefront Customer Layout
 function MainLayout() {
+  const { pathname } = useLocation();
+  const isCheckout = pathname === '/checkout';
+
   return (
-    <div className="min-h-screen flex flex-col bg-[#FFFDFC] pb-16 md:pb-0">
+    <div className={`min-h-screen flex flex-col bg-[#FFFDFC] ${isCheckout ? 'pb-0' : 'pb-16 md:pb-0'}`}>
       <ScrollToTop />
       <Header />
       <CartDrawer />
@@ -114,9 +118,42 @@ function MainLayout() {
       <main className="flex-1">
         <Outlet />
       </main>
-      <Footer />
-      <WhatsAppButton />
-      <MobileBottomNav />
+      {!isCheckout && <Footer />}
+      {!isCheckout && <WhatsAppButton />}
+      {!isCheckout && <MobileBottomNav />}
+    </div>
+  );
+}
+
+// Brand Intro Preloader - Runs smoothly when website is first opened / refreshed
+function InitialSiteLoader() {
+  const [show, setShow] = useState(true);
+  const [isFading, setIsFading] = useState(false);
+
+  useEffect(() => {
+    const fadeTimer = setTimeout(() => {
+      setIsFading(true);
+    }, 900);
+
+    const removeTimer = setTimeout(() => {
+      setShow(false);
+    }, 1350);
+
+    return () => {
+      clearTimeout(fadeTimer);
+      clearTimeout(removeTimer);
+    };
+  }, []);
+
+  if (!show) return null;
+
+  return (
+    <div
+      className={`fixed inset-0 z-[99999] bg-[#FFFDFC] flex flex-col items-center justify-center transition-all duration-400 ease-out select-none ${
+        isFading ? 'opacity-0 pointer-events-none scale-98' : 'opacity-100 scale-100'
+      }`}
+    >
+      <TohayLoader size="xl" text="Welcome to Tohay Kids Festive..." />
     </div>
   );
 }
@@ -125,6 +162,7 @@ export default function App() {
   return (
     <BrowserRouter>
       <ShopProvider>
+        <InitialSiteLoader />
         <ScrollToTop />
         <Routes>
           {/* Admin Authentication Route */}

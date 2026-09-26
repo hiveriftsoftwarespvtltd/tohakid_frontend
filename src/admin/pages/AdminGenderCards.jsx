@@ -134,6 +134,8 @@ export default function AdminGenderCards() {
 
     const payload = {
       ...cardForm,
+      position: 'Gender Collection Card',
+      placement: editingCard?.slot?.slotKey || cardForm.placement,
       image: cardForm.imageUrl,
       imageUrl: cardForm.imageUrl,
       link: cardForm.btnPrimaryLink

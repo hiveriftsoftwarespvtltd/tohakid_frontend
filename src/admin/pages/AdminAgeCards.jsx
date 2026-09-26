@@ -114,6 +114,8 @@ export default function AdminAgeCards() {
 
     const payload = {
       ...cardForm,
+      position: 'Age Card',
+      placement: editingCard?.slot?.slotKey || cardForm.placement,
       image: cardForm.imageUrl,
       imageUrl: cardForm.imageUrl,
       link: cardForm.btnPrimaryLink

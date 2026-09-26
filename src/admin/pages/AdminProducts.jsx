@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import {
   Plus, Search, Filter, Edit, Trash2, Copy, Eye, Tag, AlertTriangle, Check, X, ExternalLink
@@ -6,7 +6,7 @@ import {
 import { useAdmin } from '../context/AdminContext';
 import DataTable from '../components/DataTable';
 import StatusBadge from '../components/StatusBadge';
-import { isSubcategoryMatch, isAgeMatch } from '../../utils/filterUtils';
+import { isSubcategoryMatch, isAgeMatch, isCategoryMatch } from '../../utils/filterUtils';
 
 export default function AdminProducts() {
   const navigate = useNavigate();
@@ -21,96 +21,156 @@ export default function AdminProducts() {
     addProduct
   } = useAdmin();
 
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const searchFromUrl = searchParams.get('search') || '';
 
-  const [selectedCategory, setSelectedCategory] = useState('All');
-  const [selectedSubcategory, setSelectedSubcategory] = useState('All');
-  const [selectedStockStatus, setSelectedStockStatus] = useState('All');
-  const [selectedSaleStatus, setSelectedSaleStatus] = useState('All');
+  // Persist filter states in URL searchParams & sessionStorage across page refreshes
+  const [selectedCategory, setSelectedCategory] = useState(() => {
+    return searchParams.get('category') || sessionStorage.getItem('tohay_admin_filter_category') || 'All Categories';
+  });
+  const [selectedSubcategory, setSelectedSubcategory] = useState(() => {
+    return searchParams.get('subcategory') || sessionStorage.getItem('tohay_admin_filter_subcategory') || 'All Subcategories';
+  });
+  const [selectedStockStatus, setSelectedStockStatus] = useState(() => {
+    return searchParams.get('stock') || sessionStorage.getItem('tohay_admin_filter_stock') || 'All';
+  });
+  const [selectedSaleStatus, setSelectedSaleStatus] = useState(() => {
+    return searchParams.get('pricing') || sessionStorage.getItem('tohay_admin_filter_pricing') || 'All';
+  });
+
+  // Keep URL parameters and sessionStorage in sync whenever filters change
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+
+    if (selectedCategory && selectedCategory !== 'All Categories' && selectedCategory !== 'All') {
+      params.set('category', selectedCategory);
+      sessionStorage.setItem('tohay_admin_filter_category', selectedCategory);
+    } else {
+      params.delete('category');
+      sessionStorage.removeItem('tohay_admin_filter_category');
+    }
+
+    if (selectedSubcategory && selectedSubcategory !== 'All Subcategories' && selectedSubcategory !== 'All') {
+      params.set('subcategory', selectedSubcategory);
+      sessionStorage.setItem('tohay_admin_filter_subcategory', selectedSubcategory);
+    } else {
+      params.delete('subcategory');
+      sessionStorage.removeItem('tohay_admin_filter_subcategory');
+    }
+
+    if (selectedStockStatus && selectedStockStatus !== 'All') {
+      params.set('stock', selectedStockStatus);
+      sessionStorage.setItem('tohay_admin_filter_stock', selectedStockStatus);
+    } else {
+      params.delete('stock');
+      sessionStorage.removeItem('tohay_admin_filter_stock');
+    }
+
+    if (selectedSaleStatus && selectedSaleStatus !== 'All') {
+      params.set('pricing', selectedSaleStatus);
+      sessionStorage.setItem('tohay_admin_filter_pricing', selectedSaleStatus);
+    } else {
+      params.delete('pricing');
+      sessionStorage.removeItem('tohay_admin_filter_pricing');
+    }
+
+    const currentQuery = window.location.search.replace(/^\?/, '');
+    const newQuery = params.toString();
+    if (currentQuery !== newQuery) {
+      setSearchParams(params, { replace: true });
+    }
+  }, [selectedCategory, selectedSubcategory, selectedStockStatus, selectedSaleStatus, setSearchParams]);
+
+  // Keep search string and page stored in sessionStorage
+  useEffect(() => {
+    if (window.location.search) {
+      sessionStorage.setItem('tohay_admin_products_search', window.location.search);
+    }
+    const pageNum = searchParams.get('page');
+    if (pageNum) {
+      sessionStorage.setItem('tohay_admin_products_page', pageNum);
+    }
+  }, [searchParams]);
 
   // Product View Modal State
   const [viewProduct, setViewProduct] = useState(null);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
-  // Exact Store Main Categories List
-  const mainCategoriesList = [
-    'All Categories',
-    'Boys',
-    'Girls',
-    'Siblings',
-    'Shop By Age',
-    'New Arrivals',
-    'Collections',
-    'Sale'
-  ];
+  // 100% Dynamic Categories List strictly from Backend API (categoriesList)
+  const mainCategoriesList = useMemo(() => {
+    const list = ['All Categories'];
 
-  // Subcategories Options (Dynamic based on selected Main Category)
+    if (Array.isArray(categoriesList)) {
+      categoriesList.forEach((cat) => {
+        const name = (typeof cat === 'object' ? cat.name : cat)?.trim();
+        if (name && !list.includes(name)) {
+          list.push(name);
+        }
+      });
+    }
+
+    return list;
+  }, [categoriesList]);
+
+  // Subcategories Options strictly from Backend API & Products of Selected Category
   const subcategoryOptions = useMemo(() => {
-    if (selectedCategory === 'Boys') {
-      return ['All Subcategories', 'Kurta Pyjama', 'Nehru Jacket Sets', 'Sherwani Sets', 'Indo Western Sets', 'Dhoti Kurta Sets'];
-    }
-    if (selectedCategory === 'Girls') {
-      return ['All Subcategories', 'Lehenga Choli', 'Party Gowns', 'Sharara Sets', 'Anarkali Sets', 'Dhoti Kurti Sets'];
-    }
-    if (selectedCategory === 'Siblings') {
-      return ['All Subcategories', 'Brother & Sister Sets', 'Sister & Sister Sets', 'Brother & Brother Sets', 'Unisex Sibling Sets'];
-    }
-    if (selectedCategory === 'Shop By Age') {
-      return ['All Subcategories', '0-8 Years', '9-12 Years', '13-16 Years'];
-    }
-    if (selectedCategory === 'Collections') {
-      return ['All Subcategories', 'Festive', 'Wedding', 'Party'];
-    }
-    if (selectedCategory === 'Sale') {
-      return ['All Subcategories', '10% - 20% OFF', '20% - 30% OFF', '30% - 40% OFF', '40% - 50% OFF'];
+    const set = new Set();
+
+    // If a specific category is selected, extract its subcategories from backend categoriesList
+    if (selectedCategory !== 'All' && selectedCategory !== 'All Categories') {
+      const matchedCat = (categoriesList || []).find((c) => {
+        const cName = typeof c === 'object' ? c.name : c;
+        return isCategoryMatch(selectedCategory, cName);
+      });
+
+      if (matchedCat && Array.isArray(matchedCat.subcategories)) {
+        matchedCat.subcategories.forEach((sub) => {
+          const sName = typeof sub === 'string' ? sub : sub?.name;
+          if (sName?.trim()) set.add(sName.trim());
+        });
+      }
+
+      // Also include subcategories present on actual products in this category
+      (productsList || []).forEach((p) => {
+        if (isCategoryMatch(selectedCategory, p.category)) {
+          if (p.subcategory?.trim()) set.add(p.subcategory.trim());
+        }
+      });
+    } else {
+      // All Categories: combine all subcategories from backend categoriesList + productsList
+      (categoriesList || []).forEach((c) => {
+        if (Array.isArray(c.subcategories)) {
+          c.subcategories.forEach((sub) => {
+            const sName = typeof sub === 'string' ? sub : sub?.name;
+            if (sName?.trim()) set.add(sName.trim());
+          });
+        }
+      });
+      (productsList || []).forEach((p) => {
+        if (p.subcategory?.trim()) set.add(p.subcategory.trim());
+      });
     }
 
-    const set = new Set();
-    productsList.forEach((p) => {
-      if (p.subcategory) set.add(p.subcategory);
-    });
     return ['All Subcategories', ...Array.from(set)];
-  }, [productsList, selectedCategory]);
+  }, [categoriesList, productsList, selectedCategory]);
 
   // Filtered Products
   const filteredProducts = useMemo(() => {
     return productsList.filter((item) => {
-      // 1. MAIN CATEGORY FILTER
-      if (selectedCategory === 'Boys' && item.category !== 'Boys') return false;
-      if (selectedCategory === 'Girls' && item.category !== 'Girls') return false;
-      if (selectedCategory === 'Siblings' && item.category !== 'Siblings') return false;
-      if (selectedCategory === 'New Arrivals' && !item.isNew) return false;
-      if (selectedCategory === 'Sale') {
-        const isDisc = item.isSale || (item.mrp && item.mrp > item.price);
-        if (!isDisc) return false;
-      }
-      if (selectedCategory === 'Collections') {
-        if (!item.collectionName && item.occasion !== 'Festive' && item.occasion !== 'Wedding' && item.occasion !== 'Party') return false;
+      // 1. MAIN CATEGORY FILTER (Strict backend match)
+      if (selectedCategory !== 'All' && selectedCategory !== 'All Categories') {
+        const isNewArrivalsCat = selectedCategory.toLowerCase().includes('new arrival');
+        if (isNewArrivalsCat) {
+          if (!isCategoryMatch(selectedCategory, item.category) && !item.isNew) return false;
+        } else {
+          if (!isCategoryMatch(selectedCategory, item.category)) return false;
+        }
       }
 
       // 2. SUBCATEGORY FILTER
       if (selectedSubcategory !== 'All' && selectedSubcategory !== 'All Subcategories') {
-        if (selectedCategory === 'Shop By Age') {
-          const ageVal = selectedSubcategory.replace(' Years', '').replace('–', '-');
-          const matchedAge = isAgeMatch(ageVal, item.ageRange, item.sizes, item.ageGroup);
-          if (!matchedAge) return false;
-        } else if (selectedCategory === 'Sale') {
-          const mrp = Number(item.mrp || item.price || 0);
-          const price = Number(item.price || 0);
-          const pct = mrp > price ? Math.round(((mrp - price) / mrp) * 100) : 0;
-          if (selectedSubcategory.includes('10%') && (pct < 10 || pct >= 20)) return false;
-          if (selectedSubcategory.includes('20%') && (pct < 20 || pct >= 30)) return false;
-          if (selectedSubcategory.includes('30%') && (pct < 30 || pct >= 40)) return false;
-          if (selectedSubcategory.includes('40%') && pct < 40) return false;
-        } else if (selectedCategory === 'Collections') {
-          const colName = String(item.collectionName || item.occasion || '').toLowerCase();
-          const targetCol = String(selectedSubcategory).toLowerCase();
-          if (!colName.includes(targetCol)) return false;
-        } else {
-          const isSubMatch = isSubcategoryMatch(selectedSubcategory, item.subcategory, item.name);
-          if (!isSubMatch) return false;
-        }
+        const isSubMatch = isSubcategoryMatch(selectedSubcategory, item.subcategory, item.name);
+        if (!isSubMatch) return false;
       }
 
       // 3. STOCK STATUS FILTER
@@ -243,7 +303,8 @@ export default function AdminProducts() {
           </button>
 
           <Link
-            to={`/admin/catalog/edit-product/${row.id}`}
+            to={`/admin/catalog/edit-product/${row.id}${window.location.search}`}
+            state={{ returnUrl: `/admin/catalog/products${window.location.search}` }}
             className="p-1.5 text-gray-500 hover:text-[#D81B60] hover:bg-pink-50 rounded-lg transition-colors"
             title="Edit Product"
           >
@@ -333,6 +394,9 @@ export default function AdminProducts() {
             onChange={(e) => {
               setSelectedCategory(e.target.value);
               setSelectedSubcategory('All Subcategories');
+              const params = new URLSearchParams(window.location.search);
+              params.delete('page');
+              setSearchParams(params, { replace: true });
             }}
             className="bg-gray-50 border border-gray-200 rounded-xl px-3 py-1.5 text-xs font-bold text-gray-800 focus:ring-1 focus:ring-[#D81B60]"
           >
@@ -349,7 +413,12 @@ export default function AdminProducts() {
           <span className="text-gray-400 font-medium">Subcategory:</span>
           <select
             value={selectedSubcategory}
-            onChange={(e) => setSelectedSubcategory(e.target.value)}
+            onChange={(e) => {
+              setSelectedSubcategory(e.target.value);
+              const params = new URLSearchParams(window.location.search);
+              params.delete('page');
+              setSearchParams(params, { replace: true });
+            }}
             className="bg-gray-50 border border-gray-200 rounded-xl px-3 py-1.5 text-xs font-bold text-gray-800 focus:ring-1 focus:ring-[#D81B60]"
           >
             {subcategoryOptions.map((sub) => (
@@ -365,7 +434,12 @@ export default function AdminProducts() {
           <span className="text-gray-400 font-medium">Stock:</span>
           <select
             value={selectedStockStatus}
-            onChange={(e) => setSelectedStockStatus(e.target.value)}
+            onChange={(e) => {
+              setSelectedStockStatus(e.target.value);
+              const params = new URLSearchParams(window.location.search);
+              params.delete('page');
+              setSearchParams(params, { replace: true });
+            }}
             className="bg-gray-50 border border-gray-200 rounded-xl px-3 py-1.5 text-xs font-bold text-gray-800 focus:ring-1 focus:ring-[#D81B60]"
           >
             <option value="All">All Stock Levels</option>
@@ -380,7 +454,12 @@ export default function AdminProducts() {
           <span className="text-gray-400 font-medium">Pricing:</span>
           <select
             value={selectedSaleStatus}
-            onChange={(e) => setSelectedSaleStatus(e.target.value)}
+            onChange={(e) => {
+              setSelectedSaleStatus(e.target.value);
+              const params = new URLSearchParams(window.location.search);
+              params.delete('page');
+              setSearchParams(params, { replace: true });
+            }}
             className="bg-gray-50 border border-gray-200 rounded-xl px-3 py-1.5 text-xs font-bold text-gray-800 focus:ring-1 focus:ring-[#D81B60]"
           >
             <option value="All">All Pricing Types</option>
@@ -389,14 +468,23 @@ export default function AdminProducts() {
           </select>
         </div>
 
-        {(selectedCategory !== 'All' || selectedSubcategory !== 'All' || selectedStockStatus !== 'All' || selectedSaleStatus !== 'All') && (
+        {((selectedCategory !== 'All' && selectedCategory !== 'All Categories') ||
+          (selectedSubcategory !== 'All' && selectedSubcategory !== 'All Subcategories') ||
+          selectedStockStatus !== 'All' ||
+          selectedSaleStatus !== 'All') && (
           <button
             type="button"
             onClick={() => {
-              setSelectedCategory('All');
-              setSelectedSubcategory('All');
+              setSelectedCategory('All Categories');
+              setSelectedSubcategory('All Subcategories');
               setSelectedStockStatus('All');
               setSelectedSaleStatus('All');
+              sessionStorage.removeItem('tohay_admin_filter_category');
+              sessionStorage.removeItem('tohay_admin_filter_subcategory');
+              sessionStorage.removeItem('tohay_admin_filter_stock');
+              sessionStorage.removeItem('tohay_admin_filter_pricing');
+              const params = new URLSearchParams();
+              setSearchParams(params, { replace: true });
             }}
             className="text-[11px] font-extrabold text-[#D81B60] hover:underline ml-auto cursor-pointer"
           >
@@ -689,7 +777,8 @@ export default function AdminProducts() {
                   Close
                 </button>
                 <Link
-                  to={`/admin/catalog/edit-product/${viewProduct.id || viewProduct._id}`}
+                  to={`/admin/catalog/edit-product/${viewProduct.id || viewProduct._id}${window.location.search}`}
+                  state={{ returnUrl: `/admin/catalog/products${window.location.search}` }}
                   className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#D81B60] hover:bg-[#C2185B] text-white font-extrabold text-xs rounded-xl shadow-2xs transition-colors cursor-pointer"
                 >
                   <Edit className="w-3.5 h-3.5" />

@@ -1,5 +1,6 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Search, ArrowUpDown, Inbox, Check } from 'lucide-react';
+import { useSearchParams } from 'react-router-dom';
 import Pagination from './Pagination';
 
 export default function DataTable({
@@ -16,12 +17,28 @@ export default function DataTable({
   defaultRowsPerPage = 10,
   selectable = true
 }) {
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const [searchQuery, setSearchQuery] = useState(() => {
+    return searchParams.get('search') || '';
+  });
   const [sortColumn, setSortColumn] = useState(null);
   const [sortDirection, setSortDirection] = useState('asc'); // 'asc' | 'desc'
   const [selectedIds, setSelectedIds] = useState([]);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [rowsPerPage, setRowsPerPage] = useState(defaultRowsPerPage);
+
+  // Initialize page from URL query param (?page=...) or fallback to sessionStorage or 1
+  const [currentPage, setCurrentPage] = useState(() => {
+    const p = parseInt(searchParams.get('page'), 10);
+    if (!isNaN(p) && p > 0) return p;
+    const sessionP = parseInt(sessionStorage.getItem('tohay_admin_products_page'), 10);
+    if (!isNaN(sessionP) && sessionP > 0) return sessionP;
+    return 1;
+  });
+
+  const [rowsPerPage, setRowsPerPage] = useState(() => {
+    const r = parseInt(searchParams.get('limit'), 10);
+    return !isNaN(r) && r > 0 ? r : defaultRowsPerPage;
+  });
 
   // Filter Data via Search
   const filteredData = useMemo(() => {
@@ -59,10 +76,43 @@ export default function DataTable({
 
   // Pagination Slice
   const totalPages = Math.ceil(sortedData.length / rowsPerPage) || 1;
+
+  // Handle page change and persist to URL (?page=...) and sessionStorage
+  const handlePageChange = (newPage) => {
+    const safePage = Math.max(1, Math.min(newPage, totalPages));
+    setCurrentPage(safePage);
+    const params = new URLSearchParams(window.location.search);
+    if (safePage > 1) {
+      params.set('page', String(safePage));
+      sessionStorage.setItem('tohay_admin_products_page', String(safePage));
+    } else {
+      params.delete('page');
+      sessionStorage.setItem('tohay_admin_products_page', '1');
+    }
+    setSearchParams(params, { replace: true });
+  };
+
+  // Keep state in sync if URL page changes externally (browser back/forward or filter reset)
+  useEffect(() => {
+    const p = parseInt(searchParams.get('page'), 10);
+    const targetPage = !isNaN(p) && p > 0 ? p : 1;
+    if (targetPage !== currentPage && (data.length === 0 || targetPage <= totalPages)) {
+      setCurrentPage(targetPage);
+    }
+  }, [searchParams, totalPages, data.length]);
+
+  // Safely clamp current page if filtered data has fewer pages, ONLY when data is actually loaded
+  useEffect(() => {
+    if (data.length > 0 && totalPages > 0 && currentPage > totalPages) {
+      handlePageChange(totalPages);
+    }
+  }, [totalPages, data.length]);
+
   const paginatedData = useMemo(() => {
-    const start = (currentPage - 1) * rowsPerPage;
+    const safeCurrent = Math.min(currentPage, totalPages);
+    const start = (safeCurrent - 1) * rowsPerPage;
     return sortedData.slice(start, start + rowsPerPage);
-  }, [sortedData, currentPage, rowsPerPage]);
+  }, [sortedData, currentPage, totalPages, rowsPerPage]);
 
   // Sort Handler
   const handleSort = (key) => {
@@ -245,12 +295,12 @@ export default function DataTable({
         <Pagination
           currentPage={currentPage}
           totalPages={totalPages}
-          onPageChange={setCurrentPage}
+          onPageChange={handlePageChange}
           totalRecords={sortedData.length}
           rowsPerPage={rowsPerPage}
           onRowsPerPageChange={(newVal) => {
             setRowsPerPage(newVal);
-            setCurrentPage(1);
+            handlePageChange(1);
           }}
         />
       </div>

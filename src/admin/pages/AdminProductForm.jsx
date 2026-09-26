@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate, useParams, Link } from 'react-router-dom';
+import { useNavigate, useParams, Link, useLocation } from 'react-router-dom';
 import {
   ArrowLeft, Upload, X, Check, Save, Sparkles, Image as ImageIcon,
   Tag, Info, IndianRupee, Warehouse, Globe, FolderPlus, Trash2, Plus
@@ -12,20 +12,73 @@ import { saveProductVariants, getProductVariants, enrichProductWithVariants } fr
 export default function AdminProductForm() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const { productsList, addProduct, updateProduct, categoriesList, showToast } = useAdmin();
-  const fileInputRef = useRef(null);
+  const coverFileInputRef = useRef(null);
+  const galleryFileInputRef = useRef(null);
 
-  const handleLocalFileUpload = async (e) => {
+  const getReturnUrl = () => {
+    if (location.state?.returnUrl) return location.state.returnUrl;
+    if (location.search) return `/admin/catalog/products${location.search}`;
+    const savedSearch = sessionStorage.getItem('tohay_admin_products_search');
+    if (savedSearch) {
+      return `/admin/catalog/products${savedSearch.startsWith('?') ? savedSearch : `?${savedSearch}`}`;
+    }
+    const savedPage = sessionStorage.getItem('tohay_admin_products_page');
+    if (savedPage && parseInt(savedPage, 10) > 1) {
+      return `/admin/catalog/products?page=${savedPage}`;
+    }
+    return '/admin/catalog/products';
+  };
+
+  // Upload Single Main Cover Photo
+  const handleCoverPhotoUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file || !file.type.startsWith('image/')) return;
+
+    showToast('Compressing & uploading cover photo...');
+    try {
+      const fileToUpload = await compressImageToFile(file, 1000, 1200, 0.8);
+      let uploadedUrl = null;
+      try {
+        const res = await uploadService.uploadImage(fileToUpload);
+        uploadedUrl = res?.data?.url || res?.url;
+      } catch (err) {
+        console.warn('Backend upload fallback:', err);
+      }
+
+      if (!uploadedUrl) {
+        uploadedUrl = await compressImage(file, 600, 800, 0.6);
+      }
+
+      if (uploadedUrl) {
+        setFormData((prev) => {
+          const gallery = prev.images.slice(1);
+          return {
+            ...prev,
+            images: [uploadedUrl, ...gallery]
+          };
+        });
+        showToast('Cover photo set successfully!');
+      }
+    } catch (err) {
+      showToast('Failed to upload cover photo.');
+    }
+    if (e.target) e.target.value = '';
+  };
+
+  // Upload Additional Gallery Photos
+  const handleGalleryPhotosUpload = async (e) => {
     const files = Array.from(e.target.files || []);
     if (files.length === 0) return;
 
-    showToast('Compressing & uploading image...');
+    showToast(`Uploading ${files.length} gallery image(s)...`);
 
+    const newUploaded = [];
     for (const file of files) {
       if (!file.type.startsWith('image/')) continue;
       try {
         const fileToUpload = await compressImageToFile(file, 1000, 1200, 0.8);
-
         let uploadedUrl = null;
         try {
           const res = await uploadService.uploadImage(fileToUpload);
@@ -39,13 +92,50 @@ export default function AdminProductForm() {
         }
 
         if (uploadedUrl) {
-          setFormData((prev) => ({ ...prev, images: [...prev.images, uploadedUrl] }));
+          newUploaded.push(uploadedUrl);
         }
       } catch (err) {}
     }
 
+    if (newUploaded.length > 0) {
+      setFormData((prev) => ({
+        ...prev,
+        images: [...prev.images, ...newUploaded]
+      }));
+      showToast('Gallery images uploaded successfully!');
+    }
     if (e.target) e.target.value = '';
-    showToast('Image uploaded successfully!');
+  };
+
+  // Set any existing gallery photo as the Cover Photo
+  const handleSetCoverPhoto = (url) => {
+    setFormData((prev) => {
+      const remaining = prev.images.filter((img) => img !== url);
+      return { ...prev, images: [url, ...remaining] };
+    });
+    showToast('Cover photo updated!');
+  };
+
+  // Remove Cover Photo
+  const handleRemoveCoverPhoto = () => {
+    setFormData((prev) => ({
+      ...prev,
+      images: prev.images.slice(1)
+    }));
+    showToast('Cover photo removed.');
+  };
+
+  // Remove a specific Gallery Photo
+  const handleRemoveGalleryPhoto = (galleryIdx) => {
+    setFormData((prev) => {
+      const cover = prev.images[0];
+      const gallery = prev.images.slice(1).filter((_, idx) => idx !== galleryIdx);
+      return {
+        ...prev,
+        images: cover ? [cover, ...gallery] : gallery
+      };
+    });
+    showToast('Gallery photo removed.');
   };
 
 
@@ -81,10 +171,7 @@ export default function AdminProductForm() {
     metaTitle: '',
     metaDescription: '',
     slug: '',
-    images: [
-      'https://images.unsplash.com/photo-1596870230751-ebdfce98ec42?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?auto=format&fit=crop&w=800&q=80'
-    ]
+    images: []
   });
 
   const [customSizeInput, setCustomSizeInput] = useState('');
@@ -179,24 +266,6 @@ export default function AdminProductForm() {
     }));
   };
 
-  // Add dummy image simulation
-  const handleAddSampleImage = () => {
-    const samples = [
-      'https://images.unsplash.com/photo-1503944583220-79d8926ad5e2?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1622290291468-a28f7a7dc6a8?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1518831959646-742c3a14ebf7?auto=format&fit=crop&w=800&q=80'
-    ];
-    const randomSample = samples[Math.floor(Math.random() * samples.length)];
-    setFormData((prev) => ({ ...prev, images: [...prev.images, randomSample] }));
-    showToast('Image uploaded successfully!');
-  };
-
-  const handleRemoveImage = (idx) => {
-    setFormData((prev) => ({
-      ...prev,
-      images: prev.images.filter((_, i) => i !== idx)
-    }));
-  };
 
   // Toggle Size Chip and sync with sizeVariants
   const toggleSize = (sizeTag) => {
@@ -350,7 +419,7 @@ export default function AdminProductForm() {
       } else {
         await addProduct(payload);
       }
-      navigate('/admin/catalog/products');
+      navigate(getReturnUrl());
     } catch (err) {
       console.error('Failed to save product:', err);
     }
@@ -363,7 +432,7 @@ export default function AdminProductForm() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <Link
-            to="/admin/catalog/products"
+            to={getReturnUrl()}
             className="p-2.5 rounded-xl border border-gray-200 text-gray-600 hover:text-gray-900 hover:bg-pink-50 transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
@@ -380,7 +449,7 @@ export default function AdminProductForm() {
 
         <div className="flex items-center gap-3">
           <Link
-            to="/admin/catalog/products"
+            to={getReturnUrl()}
             className="px-4 py-2.5 bg-white border border-gray-200 text-gray-700 font-bold text-xs rounded-xl hover:bg-gray-50 transition-all"
           >
             Cancel
@@ -785,61 +854,147 @@ export default function AdminProductForm() {
 
         {/* Right Column (4 Cols): Media Upload, Organization & Stock */}
         <div className="lg:col-span-4 space-y-6">
-          {/* Product Media Gallery */}
-          <div className="bg-white rounded-3xl p-6 border border-pink-100/80 shadow-2xs space-y-4">
-            <h3 className="font-heading font-extrabold text-base text-gray-900 flex items-center gap-2">
-              <ImageIcon className="w-4 h-4 text-[#D81B60]" />
-              <span>Product Media</span>
-            </h3>
-
-            {/* Images Grid */}
-            <div className="grid grid-cols-2 gap-3">
-              {formData.images.map((img, i) => (
-                <div key={i} className="relative group rounded-2xl overflow-hidden border border-gray-200 aspect-square">
-                  <img src={img} alt={`Product ${i}`} className="w-full h-full object-cover" />
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveImage(i)}
-                    className="absolute top-2 right-2 bg-rose-600 text-white p-1 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
-                  >
-                    <X className="w-3.5 h-3.5" />
-                  </button>
-                  {i === 0 && (
-                    <span className="absolute bottom-2 left-2 bg-black/70 text-white text-[9px] font-bold px-2 py-0.5 rounded-md">
-                      Cover
-                    </span>
-                  )}
-                </div>
-              ))}
+          {/* Product Media Gallery with Separate Cover Photo & Gallery Fields */}
+          <div className="bg-white rounded-3xl p-6 border border-pink-100/80 shadow-2xs space-y-5">
+            <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+              <h3 className="font-heading font-extrabold text-base text-gray-900 flex items-center gap-2">
+                <ImageIcon className="w-4 h-4 text-[#D81B60]" />
+                <span>Product Images</span>
+              </h3>
+              <span className="text-[11px] font-bold text-gray-400">
+                {formData.images.length} {formData.images.length === 1 ? 'photo' : 'photos'} added
+              </span>
             </div>
 
-            {/* Hidden File Input for Local System Upload */}
+            {/* Hidden Inputs for Local Uploads */}
             <input
               type="file"
-              ref={fileInputRef}
+              ref={coverFileInputRef}
+              accept="image/*"
+              className="hidden"
+              onChange={handleCoverPhotoUpload}
+            />
+            <input
+              type="file"
+              ref={galleryFileInputRef}
               accept="image/*"
               multiple
               className="hidden"
-              onChange={handleLocalFileUpload}
+              onChange={handleGalleryPhotosUpload}
             />
 
-            {/* Upload Buttons Row */}
-            <div className="space-y-2">
-              <button
-                type="button"
-                onClick={() => fileInputRef.current?.click()}
-                className="w-full py-3.5 border-2 border-dashed border-pink-300 hover:border-[#D81B60] bg-pink-50/40 hover:bg-pink-50 text-[#D81B60] rounded-2xl font-bold text-xs flex flex-col items-center justify-center gap-1 transition-all cursor-pointer"
-              >
-                <FolderPlus className="w-5 h-5 stroke-[2]" />
-                <span>Upload Photos from Local Computer</span>
-              </button>
+            {/* 1. DEDICATED COVER PHOTO FIELD */}
+            <div className="space-y-2.5">
+              <div className="flex items-center justify-between">
+                <label className="text-[11px] font-extrabold uppercase text-gray-700 tracking-wider flex items-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
+                  <span>Main Cover Photo</span>
+                  <span className="text-rose-500 font-bold">*</span>
+                </label>
+                <span className="text-[10px] text-gray-400 font-medium">Hero / Catalog Card Photo</span>
+              </div>
 
+              {formData.images[0] ? (
+                <div className="relative group rounded-2xl overflow-hidden border-2 border-[#D81B60] shadow-xs bg-gray-50 aspect-4/3 flex items-center justify-center">
+                  <img
+                    src={formData.images[0]}
+                    alt="Product Cover"
+                    className="w-full h-full object-cover"
+                  />
+                  {/* Badge */}
+                  <span className="absolute top-2.5 left-2.5 bg-[#D81B60] text-white text-[10px] font-extrabold px-2.5 py-1 rounded-full shadow-md flex items-center gap-1">
+                    <Sparkles className="w-3 h-3 fill-white" />
+                    <span>Cover Photo</span>
+                  </span>
+
+                  {/* Hover Overlay Buttons */}
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 p-3">
+                    <button
+                      type="button"
+                      onClick={() => coverFileInputRef.current?.click()}
+                      className="px-3 py-1.5 bg-white text-gray-900 rounded-xl text-xs font-bold hover:bg-gray-100 transition-colors shadow-md flex items-center gap-1 cursor-pointer"
+                    >
+                      <Upload className="w-3.5 h-3.5 text-[#D81B60]" />
+                      <span>Change</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleRemoveCoverPhoto}
+                      className="p-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl transition-colors shadow-md cursor-pointer"
+                      title="Remove Cover Photo"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => coverFileInputRef.current?.click()}
+                  className="w-full p-6 border-2 border-dashed border-pink-300 hover:border-[#D81B60] bg-pink-50/30 hover:bg-pink-50/70 text-[#D81B60] rounded-2xl font-bold text-xs flex flex-col items-center justify-center gap-2 transition-all cursor-pointer group"
+                >
+                  <div className="w-12 h-12 rounded-2xl bg-pink-100 text-[#D81B60] flex items-center justify-center group-hover:scale-105 transition-transform shadow-xs">
+                    <Sparkles className="w-6 h-6 fill-pink-200 stroke-[#D81B60]" />
+                  </div>
+                  <div className="text-center">
+                    <p className="font-extrabold text-xs text-gray-900">Upload Main Cover Photo</p>
+                    <p className="text-[10px] text-gray-500 font-medium mt-0.5">Click to choose primary image (PNG, JPG, WebP)</p>
+                  </div>
+                </button>
+              )}
+            </div>
+
+            {/* 2. DEDICATED ADDITIONAL GALLERY PHOTOS FIELD */}
+            <div className="space-y-2.5 pt-3 border-t border-gray-100">
+              <div className="flex items-center justify-between">
+                <label className="text-[11px] font-extrabold uppercase text-gray-700 tracking-wider">
+                  Additional Gallery Photos ({Math.max(0, formData.images.length - 1)})
+                </label>
+                <span className="text-[10px] text-gray-400 font-medium">Extra Angles & Detail Shots</span>
+              </div>
+
+              {/* Gallery Grid */}
+              {formData.images.length > 1 && (
+                <div className="grid grid-cols-3 gap-2.5">
+                  {formData.images.slice(1).map((img, i) => (
+                    <div
+                      key={i}
+                      className="relative group rounded-xl overflow-hidden border border-gray-200 aspect-square bg-gray-50"
+                    >
+                      <img src={img} alt={`Gallery ${i + 1}`} className="w-full h-full object-cover" />
+                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-1.5 p-1">
+                        <button
+                          type="button"
+                          onClick={() => handleSetCoverPhoto(img)}
+                          className="px-2 py-0.5 bg-amber-500 hover:bg-amber-600 text-white rounded-md text-[9px] font-extrabold transition-colors cursor-pointer shadow-xs"
+                          title="Make this photo the Cover Photo"
+                        >
+                          Set as Cover
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveGalleryPhoto(i)}
+                          className="p-1 bg-rose-600 hover:bg-rose-700 text-white rounded-md transition-colors cursor-pointer"
+                          title="Remove photo"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Upload Extra Photos Button */}
               <button
                 type="button"
-                onClick={handleAddSampleImage}
-                className="w-full py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold text-xs rounded-xl transition-all cursor-pointer"
+                onClick={() => galleryFileInputRef.current?.click()}
+                className="w-full py-3 border-2 border-dashed border-gray-200 hover:border-[#D81B60] hover:bg-pink-50/30 text-gray-600 hover:text-[#D81B60] rounded-2xl font-bold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer"
               >
-                + Add Sample Web Photo
+                <FolderPlus className="w-4 h-4 text-[#D81B60]" />
+                <span>
+                  {formData.images.length <= 1 ? '+ Upload Extra Gallery Photos' : '+ Add More Gallery Photos'}
+                </span>
               </button>
             </div>
           </div>

@@ -163,8 +163,8 @@ export default function ProductCard({ product }) {
                   setCurrentImageIndex(idx);
                 }}
                 className={`rounded-full transition-all duration-300 cursor-pointer ${currentImageIndex === idx
-                    ? 'w-2 h-2 bg-[#D81B60]'
-                    : 'w-1.5 h-1.5 bg-white/80 hover:bg-white'
+                  ? 'w-2 h-2 bg-[#D81B60]'
+                  : 'w-1.5 h-1.5 bg-white/80 hover:bg-white'
                   }`}
                 aria-label={`Go to photo ${idx + 1}`}
               />

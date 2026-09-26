@@ -2,12 +2,12 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import logoImg from '../assets/logo.png';
 
-export default function Logo({ 
-  className = '', 
-  size = 'normal', 
-  showTagline = true, 
+export default function Logo({
+  className = '',
+  size = 'normal',
+  showTagline = true,
   align = 'center',
-  taglineClassName = '' 
+  taglineClassName = ''
 }) {
   // Compact, sleek image height presets to maximize screen space for products
   const sizeClasses = {
@@ -22,26 +22,27 @@ export default function Logo({
     large: 'text-xs sm:text-sm md:text-base tracking-widest'
   };
 
-  const alignClasses = align === 'start' 
-    ? 'items-start text-left' 
-    : align === 'end' 
-    ? 'items-end text-right' 
-    : 'items-center text-center';
+  const alignClasses = align === 'start'
+    ? 'items-start text-left'
+    : align === 'end'
+      ? 'items-end text-right'
+      : 'items-center text-center';
 
   return (
-    <Link 
-      to="/" 
-      className={`inline-flex flex-col justify-center group cursor-pointer ${alignClasses} ${className}`} 
+    <Link
+      to="/"
+      className={`inline-flex flex-col justify-center bg-transparent group cursor-pointer ${alignClasses} ${className}`}
       aria-label="TOHAY KIDS Home"
     >
       <img
         src={logoImg}
         alt="Tohay Kids Logo"
-        className={`object-contain transition-transform duration-300 group-hover:scale-105 ${sizeClasses[size] || sizeClasses.normal}`}
+        className={`object-contain bg-transparent mix-blend-multiply transition-transform duration-300 group-hover:scale-105 ${sizeClasses[size] || sizeClasses.normal}`}
+        style={{ mixBlendMode: 'multiply', backgroundColor: 'transparent' }}
       />
       {showTagline && (
         <span
-          className={`font-serif italic font-bold text-[#C2185B] group-hover:text-[#D81B60] transition-colors duration-300 mt-0.5 select-none whitespace-nowrap leading-tight ${taglineSizeClasses[size] || taglineSizeClasses.normal} ${taglineClassName}`}
+          className={`font-serif italic font-bold text-[#C2185B] group-hover:text-[#D81B60] transition-colors duration-300 mt-0.5 select-none whitespace-nowrap leading-tight bg-transparent ${taglineSizeClasses[size] || taglineSizeClasses.normal} ${taglineClassName}`}
           style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
         >
           Elegance for Little Dreamers

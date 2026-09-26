@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
-import { 
-  Search, 
-  Package, 
-  Truck, 
-  Clock, 
-  CheckCircle2, 
-  AlertCircle, 
+import {
+  Search,
+  Package,
+  Truck,
+  Clock,
+  CheckCircle2,
+  AlertCircle,
   ArrowRight,
   Calendar,
   Loader2
@@ -57,7 +57,7 @@ export default function TrackOrderPage() {
           formatAndSetOrder(localMatch, cleanId);
           return;
         }
-      } catch (localErr) {}
+      } catch (localErr) { }
 
       setErrorMessage(
         `No order found with Reference ID "${cleanId}". Please check the ID provided in your confirmation message or order history.`
@@ -157,8 +157,8 @@ export default function TrackOrderPage() {
           />
           <Search className="w-4 h-4 text-gray-400 absolute left-3 top-3" />
         </div>
-        <button 
-          type="submit" 
+        <button
+          type="submit"
           disabled={isLoading}
           className="bg-[#D81B60] hover:bg-[#C2185B] disabled:bg-gray-400 text-white font-extrabold text-xs px-7 py-3 rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-xs"
         >
@@ -240,11 +240,10 @@ export default function TrackOrderPage() {
             {trackedOrder.steps.map((step, idx) => (
               <div key={idx} className="relative flex items-start gap-4">
                 <div
-                  className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 z-10 transition-all ${
-                    step.completed
+                  className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 z-10 transition-all ${step.completed
                       ? 'bg-[#D81B60] text-white shadow-xs'
                       : 'bg-gray-100 text-gray-400 border border-gray-200'
-                  }`}
+                    }`}
                 >
                   {step.completed ? <CheckCircle2 className="w-4 h-4" /> : idx + 1}
                 </div>

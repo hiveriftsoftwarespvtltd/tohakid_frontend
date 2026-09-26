@@ -6,8 +6,8 @@ import ProductCard from '../components/ProductCard';
 import ProductFilterSidebar from '../components/ProductFilterSidebar';
 import { usePageBanner } from '../utils/usePageBanner';
 import { isCategoryMatch, isSubcategoryMatch, isAgeMatch, isColorMatch } from '../utils/filterUtils';
-import dd from '../assets/dd.png';
-import sibblingsMobileImg from '../assets/sibblingss.png';
+import sib2DesktopImg from '../assets/sib2.png';
+import sib1MobileImg from '../assets/sib1.jpeg';
 
 const ITEMS_PER_PAGE = 9;
 
@@ -17,9 +17,9 @@ export default function SiblingsPage() {
     'Siblings Header Banner',
     'Sibling Sets',
     'Twice the charm. Perfect matching ethnic sets.',
-    dd,
+    sib2DesktopImg,
     '/siblings',
-    sibblingsMobileImg
+    sib1MobileImg
   );
 
   const [sortOption, setSortOption] = useState('newest');
@@ -114,16 +114,16 @@ export default function SiblingsPage() {
       </nav>
 
       {/* Siblings Purple Banner */}
-      <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden border border-purple-200/60 shadow-md aspect-square sm:aspect-auto min-h-[380px] sm:min-h-0 sm:h-[440px] md:h-[500px] lg:h-[540px] xl:h-[560px] bg-[#F3E5F5] select-none">
-        <picture className="absolute inset-0 w-full h-full">
+      <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden border border-purple-200/60 shadow-md aspect-square sm:aspect-auto sm:h-[440px] md:h-[500px] lg:h-[540px] xl:h-[560px] bg-[#F3E5F5] select-none">
+        <picture className="absolute inset-0 w-full h-full block">
           <source
             media="(max-width: 640px)"
-            srcSet={heroBanner.mobileImage || sibblingsMobileImg}
+            srcSet={heroBanner.mobileImage || sib1MobileImg}
           />
           <img
-            src={heroBanner.image}
+            src={heroBanner.image || sib2DesktopImg}
             alt={heroBanner.title}
-            className="absolute inset-0 w-full h-full object-cover object-center"
+            className="w-full h-full object-cover object-center"
           />
         </picture>
       </div>
