@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   HelpCircle, Search, ChevronDown, ChevronUp, MessageSquare, PhoneCall, 
-  Sparkles, ShieldCheck, Truck, RefreshCw, Heart, ArrowRight 
+  ShieldCheck, Truck, RefreshCw, Heart, ArrowRight, Ruler 
 } from 'lucide-react';
 import { faqs } from '../data/products';
 
@@ -75,11 +75,31 @@ export default function FaqPage() {
           ))}
         </div>
 
+        {/* Quick Size Chart Callout Banner */}
+        <div className="bg-gradient-to-r from-pink-50 via-purple-50 to-pink-50 p-4 sm:p-5 rounded-2xl border border-pink-200/80 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-2xs">
+          <div className="flex items-center gap-3 text-center sm:text-left">
+            <div className="w-10 h-10 rounded-xl bg-[#D81B60] text-white flex items-center justify-center shrink-0 shadow-xs">
+              <Ruler className="w-5 h-5" />
+            </div>
+            <div>
+              <h3 className="font-heading font-extrabold text-sm text-gray-900">Looking for Exact Measurements?</h3>
+              <p className="text-xs text-gray-500">View detailed chest, length & pants size charts for Girls and Boys.</p>
+            </div>
+          </div>
+          <Link
+            to="/size-guide"
+            className="px-5 py-2.5 bg-[#D81B60] hover:bg-[#B5124E] text-white font-bold text-xs uppercase tracking-wider rounded-xl transition-all shadow-xs shrink-0 flex items-center gap-2"
+          >
+            <span>View Size Chart</span>
+            <ArrowRight className="w-4 h-4" />
+          </Link>
+        </div>
+
         {/* FAQ Accordions List */}
         <div className="bg-white rounded-3xl p-6 sm:p-8 border border-pink-100 shadow-xl space-y-4">
           <div className="flex items-center justify-between border-b border-gray-100 pb-4">
             <h2 className="font-heading font-extrabold text-lg text-gray-900 flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-[#D81B60]" />
+              <HelpCircle className="w-5 h-5 text-[#D81B60]" />
               <span>{activeCategory === 'All' ? 'All Popular Questions' : `${activeCategory} Questions`}</span>
             </h2>
             <span className="text-xs font-bold text-gray-400 font-mono">
@@ -155,7 +175,7 @@ export default function FaqPage() {
           <div className="space-y-1 text-center sm:text-left">
             <h3 className="font-heading font-extrabold text-lg sm:text-xl">Still Have Questions?</h3>
             <p className="text-xs text-gray-300 font-normal">
-              Our parent happiness team is online to assist you with sizing, fabric details, and custom orders.
+              Our parent happiness team is online to assist you with sizing, fabric details, and styling guidance.
             </p>
           </div>
 

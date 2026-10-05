@@ -4,23 +4,12 @@ import { ChevronRight, ChevronLeft, SlidersHorizontal } from 'lucide-react';
 import { useShop } from '../context/ShopContext';
 import ProductCard from '../components/ProductCard';
 import ProductFilterSidebar from '../components/ProductFilterSidebar';
-import { usePageBanner } from '../utils/usePageBanner';
 import { isCategoryMatch, isSubcategoryMatch, isAgeMatch, isColorMatch } from '../utils/filterUtils';
-import aa from '../assets/aa.png';
-import boysMobileImg from '../assets/boys.png';
 
 const ITEMS_PER_PAGE = 9;
 
 export default function BoysPage() {
   const { products, categoriesList } = useShop();
-  const heroBanner = usePageBanner(
-    'Boys Category Top Banner',
-    'Boys Collection',
-    'Smart. Stylish. Made for every celebration.',
-    aa,
-    '/boys',
-    boysMobileImg
-  );
   const [searchParams] = useSearchParams();
   const selectedSubcatParam = searchParams.get('subcategory') || '';
 
@@ -69,13 +58,13 @@ export default function BoysPage() {
   };
 
   const handleSubcatTabClick = (subcat) => {
-    if (activeSubcat === subcat) {
-      setActiveSubcat('');
-      setFilters((prev) => ({ ...prev, subcategories: [] }));
-    } else {
-      setActiveSubcat(subcat);
-      setFilters((prev) => ({ ...prev, subcategories: [subcat] }));
-    }
+    setFilters((prev) => {
+      const current = prev.subcategories || [];
+      const isAlready = current.some((s) => s.toLowerCase() === subcat.toLowerCase());
+      const updated = isAlready ? [] : [subcat];
+      setActiveSubcat(isAlready ? '' : subcat);
+      return { ...prev, subcategories: updated };
+    });
   };
 
   const boysProducts = useMemo(() => {
@@ -111,7 +100,7 @@ export default function BoysPage() {
   }, [products, filters, sortOption]);
 
   const totalPages = Math.ceil(boysProducts.length / ITEMS_PER_PAGE) || 1;
-  
+
   const paginatedProducts = useMemo(() => {
     const start = (currentPage - 1) * ITEMS_PER_PAGE;
     return boysProducts.slice(start, start + ITEMS_PER_PAGE);
@@ -121,56 +110,47 @@ export default function BoysPage() {
   const endIndex = Math.min(currentPage * ITEMS_PER_PAGE, boysProducts.length);
 
   return (
-    <div className="max-w-[1600px] mx-auto px-4 py-6 space-y-6">
-      {/* Breadcrumb */}
-      <nav className="flex items-center gap-2 text-xs font-semibold text-gray-500">
-        <Link to="/" className="hover:text-pink-600 transition-colors">Home</Link>
-        <ChevronRight className="w-3.5 h-3.5 text-gray-400" />
-        <span className="text-[#D81B60] font-bold">Boys Collection</span>
-      </nav>
+    <div className="max-w-[1600px] mx-auto px-4 pt-3 pb-8 space-y-4 sm:space-y-5">
+      {/* Breadcrumb & Collections Header */}
+      <div className="space-y-2.5 sm:space-y-3">
+        {/* Breadcrumb */}
+        <nav className="flex items-center gap-1.5 text-xs font-semibold text-gray-500">
+          <Link to="/" className="hover:text-[#D81B60] transition-colors">Home</Link>
+          <ChevronRight className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+          <span className="text-[#D81B60] font-bold">Boys Collection</span>
+        </nav>
 
-      {/* Boys Hero Banner */}
-      <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden border border-pink-200/60 shadow-md aspect-square sm:aspect-auto sm:h-[440px] md:h-[500px] lg:h-[540px] xl:h-[560px] bg-[#FFF5F7] select-none">
-        <picture className="absolute inset-0 w-full h-full block">
-          <source
-            media="(max-width: 640px)"
-            srcSet={heroBanner.mobileImage || boysMobileImg}
-          />
-          <img
-            src={heroBanner.image}
-            alt={heroBanner.title}
-            className="w-full h-full object-cover object-center"
-          />
-        </picture>
-      </div>
-
-      {/* Dynamic Boys Collections Chips Bar from MongoDB Atlas */}
-      <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1 shrink-0">
-        <span className="text-[11px] font-extrabold text-gray-400 uppercase tracking-wider shrink-0">Collections:</span>
-        {['All Boys', ...(boysSubcategories || [])].map((subcat) => {
-          const isSelected = subcat === 'All Boys' ? activeSubcat === '' : activeSubcat === subcat;
-          return (
-            <button
-              key={subcat}
-              type="button"
-              onClick={() => {
-                if (subcat === 'All Boys') {
-                  setActiveSubcat('');
-                  setFilters((prev) => ({ ...prev, subcategories: [] }));
-                } else {
-                  handleSubcatTabClick(subcat);
-                }
-              }}
-              className={`px-4 py-2 rounded-full text-xs font-extrabold whitespace-nowrap transition-all shrink-0 cursor-pointer ${
-                isSelected
-                  ? 'bg-[#D81B60] text-white shadow-xs'
-                  : 'bg-white text-gray-700 border border-gray-200 hover:border-pink-300 hover:bg-pink-50/50'
-              }`}
-            >
-              {subcat}
-            </button>
-          );
-        })}
+        {/* Dynamic Boys Collections Chips Bar from MongoDB Atlas */}
+        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1 -mx-4 px-4 sm:mx-0 sm:px-0">
+          <span className="text-[11px] sm:text-xs font-bold text-gray-600 uppercase tracking-wider shrink-0 self-center leading-none">
+            Collections:
+          </span>
+          {['All Boys', ...(boysSubcategories || [])].map((subcat) => {
+            const isSelected = subcat === 'All Boys'
+              ? (!filters.subcategories || filters.subcategories.length === 0)
+              : (filters.subcategories || []).some((s) => s.toLowerCase() === subcat.toLowerCase());
+            return (
+              <button
+                key={subcat}
+                type="button"
+                onClick={() => {
+                  if (subcat === 'All Boys') {
+                    setActiveSubcat('');
+                    setFilters((prev) => ({ ...prev, subcategories: [] }));
+                  } else {
+                    handleSubcatTabClick(subcat);
+                  }
+                }}
+                className={`px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all shrink-0 flex items-center justify-center cursor-pointer ${isSelected
+                    ? 'bg-[#D81B60] text-white shadow-xs'
+                    : 'bg-white text-gray-700 border border-gray-200 hover:border-pink-300 hover:bg-pink-50/50'
+                  }`}
+              >
+                {subcat}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* Grid Header & Sort */}
@@ -179,10 +159,16 @@ export default function BoysPage() {
           <button
             type="button"
             onClick={() => setIsMobileFilterOpen(true)}
-            className="lg:hidden flex items-center gap-2 bg-pink-50 border border-pink-200 text-[#D81B60] px-3.5 py-2 rounded-xl text-xs font-bold shrink-0 shadow-2xs"
+            className="flex items-center gap-2 bg-pink-50 hover:bg-pink-100 border border-pink-200 text-[#D81B60] px-3.5 py-2 rounded-xl text-xs font-bold shrink-0 shadow-2xs cursor-pointer transition-all active:scale-95"
+            title="Open Filters"
           >
             <SlidersHorizontal className="w-3.5 h-3.5" />
             <span>Filters</span>
+            {filters.subcategories?.length > 0 && (
+              <span className="w-5 h-5 rounded-full bg-[#D81B60] text-white text-[10px] font-extrabold flex items-center justify-center">
+                {filters.subcategories.length}
+              </span>
+            )}
           </button>
 
           <div className="flex items-center gap-2 sm:hidden">
@@ -271,11 +257,10 @@ export default function BoysPage() {
                         setCurrentPage(pageNum);
                         window.scrollTo({ top: 300, behavior: 'smooth' });
                       }}
-                      className={`w-9 h-9 rounded-full text-xs font-extrabold flex items-center justify-center transition-all cursor-pointer ${
-                        currentPage === pageNum
+                      className={`w-9 h-9 rounded-full text-xs font-extrabold flex items-center justify-center transition-all cursor-pointer ${currentPage === pageNum
                           ? 'bg-[#D81B60] text-white shadow-xs'
                           : 'bg-white hover:bg-gray-100 text-gray-700 border border-gray-200'
-                      }`}
+                        }`}
                     >
                       {pageNum}
                     </button>

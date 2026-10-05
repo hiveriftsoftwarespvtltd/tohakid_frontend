@@ -1,7 +1,8 @@
-import React, { useMemo } from 'react';
-import { ShieldCheck, RotateCcw, SlidersHorizontal } from 'lucide-react';
+import React, { useMemo, useEffect } from 'react';
+import { createPortal } from 'react-dom';
+import { ShieldCheck, RotateCcw, SlidersHorizontal, X } from 'lucide-react';
 import { useShop } from '../context/ShopContext';
-import { isSubcategoryMatch } from '../utils/filterUtils';
+import { isCategoryMatch, isSubcategoryMatch } from '../utils/filterUtils';
 
 export default function ProductFilterSidebar({
   filters,
@@ -15,16 +16,6 @@ export default function ProductFilterSidebar({
   isCollectionsPage = false,
   isSalePage = false,
   categories = null,
-  colors = [
-    { name: 'Pink', hex: '#FF80AB' },
-    { name: 'Lavender', hex: '#CE93D8' },
-    { name: 'Mint Green', hex: '#A5D6A7' },
-    { name: 'Yellow', hex: '#FDE047' },
-    { name: 'Sky Blue', hex: '#38BDF8' },
-    { name: 'Peach', hex: '#FFAB91' },
-    { name: 'Maroon', hex: '#880E4F' },
-    { name: 'Teal', hex: '#0F766E' }
-  ],
   isOpenMobile = false,
   setIsOpenMobile = () => { },
   allProducts = null
@@ -32,44 +23,47 @@ export default function ProductFilterSidebar({
   const { products: storeProducts, categoriesList } = useShop();
   const rawProducts = allProducts || storeProducts || [];
 
+  // Prevent background scrolling when filter drawer is open
+  useEffect(() => {
+    if (!isOpenMobile) return;
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = originalOverflow;
+    };
+  }, [isOpenMobile]);
+
   const hasActiveFilters = useMemo(() => {
     return (
       (filters.subcategories && filters.subcategories.length > 0) ||
-      (filters.ages && filters.ages.length > 0) ||
-      (filters.sizes && filters.sizes.length > 0) ||
-      (filters.colors && filters.colors.length > 0) ||
       (filters.discounts && filters.discounts.length > 0) ||
-      (filters.shopByGenders && filters.shopByGenders.length > 0) ||
-      (filters.maxPrice && filters.maxPrice < 5000)
+      (filters.shopByGenders && filters.shopByGenders.length > 0)
     );
   }, [filters]);
 
   // Base product pool for current page context
   const baseProducts = useMemo(() => {
-    if (isBoysPage) return rawProducts.filter((p) => p.category === 'Boys' || (p.category && p.category.toLowerCase().includes('boy')));
-    if (isGirlsPage) return rawProducts.filter((p) => p.category === 'Girls' || (p.category && p.category.toLowerCase().includes('girl')));
-    if (isSiblingPage) return rawProducts.filter((p) => p.category === 'Siblings' || (p.category && p.category.toLowerCase().includes('sibling')));
+    if (isBoysPage) return rawProducts.filter((p) => isCategoryMatch('Boys', p.category));
+    if (isGirlsPage) return rawProducts.filter((p) => isCategoryMatch('Girls', p.category));
+    if (isSiblingPage) return rawProducts.filter((p) => isCategoryMatch('Siblings', p.category) || p.isSiblingSet);
     if (isNewArrivalsPage) return rawProducts.filter((p) => p.isNew || (p.category && p.category.toLowerCase().includes('new')));
     if (isSalePage) return rawProducts.filter((p) => p.isSale || (p.price && p.mrp && p.price < p.mrp));
     return rawProducts;
   }, [rawProducts, isBoysPage, isGirlsPage, isSiblingPage, isNewArrivalsPage, isSalePage]);
 
-  // 100% Pure Dynamic Subcategories matching Admin API categoriesList
+  // Dynamic Subcategories matching Admin API or active products
   const displayCategories = useMemo(() => {
-    // 1. First priority: Subcategories officially configured in Admin Panel / Database API
-    const adminSubs = new Set();
+    const rawSubs = [];
 
-    // Check explicit categories prop passed from page
     if (Array.isArray(categories) && categories.length > 0) {
       categories.forEach((c) => {
         const name = typeof c === 'string' ? c : c?.name;
         if (name && typeof name === 'string' && name.trim()) {
-          adminSubs.add(name.trim());
+          rawSubs.push(name.trim());
         }
       });
     }
 
-    // Extract from backend categoriesList filtered strictly by active page context
     if (Array.isArray(categoriesList) && categoriesList.length > 0) {
       categoriesList.forEach((c) => {
         const catNameLower = (c.name || '').toLowerCase();
@@ -82,41 +76,44 @@ export default function ProductFilterSidebar({
           c.subcategories.forEach((s) => {
             const name = typeof s === 'string' ? s : s?.name;
             if (name && typeof name === 'string' && name.trim()) {
-              adminSubs.add(name.trim());
+              rawSubs.push(name.trim());
             }
           });
         }
       });
     }
 
-    // If Admin has defined subcategories, show EXACTLY those official subcategories from Admin
-    if (adminSubs.size > 0) {
-      return Array.from(adminSubs);
+    if (rawSubs.length === 0) {
+      const targetProducts = (isBoysPage || isGirlsPage || isSiblingPage)
+        ? baseProducts
+        : (baseProducts.length > 0 ? baseProducts : rawProducts);
+
+      if (Array.isArray(targetProducts) && targetProducts.length > 0) {
+        targetProducts.forEach((p) => {
+          if (p.subcategory && typeof p.subcategory === 'string' && p.subcategory.trim()) {
+            rawSubs.push(p.subcategory.trim());
+          }
+        });
+      }
     }
 
-    // 2. Fallback only if admin has not defined any subcategories in database yet:
-    const targetProducts = (isBoysPage || isGirlsPage || isSiblingPage)
-      ? baseProducts
-      : (baseProducts.length > 0 ? baseProducts : rawProducts);
+    // Deduplicate case-insensitively while preserving clean title casing
+    const seen = new Map();
+    rawSubs.forEach((item) => {
+      const key = item.toLowerCase();
+      if (!seen.has(key)) {
+        const formatted = (item === item.toUpperCase() && item.length > 3) || (item.toLowerCase() === item)
+          ? item.replace(/\b\w/g, (c) => c.toUpperCase())
+          : item;
+        seen.set(key, formatted);
+      }
+    });
 
-    const productSubs = new Set();
-    if (Array.isArray(targetProducts) && targetProducts.length > 0) {
-      targetProducts.forEach((p) => {
-        if (p.subcategory && typeof p.subcategory === 'string' && p.subcategory.trim()) {
-          productSubs.add(p.subcategory.trim());
-        }
-      });
-    }
-
-    return Array.from(productSubs);
+    return Array.from(seen.values());
   }, [categories, categoriesList, baseProducts, rawProducts, isBoysPage, isGirlsPage, isSiblingPage]);
 
   const getSubcategoryCount = (label) => {
     return baseProducts.filter((p) => isSubcategoryMatch(label, p.subcategory, p.name)).length;
-  };
-
-  const getAgeCount = (ageVal) => {
-    return baseProducts.filter((p) => isAgeMatch(ageVal, p.ageRange, p.sizes, p.ageGroup)).length;
   };
 
   const getDiscountCount = (itemLabel) => {
@@ -135,51 +132,16 @@ export default function ProductFilterSidebar({
   };
 
   const getShopByCount = (genderLabel) => {
-    return baseProducts.filter((p) => {
-      if (genderLabel === 'Boys') return p.category === 'Boys';
-      if (genderLabel === 'Girls') return p.category === 'Girls';
-      if (genderLabel === 'Siblings') return p.category === 'Siblings';
-      return false;
-    }).length;
+    return baseProducts.filter((p) => isCategoryMatch(genderLabel, p.category)).length;
   };
 
   const handleSubcategoryChange = (catName) => {
     setFilters((prev) => {
       const current = prev.subcategories || [];
-      const updated = current.includes(catName)
-        ? current.filter((c) => c !== catName)
+      const updated = current.some((c) => c.toLowerCase() === catName.toLowerCase())
+        ? current.filter((c) => c.toLowerCase() !== catName.toLowerCase())
         : [...current, catName];
       return { ...prev, subcategories: updated };
-    });
-  };
-
-  const handleAgeChange = (ageVal) => {
-    setFilters((prev) => {
-      const current = prev.ages || [];
-      const updated = current.includes(ageVal)
-        ? current.filter((a) => a !== ageVal)
-        : [...current, ageVal];
-      return { ...prev, ages: updated };
-    });
-  };
-
-  const handleSizeChange = (sz) => {
-    setFilters((prev) => {
-      const current = prev.sizes || [];
-      const updated = current.includes(sz)
-        ? current.filter((s) => s !== sz)
-        : [...current, sz];
-      return { ...prev, sizes: updated };
-    });
-  };
-
-  const handleColorChange = (cName) => {
-    setFilters((prev) => {
-      const current = prev.colors || [];
-      const updated = current.includes(cName)
-        ? current.filter((c) => c !== cName)
-        : [...current, cName];
-      return { ...prev, colors: updated };
     });
   };
 
@@ -209,20 +171,25 @@ export default function ProductFilterSidebar({
       <div className="flex items-center justify-between pb-3 border-b border-gray-100">
         <h3 className="font-heading font-extrabold text-xs text-gray-900 uppercase tracking-wider flex items-center gap-1.5">
           <SlidersHorizontal className="w-4 h-4 text-[#D81B60]" />
-          Filters
+          <span>Filters</span>
+          {hasActiveFilters && (
+            <span className="w-2 h-2 rounded-full bg-[#D81B60]" />
+          )}
         </h3>
         <button
           type="button"
           onClick={resetFilters}
-          className={`inline-flex items-center gap-1 text-xs font-extrabold px-2.5 py-1 rounded-lg transition-all cursor-pointer ${hasActiveFilters
+          className={`inline-flex items-center gap-1 text-xs font-extrabold px-2.5 py-1 rounded-lg transition-all cursor-pointer ${
+            hasActiveFilters
               ? 'bg-pink-100 text-[#D81B60] hover:bg-pink-200 shadow-2xs'
               : 'text-gray-400 hover:text-gray-600 bg-gray-50'
-            }`}
+          }`}
         >
           <RotateCcw className="w-3 h-3" />
-          Reset Filters
+          <span>Reset Filters</span>
         </button>
       </div>
+
       {/* 0. DISCOUNT FILTER (Only for Sale Page) */}
       {isSalePage && (
         <div className="space-y-3 pb-4 border-b border-gray-100">
@@ -286,7 +253,7 @@ export default function ProductFilterSidebar({
         </div>
       )}
 
-      {/* 1. SUBCATEGORIES (Only shown when categories exist in database or active products) */}
+      {/* 1. SUBCATEGORIES */}
       {displayCategories.length > 0 && (
         <div className="space-y-3 pb-4 border-b border-gray-100">
           <h4 className="font-heading font-extrabold text-xs text-gray-900 uppercase tracking-wider">
@@ -294,7 +261,7 @@ export default function ProductFilterSidebar({
           </h4>
           <div className="space-y-2 text-xs font-semibold">
             {displayCategories.map((cat) => {
-              const isChecked = (filters.subcategories || []).includes(cat);
+              const isChecked = (filters.subcategories || []).some((c) => c.toLowerCase() === cat.toLowerCase());
               const dynamicCount = getSubcategoryCount(cat);
               return (
                 <label key={cat} className="flex items-center justify-between text-gray-700 hover:text-gray-900 cursor-pointer group">
@@ -315,11 +282,7 @@ export default function ProductFilterSidebar({
         </div>
       )}
 
-
-
-
-
-      {/* 6. CTA BUTTONS */}
+      {/* CTA BUTTONS */}
       <div className="space-y-2 pt-2">
         <button
           type="button"
@@ -359,9 +322,9 @@ export default function ProductFilterSidebar({
         {filterContent}
       </div>
 
-      {/* Mobile Bottom Sheet / Drawer via Portal */}
+      {/* Filter Bottom Sheet / Slide-in Drawer via React Portal */}
       {isOpenMobile && createPortal(
-        <div className="fixed inset-0 z-50 flex lg:hidden">
+        <div className="fixed inset-0 z-[999] flex">
           <div
             className="fixed inset-0 bg-black/50 backdrop-blur-xs transition-opacity"
             onClick={() => setIsOpenMobile(false)}
@@ -369,7 +332,12 @@ export default function ProductFilterSidebar({
           <div className="fixed inset-y-0 right-0 max-w-xs w-full bg-white shadow-2xl p-5 overflow-y-auto flex flex-col z-50 animate-in slide-in-from-right duration-200">
             <div className="flex justify-between items-center pb-3 mb-4 border-b border-gray-100">
               <h3 className="font-heading font-bold text-base text-gray-900">Filter Outfits</h3>
-              <button onClick={() => setIsOpenMobile(false)} className="p-1.5 text-gray-400 hover:text-gray-700 cursor-pointer">
+              <button
+                type="button"
+                onClick={() => setIsOpenMobile(false)}
+                className="p-1.5 text-gray-400 hover:text-gray-700 cursor-pointer"
+                aria-label="Close Filters"
+              >
                 <X className="w-5 h-5" />
               </button>
             </div>

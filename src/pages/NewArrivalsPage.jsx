@@ -158,10 +158,16 @@ export default function NewArrivalsPage() {
           <button
             type="button"
             onClick={() => setIsMobileFilterOpen(true)}
-            className="lg:hidden flex items-center gap-2 bg-pink-50 border border-pink-200 text-[#D81B60] px-3.5 py-2 rounded-xl text-xs font-bold shrink-0 shadow-2xs"
+            className="flex items-center gap-2 bg-pink-50 hover:bg-pink-100 border border-pink-200 text-[#D81B60] px-3.5 py-2 rounded-xl text-xs font-bold shrink-0 shadow-2xs cursor-pointer transition-all active:scale-95"
+            title="Open Filters"
           >
             <SlidersHorizontal className="w-3.5 h-3.5" />
             <span>Filters</span>
+            {filters.subcategories?.length > 0 && (
+              <span className="w-5 h-5 rounded-full bg-[#D81B60] text-white text-[10px] font-extrabold flex items-center justify-center">
+                {filters.subcategories.length}
+              </span>
+            )}
           </button>
 
           <div className="flex items-center gap-2 sm:hidden">
@@ -251,11 +257,10 @@ export default function NewArrivalsPage() {
                         setCurrentPage(pageNum);
                         window.scrollTo({ top: 300, behavior: 'smooth' });
                       }}
-                      className={`w-9 h-9 rounded-full text-xs font-extrabold flex items-center justify-center transition-all cursor-pointer ${
-                        currentPage === pageNum
+                      className={`w-9 h-9 rounded-full text-xs font-extrabold flex items-center justify-center transition-all cursor-pointer ${currentPage === pageNum
                           ? 'bg-[#D81B60] text-white shadow-xs'
                           : 'bg-white hover:bg-gray-100 text-gray-700 border border-gray-200'
-                      }`}
+                        }`}
                     >
                       {pageNum}
                     </button>

@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react';
 import { useShop } from '../../context/ShopContext';
 import { formatImageUrl } from '../../utils/imageUtils';
@@ -8,57 +8,97 @@ import bb from '../../assets/bb.png';
 import cc from '../../assets/cc.png';
 import dd from '../../assets/dd.png';
 
+// ✅ OUTSIDE component — stable reference, never re-created on render
+const DEFAULT_HERO_SLIDES = [
+  { id: 1, image: aa, link: '/boys' },
+  { id: 2, image: bb, link: '/girls' },
+  { id: 3, image: cc, link: '/new-arrivals' },
+  { id: 4, image: dd, link: '/siblings' },
+];
+
+// Local fallback images mapped by position index
+const FALLBACK_IMAGES = [aa, bb, cc, dd];
+
+// Sub-component for individual slide: renders local fallback immediately, fades in API image when loaded
+const CarouselSlide = React.memo(({ slide, fallback, isPriority }) => {
+  const [apiLoaded, setApiLoaded] = useState(false);
+  const apiSrc = slide.image;
+  const isDifferentFromFallback = Boolean(apiSrc && apiSrc !== fallback);
+
+  return (
+    <div className="w-full h-full shrink-0 relative overflow-hidden select-none">
+      {/* 1. Base Layer: Local fallback image — instant 0ms render from memory, never blank */}
+      <img
+        src={fallback}
+        alt={slide.title || 'Kids Ethnic Wear'}
+        className="absolute inset-0 w-full h-full object-cover object-center pointer-events-none select-none"
+        draggable={false}
+      />
+
+      {/* 2. Top Layer: API / Cloudinary image — only fades in once 100% downloaded */}
+      {isDifferentFromFallback && (
+        <picture
+          className={`absolute inset-0 w-full h-full transition-opacity duration-700 ease-in-out ${
+            apiLoaded ? 'opacity-100' : 'opacity-0'
+          }`}
+        >
+          {slide.mobileImage && (
+            <source media="(max-width: 640px)" srcSet={slide.mobileImage} />
+          )}
+          <img
+            src={apiSrc}
+            alt={slide.title || 'Kids Ethnic Wear'}
+            loading={isPriority ? 'eager' : 'lazy'}
+            decoding="async"
+            draggable={false}
+            onLoad={() => setApiLoaded(true)}
+            onError={() => setApiLoaded(false)}
+            className="w-full h-full object-cover object-center pointer-events-none select-none"
+          />
+        </picture>
+      )}
+
+      {/* Clickable banner link if configured */}
+      {slide.link && (
+        <Link
+          to={slide.link}
+          className="absolute inset-0 z-10"
+          aria-label={slide.title || 'Shop Collection'}
+        />
+      )}
+    </div>
+  );
+});
+
 export default function HeroCarouselSection() {
-  const navigate = useNavigate();
   const { banners } = useShop();
   const [isHovered, setIsHovered] = useState(false);
 
-  const defaultHeroSlides = [
-    {
-      id: 1,
-      image: aa,
-      link: '/boys'
-    },
-    {
-      id: 2,
-      image: bb,
-      link: '/girls'
-    },
-    {
-      id: 3,
-      image: cc,
-      link: '/new-arrivals'
-    },
-    {
-      id: 4,
-      image: dd,
-      link: '/siblings'
+  const heroSlides = useMemo(() => {
+    const apiHeroBanners = Array.isArray(banners)
+      ? banners.filter(
+          (b) =>
+            (b.status === 'Active' || !b.status) &&
+            b.placement === 'Homepage Main Hero Carousel' &&
+            b.position !== 'Gender Collection Card' &&
+            !b.placement?.toLowerCase().includes('card') &&
+            !!(b.imageUrl || b.image)
+        )
+      : [];
+
+    if (apiHeroBanners.length > 0) {
+      return apiHeroBanners.map((b) => ({
+        ...b,
+        image: formatImageUrl(b.imageUrl || b.image) || aa,
+        mobileImage: formatImageUrl(b.mobileImageUrl || b.mobileImage) || null,
+      }));
     }
-  ];
-
-  // Dynamically resolve banners strictly for Hero Carousel (never include Gender/Promo cards)
-  const apiHeroBanners = Array.isArray(banners)
-    ? banners.filter(
-        (b) =>
-          (b.status === 'Active' || !b.status) &&
-          (b.placement === 'Homepage Main Hero Carousel' ||
-            (!b.placement && b.position === 'Hero Slider'))
-      )
-    : (banners?.hero || []);
-
-  const heroSlides =
-    apiHeroBanners.length > 0
-      ? apiHeroBanners.map((b) => ({
-          ...b,
-          image: formatImageUrl(b.imageUrl || b.image) || aa,
-          mobileImage: formatImageUrl(b.mobileImageUrl || b.mobileImage) || null,
-        }))
-      : defaultHeroSlides;
+    return DEFAULT_HERO_SLIDES;
+  }, [banners]);
 
   const totalSlides = heroSlides.length;
 
-  // Clone first and last slide for seamless infinite loop (no rewind jerk)
-  const extendedSlides = React.useMemo(() => {
+  const extendedSlides = useMemo(() => {
     if (totalSlides <= 1) return heroSlides;
     return [heroSlides[totalSlides - 1], ...heroSlides, heroSlides[0]];
   }, [heroSlides, totalSlides]);
@@ -67,66 +107,79 @@ export default function HeroCarouselSection() {
   const [isTransitioning, setIsTransitioning] = useState(true);
   const isMovingRef = useRef(false);
 
+  // Safety bound check: ensure currentIndex is never outside extended range
+  useEffect(() => {
+    if (currentIndex < 0 || currentIndex > totalSlides + 1) {
+      setIsTransitioning(false);
+      setCurrentIndex(1);
+    }
+  }, [currentIndex, totalSlides]);
+
   const nextSlide = useCallback(() => {
     if (isMovingRef.current || totalSlides <= 1) return;
     isMovingRef.current = true;
     setIsTransitioning(true);
-    setCurrentIndex((prev) => prev + 1);
+    setCurrentIndex((prev) => {
+      if (prev >= totalSlides + 1) return 1;
+      return prev + 1;
+    });
   }, [totalSlides]);
 
   const prevSlide = useCallback(() => {
     if (isMovingRef.current || totalSlides <= 1) return;
     isMovingRef.current = true;
     setIsTransitioning(true);
-    setCurrentIndex((prev) => prev - 1);
+    setCurrentIndex((prev) => {
+      if (prev <= 0) return totalSlides;
+      return prev - 1;
+    });
   }, [totalSlides]);
 
   const handleTransitionEnd = (e) => {
-    // Only handle transition of the track itself, not bubbling from children
     if (e.target !== e.currentTarget) return;
     isMovingRef.current = false;
-    if (currentIndex === totalSlides + 1) {
+    if (currentIndex >= totalSlides + 1) {
       setIsTransitioning(false);
       setCurrentIndex(1);
-    } else if (currentIndex === 0) {
+    } else if (currentIndex <= 0) {
       setIsTransitioning(false);
       setCurrentIndex(totalSlides);
     }
   };
 
-  // Re-enable transition after teleporting back to clone
   useEffect(() => {
     if (!isTransitioning) {
       const id = requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          setIsTransitioning(true);
-        });
+        requestAnimationFrame(() => setIsTransitioning(true));
       });
       return () => cancelAnimationFrame(id);
     }
   }, [isTransitioning]);
 
-  // Safety fallback to unlock sliding if transitionend is missed (e.g. background tab)
+  // Safety timeout: In case browser drops transitionend (e.g. background tab)
   useEffect(() => {
-    if (isMovingRef.current) {
+    if (isTransitioning && (currentIndex === 0 || currentIndex >= totalSlides + 1)) {
       const timer = setTimeout(() => {
+        setIsTransitioning(false);
+        if (currentIndex === 0) setCurrentIndex(totalSlides);
+        if (currentIndex >= totalSlides + 1) setCurrentIndex(1);
         isMovingRef.current = false;
       }, 850);
+      return () => clearTimeout(timer);
+    }
+  }, [currentIndex, isTransitioning, totalSlides]);
+
+  useEffect(() => {
+    if (isMovingRef.current) {
+      const timer = setTimeout(() => { isMovingRef.current = false; }, 900);
       return () => clearTimeout(timer);
     }
   }, [currentIndex]);
 
   const touchStartX = useRef(0);
   const touchEndX = useRef(0);
-
-  const handleTouchStart = (e) => {
-    touchStartX.current = e.touches[0].clientX;
-  };
-
-  const handleTouchMove = (e) => {
-    touchEndX.current = e.touches[0].clientX;
-  };
-
+  const handleTouchStart = (e) => { touchStartX.current = e.touches[0].clientX; };
+  const handleTouchMove = (e) => { touchEndX.current = e.touches[0].clientX; };
   const handleTouchEnd = () => {
     const diff = touchStartX.current - touchEndX.current;
     if (Math.abs(diff) > 45 && touchEndX.current !== 0) {
@@ -137,14 +190,13 @@ export default function HeroCarouselSection() {
     touchEndX.current = 0;
   };
 
-  // Auto-slide every 4.0 seconds when not hovered
+  // Auto-play: Pauses when user hovers OR when tab is hidden in background
   useEffect(() => {
     if (totalSlides <= 1 || isHovered) return;
-
     const timer = setInterval(() => {
+      if (document.hidden) return; // Prevent slider from running off in background tab
       nextSlide();
-    }, 4000);
-
+    }, 4500);
     return () => clearInterval(timer);
   }, [totalSlides, isHovered, nextSlide]);
 
@@ -155,14 +207,14 @@ export default function HeroCarouselSection() {
   return (
     <section className="relative max-w-[1600px] mx-auto px-3 sm:px-4 pt-2 sm:pt-4">
       <div
-        className="relative rounded-2xl sm:rounded-3xl overflow-hidden border border-pink-100/80 shadow-md aspect-square sm:aspect-auto sm:h-[440px] md:h-[500px] lg:h-[540px] xl:h-[560px] bg-[#FAF8F5] select-none"
+        className="relative rounded-2xl sm:rounded-3xl overflow-hidden border border-pink-100/80 shadow-md aspect-square sm:aspect-auto sm:h-[440px] md:h-[500px] lg:h-[540px] xl:h-[560px] select-none bg-[#FAF8F5]"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
       >
-        {/* Continuous track with hardware-accelerated transform translation */}
+        {/* ── Slide Track ── */}
         <div
           className="flex w-full h-full"
           onTransitionEnd={handleTransitionEnd}
@@ -174,58 +226,43 @@ export default function HeroCarouselSection() {
             WebkitBackfaceVisibility: 'hidden',
           }}
         >
-          {extendedSlides.map((slide, idx) => (
-            <div
-              key={idx}
-              className="w-full h-full shrink-0 relative select-none"
-            >
-              {/* Responsive Slide Banner Image (Serves Mobile Image on Phone Screens) */}
-              <picture className="block absolute inset-0 w-full h-full">
-                  {slide.mobileImage && (
-                    <source
-                      media="(max-width: 640px)"
-                      srcSet={slide.mobileImage}
-                    />
-                  )}
-                  <img
-                    src={slide.image || aa}
-                    alt={slide.title || 'Brand Hero Banner'}
-                    loading={idx === 1 ? 'eager' : 'lazy'}
-                    decoding="async"
-                    className="w-full h-full object-cover object-center pointer-events-none select-none"
-                  />
-                </picture>
-              </div>
-          ))}
+          {extendedSlides.map((slide, idx) => {
+            const realIdx = ((idx - 1) % totalSlides + totalSlides) % totalSlides;
+            const fallback = FALLBACK_IMAGES[realIdx % FALLBACK_IMAGES.length];
+            const slideKey = `hero-slide-${idx}-${slide.id || slide._id || realIdx}`;
+
+            return (
+              <CarouselSlide
+                key={slideKey}
+                slide={slide}
+                fallback={fallback}
+                isPriority={idx === 1}
+              />
+            );
+          })}
         </div>
 
-        {/* Left Navigation Circular Arrow Button */}
+        {/* ── Left Arrow ── */}
         <button
           type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            prevSlide();
-          }}
+          onClick={(e) => { e.stopPropagation(); prevSlide(); }}
           className="absolute left-2.5 sm:left-4 md:left-6 top-1/2 -translate-y-1/2 w-8 h-8 sm:w-10 sm:h-10 md:w-11 md:h-11 rounded-full bg-white/95 hover:bg-white shadow-md text-[#D81B60] flex items-center justify-center transition-all z-20 hover:scale-110 border border-pink-100 cursor-pointer active:scale-95"
           aria-label="Previous Slide"
         >
           <ChevronLeft className="w-5 h-5 md:w-6 md:h-6 stroke-[2.5]" />
         </button>
 
-        {/* Right Navigation Circular Arrow Button */}
+        {/* ── Right Arrow ── */}
         <button
           type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            nextSlide();
-          }}
+          onClick={(e) => { e.stopPropagation(); nextSlide(); }}
           className="absolute right-2.5 sm:right-4 md:right-6 top-1/2 -translate-y-1/2 w-8 h-8 sm:w-10 sm:h-10 md:w-11 md:h-11 rounded-full bg-white/95 hover:bg-white shadow-md text-[#D81B60] flex items-center justify-center transition-all z-20 hover:scale-110 border border-pink-100 cursor-pointer active:scale-95"
           aria-label="Next Slide"
         >
           <ChevronRight className="w-5 h-5 md:w-6 md:h-6 stroke-[2.5]" />
         </button>
 
-        {/* Slide Dots Indicator */}
+        {/* ── Dots Indicator ── */}
         <div className="absolute bottom-3 sm:bottom-4 inset-x-0 z-20 flex items-center justify-center gap-2 pointer-events-auto">
           {heroSlides.map((_, idx) => (
             <button
@@ -249,44 +286,35 @@ export default function HeroCarouselSection() {
         </div>
       </div>
 
-      {/* Three Fixed Navigation Boxes at the bottom of the banner: “Girls”, “Boys”, and “Siblings” */}
+      {/* ── Bottom Nav: Girls / Boys / Siblings ── */}
       <div className="flex justify-center pt-2 sm:pt-3">
         <div className="grid grid-cols-3 gap-2.5 sm:gap-4 md:gap-6 w-full max-w-xs sm:max-w-md md:max-w-lg">
-          {/* Box 1: Girls */}
           <Link
             to="/girls"
             className="group/box flex items-center justify-center py-2.5 sm:py-3.5 px-3 sm:px-6 rounded-xl sm:rounded-2xl bg-gradient-to-r from-[#D81B60] via-[#E91E63] to-[#EC407A] text-white shadow-md shadow-pink-500/25 hover:shadow-lg hover:shadow-pink-500/40 border border-pink-300/30 transition-all duration-300 hover:scale-105 active:scale-95 text-center cursor-pointer"
           >
             <div className="flex items-center gap-1.5 sm:gap-2">
-              <span className="font-heading font-extrabold text-xs sm:text-sm md:text-base tracking-wider uppercase text-white whitespace-nowrap leading-none drop-shadow-xs">
-                Girls
-              </span>
+              <span className="font-heading font-extrabold text-xs sm:text-sm md:text-base tracking-wider uppercase text-white whitespace-nowrap leading-none drop-shadow-xs">Girls</span>
               <ArrowRight className="w-3.5 h-3.5 text-white/90 -translate-x-1 group-hover/box:translate-x-0.5 transition-all duration-200 hidden sm:inline-block" />
             </div>
           </Link>
 
-          {/* Box 2: Boys */}
           <Link
             to="/boys"
             className="group/box flex items-center justify-center py-2.5 sm:py-3.5 px-3 sm:px-6 rounded-xl sm:rounded-2xl bg-gradient-to-r from-[#0284C7] via-[#0EA5E9] to-[#38BDF8] text-white shadow-md shadow-sky-500/25 hover:shadow-lg hover:shadow-sky-500/40 border border-sky-300/30 transition-all duration-300 hover:scale-105 active:scale-95 text-center cursor-pointer"
           >
             <div className="flex items-center gap-1.5 sm:gap-2">
-              <span className="font-heading font-extrabold text-xs sm:text-sm md:text-base tracking-wider uppercase text-white whitespace-nowrap leading-none drop-shadow-xs">
-                Boys
-              </span>
+              <span className="font-heading font-extrabold text-xs sm:text-sm md:text-base tracking-wider uppercase text-white whitespace-nowrap leading-none drop-shadow-xs">Boys</span>
               <ArrowRight className="w-3.5 h-3.5 text-white/90 -translate-x-1 group-hover/box:translate-x-0.5 transition-all duration-200 hidden sm:inline-block" />
             </div>
           </Link>
 
-          {/* Box 3: Siblings */}
           <Link
             to="/siblings"
             className="group/box flex items-center justify-center py-2.5 sm:py-3.5 px-3 sm:px-6 rounded-xl sm:rounded-2xl bg-gradient-to-r from-[#8E24AA] via-[#9C27B0] to-[#BA68C8] text-white shadow-md shadow-purple-500/25 hover:shadow-lg hover:shadow-purple-500/40 border border-purple-300/30 transition-all duration-300 hover:scale-105 active:scale-95 text-center cursor-pointer"
           >
             <div className="flex items-center gap-1.5 sm:gap-2">
-              <span className="font-heading font-extrabold text-xs sm:text-sm md:text-base tracking-wider uppercase text-white whitespace-nowrap leading-none drop-shadow-xs">
-                Siblings
-              </span>
+              <span className="font-heading font-extrabold text-xs sm:text-sm md:text-base tracking-wider uppercase text-white whitespace-nowrap leading-none drop-shadow-xs">Siblings</span>
               <ArrowRight className="w-3.5 h-3.5 text-white/90 -translate-x-1 group-hover/box:translate-x-0.5 transition-all duration-200 hidden sm:inline-block" />
             </div>
           </Link>

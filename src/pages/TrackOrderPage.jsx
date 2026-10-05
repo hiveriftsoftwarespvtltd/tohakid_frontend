@@ -111,7 +111,7 @@ export default function TrackOrderPage() {
       status: currentStatus,
       total: data.total || data.totalAmount || 0,
       courier: data.courier || 'BlueDart Express',
-      estimatedDelivery: data.estimatedDelivery || (isDelivered ? 'Delivered' : '2-4 Business Days'),
+      estimatedDelivery: data.estimatedDelivery || (isDelivered ? 'Delivered' : '3-5 Business Days'),
       address: data.address || '',
       items: data.items || [],
       steps

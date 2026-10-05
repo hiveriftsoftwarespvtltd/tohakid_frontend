@@ -16,8 +16,9 @@ import p8 from '../../assets/p8.png';
 export default function TrendingCategoriesSection() {
   const categoriesRef = useRef(null);
   const navigate = useNavigate();
-  const { categoriesList: dynamicCategories } = useShop();
-  const displayCategories = (dynamicCategories && dynamicCategories.length > 0) ? dynamicCategories : fallbackCategories;
+  const displayCategories = (dynamicCategories && dynamicCategories.length > 0 && dynamicCategories.some(c => c.name && (c.name.includes('Lehenga') || c.name.includes('Kurta') || c.name.includes('Sets'))))
+    ? dynamicCategories
+    : fallbackCategories;
 
   const scrollCategories = (direction) => {
     if (categoriesRef.current) {

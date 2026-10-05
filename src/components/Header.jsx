@@ -2,15 +2,14 @@ import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import {
   Search, Heart, ShoppingBag, User, Menu, X,
-  ChevronRight, ChevronDown, Truck, Sparkles, HelpCircle, Phone, Info, LogOut
+  ChevronRight, Truck, HelpCircle, Phone, Info, LogOut, Ruler, ExternalLink
 } from 'lucide-react';
 import { useShop } from '../context/ShopContext';
 import Logo from './Logo';
 
 export default function Header() {
-  const { wishlist, totalCartItems, searchQuery, setSearchQuery, setIsCartOpen, products, isLoggedIn, user, logoutUser, categoriesList } = useShop();
+  const { wishlist, totalCartItems, searchQuery, setSearchQuery, setIsCartOpen, products, isLoggedIn, user, logoutUser } = useShop();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [expandedCatId, setExpandedCatId] = useState(null);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchFocused, setSearchFocused] = useState(false);
   const searchContainerRef = useRef(null);
@@ -56,107 +55,33 @@ export default function Header() {
     }
   }, [mobileMenuOpen]);
 
-  // Dynamic Category Links derived from Categories API (with subcategories support)
-  const dynamicCategories = useMemo(() => {
-    if (Array.isArray(categoriesList) && categoriesList.length > 0) {
-      return categoriesList
-        .filter((c) => c.status !== 'Inactive')
-        .map((cat) => {
-          const slug = (cat.slug || '').toLowerCase().trim();
-          const name = (cat.name || '').trim();
-          let path = `/${slug}`;
-          let theme = {
-            activeClass: 'bg-gradient-to-r from-[#D81B60] to-[#E91E63] text-white shadow-xs',
-            hoverClass: 'hover:text-pink-800 hover:bg-pink-100/60',
-            badgeBg: 'bg-pink-100 text-[#D81B60]',
-          };
-
-          if (slug === 'boys' || name.toLowerCase().includes('boy')) {
-            path = '/boys';
-            theme = {
-              activeClass: 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-xs',
-              hoverClass: 'hover:text-blue-800 hover:bg-blue-100/60',
-              badgeBg: 'bg-blue-100 text-blue-700',
-            };
-          } else if (slug === 'girls' || name.toLowerCase().includes('girl')) {
-            path = '/girls';
-            theme = {
-              activeClass: 'bg-gradient-to-r from-[#D81B60] to-[#E91E63] text-white shadow-xs',
-              hoverClass: 'hover:text-pink-800 hover:bg-pink-100/60',
-              badgeBg: 'bg-pink-100 text-pink-700',
-            };
-          } else if (slug === 'siblings' || name.toLowerCase().includes('sibling')) {
-            path = '/siblings';
-            theme = {
-              activeClass: 'bg-gradient-to-r from-[#8E24AA] to-[#AB47BC] text-white shadow-xs',
-              hoverClass: 'hover:text-purple-800 hover:bg-purple-100/60',
-              badgeBg: 'bg-purple-100 text-purple-700',
-            };
-          } else if (slug === 'new-arrivals' || name.toLowerCase().includes('new')) {
-            path = '/new-arrivals';
-            theme = {
-              activeClass: 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-xs',
-              hoverClass: 'hover:text-amber-800 hover:bg-amber-100/60',
-              badgeBg: 'bg-amber-100 text-amber-700',
-            };
-          }
-
-          const rawSubs = Array.isArray(cat.subcategories) ? cat.subcategories : [];
-          const subcategories = rawSubs
-            .map((s) => (typeof s === 'string' ? s : s?.name))
-            .filter(Boolean);
-
-          return {
-            id: cat.id || cat._id || slug,
-            name: name,
-            displayName: name.toUpperCase(),
-            path,
-            slug,
-            subcategories,
-            ...theme,
-          };
-        });
-    }
-
-    return [
-      {
-        id: 'new-arrivals',
-        name: 'New Arrivals',
-        displayName: 'NEW ARRIVALS',
-        path: '/new-arrivals',
-        subcategories: [],
-        activeClass: 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-xs',
-        hoverClass: 'hover:text-amber-800 hover:bg-amber-100/60',
-      },
-      {
-        id: 'boys',
-        name: 'Boys',
-        displayName: 'BOYS',
-        path: '/boys',
-        subcategories: ['Kurta Pjama set'],
-        activeClass: 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-xs',
-        hoverClass: 'hover:text-blue-800 hover:bg-blue-100/60',
-      },
-      {
-        id: 'girls',
-        name: 'Girls',
-        displayName: 'GIRLS',
-        path: '/girls',
-        subcategories: ['Angrakha Set', 'Sharara Set', 'Dhoti Set', 'Pant Set', 'Salwar'],
-        activeClass: 'bg-gradient-to-r from-[#D81B60] to-[#E91E63] text-white shadow-xs',
-        hoverClass: 'hover:text-pink-800 hover:bg-pink-100/60',
-      },
-      {
-        id: 'siblings',
-        name: 'Siblings',
-        displayName: 'SIBLINGS',
-        path: '/siblings',
-        subcategories: ['DHOTI SET', 'Kurta Pjama set', 'PANT SET', 'Lehenga Choli', 'salwar'],
-        activeClass: 'bg-gradient-to-r from-[#8E24AA] to-[#AB47BC] text-white shadow-xs',
-        hoverClass: 'hover:text-purple-800 hover:bg-purple-100/60',
-      },
-    ];
-  }, [categoriesList]);
+  // Primary Category Links for Header Navigation
+  const navLinks = useMemo(() => [
+    {
+      name: 'NEW ARRIVALS',
+      path: '/new-arrivals',
+      activeClass: 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-xs',
+      hoverClass: 'hover:text-amber-800 hover:bg-amber-100/60',
+    },
+    {
+      name: 'BOYS',
+      path: '/boys',
+      activeClass: 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-xs',
+      hoverClass: 'hover:text-blue-800 hover:bg-blue-100/60',
+    },
+    {
+      name: 'GIRLS',
+      path: '/girls',
+      activeClass: 'bg-gradient-to-r from-[#D81B60] to-[#E91E63] text-white shadow-xs',
+      hoverClass: 'hover:text-pink-800 hover:bg-pink-100/60',
+    },
+    {
+      name: 'SIBLINGS',
+      path: '/siblings',
+      activeClass: 'bg-gradient-to-r from-[#8E24AA] to-[#AB47BC] text-white shadow-xs',
+      hoverClass: 'hover:text-purple-800 hover:bg-purple-100/60',
+    },
+  ], []);
 
   // Live search suggestions
   const searchResults = searchQuery.trim().length > 1
@@ -364,18 +289,17 @@ export default function Header() {
       )}
 
       {/* 3. VIBRANT THEMED CATEGORY NAVIGATION BAR */}
-      <nav className="hidden lg:block border-t border-b border-pink-200/60 bg-gradient-to-r from-[#FFF0F5]/90 via-[#FDF4FF]/85 to-[#FFFBEB]/90 py-1.5 shadow-2xs backdrop-blur-md">
-        <div className="max-w-[1600px] mx-auto px-4 flex items-center justify-center">
-          <div className="inline-flex items-center gap-2 p-1 bg-white/90 backdrop-blur-md rounded-full border border-pink-200/80 shadow-xs">
-            {dynamicCategories.map((link) => (
+      <nav className="border-t border-b border-pink-200/60 bg-gradient-to-r from-[#FFF0F5]/90 via-[#FDF4FF]/85 to-[#FFFBEB]/90 py-1 shadow-2xs backdrop-blur-md overflow-x-auto no-scrollbar">
+        <div className="max-w-[1600px] mx-auto px-3 sm:px-4 flex items-center justify-center min-w-max sm:min-w-0">
+          <div className="inline-flex items-center gap-1 sm:gap-1.5 p-0.5 sm:p-1 bg-white/90 backdrop-blur-md rounded-full border border-pink-200/80 shadow-xs">
+            {navLinks.map((link) => (
               <NavLink
-                key={link.id || link.name}
+                key={link.name}
                 to={link.path}
                 className={({ isActive }) =>
-                  `relative px-4 py-1.5 rounded-full inline-flex items-center justify-center text-[11px] font-extrabold uppercase tracking-[0.12em] transition-all duration-300 ${
-                    isActive
-                      ? `${link.activeClass} scale-[1.03]`
-                      : `text-gray-700 ${link.hoverClass}`
+                  `relative px-2.5 sm:px-3 py-1 rounded-full inline-flex items-center justify-center text-[11px] font-extrabold uppercase tracking-[0.08em] sm:tracking-[0.1em] transition-all duration-300 shrink-0 ${isActive
+                    ? `${link.activeClass} scale-[1.02]`
+                    : `text-gray-700 ${link.hoverClass}`
                   }`
                 }
               >
@@ -398,9 +322,9 @@ export default function Header() {
           <div className="fixed inset-y-0 left-0 max-w-xs sm:max-w-sm w-full h-full max-h-dvh bg-white shadow-2xl flex flex-col z-50 animate-in slide-in-from-left duration-250">
             {/* Drawer Header */}
             <div className="p-4 border-b border-pink-200 flex items-center justify-between bg-gradient-to-r from-[#FFF0F5] via-[#FFF5F8] to-[#FFFBEB] shrink-0">
-              <div onClick={() => setMobileMenuOpen(false)} className="cursor-pointer">
+              <Link to="/" onClick={() => setMobileMenuOpen(false)} className="cursor-pointer block">
                 <Logo size="small" align="start" />
-              </div>
+              </Link>
               <button
                 onClick={() => setMobileMenuOpen(false)}
                 className="p-2 text-gray-600 hover:text-[#D81B60] hover:bg-pink-100/60 rounded-full transition-colors cursor-pointer"
@@ -412,7 +336,7 @@ export default function Header() {
 
             {/* Scrollable Drawer Content */}
             <div className="flex-1 overflow-y-auto p-4 space-y-5 overscroll-contain">
-              
+
               {/* 1. SIGN IN / ACCOUNT SECTION */}
               <div>
                 {!isLoggedIn ? (
@@ -474,93 +398,29 @@ export default function Header() {
                 )}
               </div>
 
-              {/* 2. SHOPPING CATEGORIES (Loaded dynamically from Category API) */}
+              {/* 2. SHOPPING CATEGORIES */}
               <div className="space-y-1.5">
                 <p className="text-[10px] font-black uppercase tracking-wider text-gray-400 px-1">
                   Shopping Categories
                 </p>
 
-                {/* Categories from API with subcategories dropdown */}
-                {dynamicCategories.map((cat) => {
-                  const hasSubs = cat.subcategories && cat.subcategories.length > 0;
-                  const isExpanded = expandedCatId === cat.id;
-
-                  return (
-                    <div
-                      key={cat.id || cat.name}
-                      className="rounded-xl border border-pink-100/60 bg-gray-50/50 overflow-hidden transition-all"
-                    >
-                      <div className="flex items-center justify-between">
-                        <NavLink
-                          to={cat.path}
-                          onClick={() => setMobileMenuOpen(false)}
-                          className={({ isActive }) =>
-                            `flex-1 flex items-center justify-between px-3.5 py-2.5 text-xs font-bold uppercase transition-all ${
-                              isActive
-                                ? `${cat.activeClass}`
-                                : `text-gray-800 ${cat.hoverClass} hover:bg-pink-50/40`
-                            }`
-                          }
-                        >
-                          <span>{cat.displayName || cat.name}</span>
-                          {!hasSubs && <ChevronRight className="w-4 h-4 opacity-60" />}
-                        </NavLink>
-
-                        {hasSubs && (
-                          <button
-                            type="button"
-                            onClick={() => setExpandedCatId(isExpanded ? null : cat.id)}
-                            className="px-3 py-2.5 text-gray-500 hover:text-[#D81B60] hover:bg-pink-100/50 transition-colors border-l border-pink-100/60 cursor-pointer flex items-center justify-center"
-                            aria-label={`Toggle ${cat.name} subcategories`}
-                            title="View Subcategories"
-                          >
-                            <ChevronDown
-                              className={`w-4 h-4 transition-transform duration-200 ${
-                                isExpanded ? 'rotate-180 text-[#D81B60]' : ''
-                              }`}
-                            />
-                          </button>
-                        )}
-                      </div>
-
-                      {/* Expandable Subcategories List from API */}
-                      {hasSubs && isExpanded && (
-                        <div className="bg-white/95 border-t border-pink-100/60 px-3 py-2 space-y-1 animate-fadeIn">
-                          {cat.subcategories.map((sub, sIdx) => (
-                            <Link
-                              key={sIdx}
-                              to={`${cat.path}?subcategory=${encodeURIComponent(sub)}`}
-                              onClick={() => setMobileMenuOpen(false)}
-                              className="flex items-center justify-between px-3 py-1.5 rounded-lg text-[11px] font-semibold text-gray-600 hover:text-[#D81B60] hover:bg-pink-50/60 transition-colors"
-                            >
-                              <span>{sub}</span>
-                              <ChevronRight className="w-3 h-3 text-gray-400" />
-                            </Link>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-
-                {/* Additional Non-Gender Categories */}
-                <NavLink
-                  to="/shop-by-age"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold text-gray-700 hover:text-[#D81B60] hover:bg-pink-50 border border-gray-100 transition-all uppercase"
-                >
-                  <span>SHOP BY AGE</span>
-                  <ChevronRight className="w-4 h-4 text-gray-400" />
-                </NavLink>
-
-                <NavLink
-                  to="/collections"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold text-gray-700 hover:text-[#D81B60] hover:bg-pink-50 border border-gray-100 transition-all uppercase"
-                >
-                  <span>ALL COLLECTIONS</span>
-                  <ChevronRight className="w-4 h-4 text-gray-400" />
-                </NavLink>
+                {/* Primary Category Links with Colorful Tags */}
+                {navLinks.map((link) => (
+                  <NavLink
+                    key={link.name}
+                    to={link.path}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={({ isActive }) =>
+                      `flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold uppercase transition-all ${isActive
+                        ? `${link.activeClass}`
+                        : `text-gray-800 ${link.hoverClass} border border-pink-100/60 bg-gray-50/50 hover:bg-pink-50/40`
+                      }`
+                    }
+                  >
+                    <span>{link.name}</span>
+                    <ChevronRight className="w-4 h-4 opacity-70" />
+                  </NavLink>
+                ))}
               </div>
 
               {/* 3. OTHER APPLICABLE NAVIGATION OPTIONS */}
@@ -595,16 +455,25 @@ export default function Header() {
                 </Link>
 
                 <Link
-                  to="/faq"
+                  to="/size-guide"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center gap-2.5 px-3 py-2 text-gray-700 hover:text-[#D81B60] hover:bg-gray-50 rounded-xl font-medium transition-colors"
+                >
+                  <Ruler className="w-4 h-4 text-gray-500" />
+                  <span>Size Guide</span>
+                </Link>
+
+                <Link
+                  to="/faqs"
                   onClick={() => setMobileMenuOpen(false)}
                   className="flex items-center gap-2.5 px-3 py-2 text-gray-700 hover:text-[#D81B60] hover:bg-gray-50 rounded-xl font-medium transition-colors"
                 >
                   <HelpCircle className="w-4 h-4 text-gray-500" />
-                  <span>Size Guide & FAQs</span>
+                  <span>FAQs & Help</span>
                 </Link>
 
                 <Link
-                  to="/about"
+                  to="/about-us"
                   onClick={() => setMobileMenuOpen(false)}
                   className="flex items-center gap-2.5 px-3 py-2 text-gray-700 hover:text-[#D81B60] hover:bg-gray-50 rounded-xl font-medium transition-colors"
                 >
@@ -613,20 +482,43 @@ export default function Header() {
                 </Link>
 
                 <Link
-                  to="/contact"
+                  to="/contact-us"
                   onClick={() => setMobileMenuOpen(false)}
                   className="flex items-center gap-2.5 px-3 py-2 text-gray-700 hover:text-[#D81B60] hover:bg-gray-50 rounded-xl font-medium transition-colors"
                 >
                   <Phone className="w-4 h-4 text-gray-500" />
                   <span>Contact & Support</span>
                 </Link>
+
+                <a
+                  href="https://www.instagram.com/tohay_kids?stkn=ZDhxaG9lamJuajN3"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center justify-between px-3 py-2 text-gray-700 hover:text-[#D81B60] hover:bg-gray-50 rounded-xl font-medium transition-colors"
+                >
+                  <span className="flex items-center gap-2.5">
+                    <svg className="w-4 h-4 text-pink-600 fill-current" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" /></svg>
+                    <span>Follow on Instagram</span>
+                  </span>
+                  <ExternalLink className="w-3.5 h-3.5 text-gray-400" />
+                </a>
               </div>
 
             </div>
 
-            {/* Drawer Footer with Festive Touch */}
-            <div className="p-3.5 border-t border-pink-100 bg-gradient-to-r from-pink-50 to-amber-50 text-xs text-gray-700 text-center space-y-0.5 shrink-0">
-              <p className="font-extrabold text-[#D81B60] text-xs">Crafted for Little Celebrations ✨</p>
+            {/* Drawer Footer with Festive Touch & Social Link */}
+            <div className="p-3.5 border-t border-pink-100 bg-gradient-to-r from-pink-50 to-amber-50 text-xs text-gray-700 text-center space-y-2 shrink-0">
+              <a
+                href="https://www.instagram.com/tohay_kids?stkn=ZDhxaG9lamJuajN3"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 px-3 py-1 bg-white text-[#D81B60] border border-pink-200 rounded-full font-bold text-[11px] hover:bg-pink-600 hover:text-white transition-all shadow-2xs"
+              >
+                <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" /></svg>
+                <span>@tohay_kids</span>
+              </a>
+              <p className="font-extrabold text-[#D81B60] text-xs">Crafted for Little Celebrations </p>
               <p className="text-[10px] text-gray-500">Premium Festive & Ethnic Kids Wear</p>
             </div>
           </div>

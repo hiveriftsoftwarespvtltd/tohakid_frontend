@@ -285,10 +285,19 @@ export default function AdminBanners() {
         </button>
       </div>
 
-      {/* Main Table */}
+      {/* Main Table - Displays Hero & Page Banners (excluding Gender Cards managed in their own section) */}
       <DataTable
         columns={bannerColumns}
-        data={bannersList}
+        data={(bannersList || []).filter((b) => {
+          const placement = (b.placement || '').toLowerCase();
+          const position = (b.position || '').toLowerCase();
+          return (
+            !placement.includes('homepage girls card') &&
+            !placement.includes('homepage boys card') &&
+            !placement.includes('homepage siblings card') &&
+            !position.includes('gender collection card')
+          );
+        })}
         searchKey="title"
         searchPlaceholder="Search banner title..."
       />
@@ -333,18 +342,15 @@ export default function AdminBanners() {
                     className="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-xs font-bold mt-1 focus:bg-white focus:border-pink-500 outline-none text-[#D81B60]"
                   >
                     <option value="Homepage Main Hero Carousel">1. Homepage Main Hero Carousel</option>
-                    <option value="Homepage Girls Card">2. Homepage Girls Card</option>
-                    <option value="Homepage Boys Card">3. Homepage Boys Card</option>
-                    <option value="Homepage Siblings Card">4. Homepage Siblings Card</option>
-                    <option value="New Arrivals Hero Banner">5. New Arrivals Hero Banner</option>
-                    <option value="Boys Category Top Banner">6. Boys Category Top Banner</option>
-                    <option value="Girls Category Top Banner">7. Girls Category Top Banner</option>
-                    <option value="Siblings Header Banner">8. Siblings Header Banner</option>
-                    <option value="Shop By Age Hero Banner">9. Shop By Age Hero Banner</option>
-                    <option value="Collections Hero Banner">10. Collections Hero Banner</option>
-                    <option value="Sale & Offers Hero Banner">11. Sale & Offers Hero Banner</option>
-                    <option value="About Us Hero Banner">12. About Us Hero Banner</option>
-                    <option value="Contact Us Hero Banner">13. Contact Us Hero Banner</option>
+                    <option value="New Arrivals Hero Banner">2. New Arrivals Hero Banner</option>
+                    <option value="Boys Category Top Banner">3. Boys Category Top Banner</option>
+                    <option value="Girls Category Top Banner">4. Girls Category Top Banner</option>
+                    <option value="Siblings Header Banner">5. Siblings Header Banner</option>
+                    <option value="Shop By Age Hero Banner">6. Shop By Age Hero Banner</option>
+                    <option value="Collections Hero Banner">7. Collections Hero Banner</option>
+                    <option value="Sale & Offers Hero Banner">8. Sale & Offers Hero Banner</option>
+                    <option value="About Us Hero Banner">9. About Us Hero Banner</option>
+                    <option value="Contact Us Hero Banner">10. Contact Us Hero Banner</option>
                   </select>
                 </div>
 

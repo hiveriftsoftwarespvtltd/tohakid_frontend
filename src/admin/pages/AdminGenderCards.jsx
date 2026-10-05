@@ -8,7 +8,7 @@ import two2 from '../../assets/two2.png';
 import three3 from '../../assets/three3.png';
 
 export default function AdminGenderCards() {
-  const { bannersList, addBanner, updateBanner, deleteBanner, openConfirmModal, showToast } = useAdmin();
+  const { genderCardsList, addGenderCard, updateGenderCard, deleteGenderCard, openConfirmModal, showToast } = useAdmin();
   const [showModal, setShowModal] = useState(false);
   const [editingCard, setEditingCard] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -62,11 +62,11 @@ export default function AdminGenderCards() {
 
   const [cardForm, setCardForm] = useState(initialForm);
 
-  const getSavedBannerForSlot = (slotKey) => {
-    return (bannersList || []).find(
+  const getSavedCardForSlot = (slotKey) => {
+    return (genderCardsList || []).find(
       (b) =>
-        b.placement &&
-        b.placement.trim().toLowerCase() === slotKey.trim().toLowerCase()
+        b.slotKey &&
+        b.slotKey.trim().toLowerCase() === slotKey.trim().toLowerCase()
     );
   };
 
@@ -79,13 +79,13 @@ export default function AdminGenderCards() {
   };
 
   const handleOpenEditModal = (slot) => {
-    const existing = getSavedBannerForSlot(slot.slotKey);
+    const existing = getSavedCardForSlot(slot.slotKey);
     setEditingCard({ slot, existing });
     setCardForm({
       title: existing?.title || slot.defaultTitle,
       subtitle: existing?.subtitle || slot.defaultSubtitle,
       btnPrimaryText: existing?.btnPrimaryText || slot.defaultBtn,
-      btnPrimaryLink: existing?.btnPrimaryLink || existing?.link || slot.defaultLink,
+      btnPrimaryLink: existing?.btnPrimaryLink || slot.defaultLink,
       placement: slot.slotKey,
       imageUrl: (existing?.imageUrl && !existing.imageUrl.includes('unsplash')) ? existing.imageUrl : '',
       status: existing?.status || 'Active'
@@ -132,21 +132,26 @@ export default function AdminGenderCards() {
       return;
     }
 
+    const targetSlotKey = editingCard?.slot?.slotKey || cardForm.placement;
     const payload = {
-      ...cardForm,
-      position: 'Gender Collection Card',
-      placement: editingCard?.slot?.slotKey || cardForm.placement,
-      image: cardForm.imageUrl,
+      slotKey: targetSlotKey,
+      name: editingCard?.slot?.name || cardForm.title,
+      title: cardForm.title,
+      subtitle: cardForm.subtitle,
+      btnPrimaryText: cardForm.btnPrimaryText,
+      btnPrimaryLink: cardForm.btnPrimaryLink || editingCard?.slot?.defaultLink || '/collections',
       imageUrl: cardForm.imageUrl,
-      link: cardForm.btnPrimaryLink
+      image: cardForm.imageUrl,
+      status: cardForm.status || 'Active'
     };
 
-    const bannerId = editingCard?.existing?.id || editingCard?.existing?._id || editingCard?.id || editingCard?._id;
+    const existingCard = getSavedCardForSlot(targetSlotKey) || editingCard?.existing;
+    const cardId = existingCard?.id || existingCard?._id;
 
-    if (bannerId && bannerId !== 'undefined') {
-      updateBanner(bannerId, payload);
+    if (cardId && cardId !== 'undefined') {
+      updateGenderCard(cardId, payload);
     } else {
-      addBanner(payload);
+      addGenderCard(payload);
     }
 
     setShowModal(false);
@@ -180,7 +185,7 @@ export default function AdminGenderCards() {
       {/* Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {defaultGenderSlots.map((slot) => {
-          const saved = getSavedBannerForSlot(slot.slotKey);
+          const saved = getSavedCardForSlot(slot.slotKey);
           const currentTitle = saved?.title || slot.defaultTitle;
           const currentSubtitle = saved?.subtitle || slot.defaultSubtitle;
           const currentBtn = saved?.btnPrimaryText || slot.defaultBtn;

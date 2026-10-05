@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ChevronRight, Phone, Mail, Truck, Send, MessageCircle, Clock, ChevronDown, CheckCircle2, PackageCheck } from 'lucide-react';
-import { useShop } from '../context/ShopContext';
-import { usePageBanner } from '../utils/usePageBanner';
-import arrivehero from '../assets/arrivehero.png';
+import {
+  ChevronRight, Phone, Mail, Clock, Send,
+  MessageCircle, CheckCircle2, Truck, ShieldCheck, Heart
+} from 'lucide-react';
 
 export default function ContactPage() {
-  const heroBanner = usePageBanner('Contact Us Hero Banner', 'Contact Us', "We're here to help you find the perfect outfit for your little one.", arrivehero);
   const [formState, setFormState] = useState({
     name: '',
     email: '',
@@ -16,333 +15,308 @@ export default function ContactPage() {
   });
 
   const [submitted, setSubmitted] = useState(false);
-  const [activeFaq, setActiveFaq] = useState(null);
 
   const handleSubmit = (e) => {
     e.preventDefault();
     setSubmitted(true);
-    setFormState({ name: '', email: '', phone: '', subject: 'Sizing & Fit Advice', message: '' });
+    setFormState({
+      name: '',
+      email: '',
+      phone: '',
+      subject: 'Sizing & Fit Advice',
+      message: ''
+    });
     setTimeout(() => setSubmitted(false), 6000);
   };
 
-  const toggleFaq = (index) => {
-    setActiveFaq(activeFaq === index ? null : index);
-  };
-
-  const faqs = [
-    {
-      q: 'How do I choose the right size for my child?',
-      a: 'We provide age-appropriate sizing charts (0-8Y, 9-12Y, 13-16Y) with exact chest, waist, and length measurements on every product page. If your child is between sizes, we recommend opting for the larger size for maximum comfort.'
-    },
-    {
-      q: 'What is your return & exchange policy?',
-      a: 'We offer a hassle-free 7-day return and exchange policy from the date of delivery. Items must be unused, unwashed, and in their original packaging with tags intact.'
-    },
-    {
-      q: 'How long does shipping take across India?',
-      a: 'Standard delivery takes 3 to 5 business days for major metro cities and 5 to 7 days for rest of India. Express shipping is also available at checkout for urgent festive orders.'
-    },
-    {
-      q: 'Do you offer custom tailoring for sibling matching outfits?',
-      a: 'Yes! Our Tohay Design Studio specializes in custom color coordination and custom fitting for Brother & Sister lehenga & kurta sets. Connect directly with our styling concierge on WhatsApp.'
-    }
-  ];
-
   return (
-    <div className="max-w-[1600px] mx-auto px-4 py-6 space-y-12">
-      {/* Breadcrumb */}
+    <div className="max-w-[1360px] mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 space-y-8 font-sans">
+      
+      {/* 1. Breadcrumb Navigation */}
       <nav className="flex items-center gap-2 text-xs font-semibold text-gray-500">
         <Link to="/" className="hover:text-[#D81B60] transition-colors">Home</Link>
         <ChevronRight className="w-3.5 h-3.5 text-gray-400" />
         <span className="text-[#D81B60] font-bold">Contact Us</span>
       </nav>
 
-      {/* 1. Hero Header Banner */}
-      <div className="relative rounded-3xl overflow-hidden border border-pink-200/60 shadow-2xs min-h-[260px] sm:min-h-[300px] md:min-h-[340px] flex items-center bg-[#FFF0F5]">
-        <img
-          src={heroBanner.image}
-          alt={heroBanner.title}
-          className="absolute inset-0 w-full h-full object-cover object-right"
-        />
-
-        <div className="absolute inset-0 bg-gradient-to-r from-[#FFF0F5] via-[#FFF0F5]/95 to-transparent w-full md:w-3/5" />
-
-        <div className="relative z-10 p-6 sm:p-8 md:p-12 max-w-xl space-y-3">
-          <h1 className="font-sans font-bold md:font-extrabold text-4xl sm:text-5xl md:text-6xl text-[#1E293B] tracking-tight leading-none">
-            {heroBanner.title}
-          </h1>
-          <p className="text-xs sm:text-sm md:text-base text-[#64748B] font-medium leading-relaxed pt-1">
-            {heroBanner.subtitle}
-          </p>
-          <div className="flex items-center gap-2 text-[#D81B60] opacity-60 pt-1">
-            <div className="w-12 h-0.5 bg-[#D81B60] rounded-full" />
-          </div>
+      {/* 2. Soft, Elegant Page Header */}
+      <div className="space-y-2 max-w-2xl">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-pink-50 border border-pink-200/80 text-[#D81B60] text-xs font-bold uppercase tracking-wider">
+          <Heart className="w-3.5 h-3.5 fill-[#D81B60]" />
+          <span>Customer Concierge</span>
         </div>
+        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-gray-800 tracking-tight">
+          Get in Touch with Tohay Kids
+        </h1>
+        <p className="text-sm sm:text-base text-gray-600 leading-relaxed font-normal">
+          Have a question about sizes, fabrics, festive styling, or your order? We are always happy to assist you.
+        </p>
       </div>
 
-      {/* 2. Top 3 Contact Info Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Card 1: WhatsApp & Call */}
-        <div className="bg-white p-6 rounded-3xl border border-pink-100 shadow-2xs hover:shadow-md transition-all space-y-4 flex flex-col justify-between">
-          <div className="space-y-3">
-            <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 shadow-2xs">
-              <Phone className="w-6 h-6" />
-            </div>
-            <div>
-              <h3 className="font-sans font-extrabold text-lg text-gray-900">WhatsApp & Call Support</h3>
-              <p className="text-xs text-gray-500 mt-1">Sizing help & instant order updates</p>
-            </div>
-            <div className="pt-1">
-              <span className="font-sans font-extrabold text-xl text-emerald-600 block">+91 98765 43210</span>
-              <span className="text-[11px] text-gray-500 font-medium flex items-center gap-1 mt-1">
-                <Clock className="w-3.5 h-3.5 text-gray-400" /> Mon - Sat: 10:00 AM - 7:00 PM IST
-              </span>
-            </div>
-          </div>
-          <a
-            href="https://wa.me/919876543210"
-            target="_blank"
-            rel="noreferrer"
-            className="w-full bg-[#25D366] hover:bg-[#1EBE5D] text-white font-extrabold text-xs uppercase tracking-wider py-3 rounded-xl flex items-center justify-center gap-2 shadow-2xs transition-colors"
-          >
-            <MessageCircle className="w-4 h-4" />
-            <span>Chat on WhatsApp</span>
-          </a>
-        </div>
-
-        {/* Card 2: Email Support */}
-        <div className="bg-white p-6 rounded-3xl border border-pink-100 shadow-2xs hover:shadow-md transition-all space-y-4 flex flex-col justify-between">
-          <div className="space-y-3">
-            <div className="w-12 h-12 rounded-2xl bg-pink-50 text-[#D81B60] flex items-center justify-center shrink-0 shadow-2xs">
-              <Mail className="w-6 h-6" />
-            </div>
-            <div>
-              <h3 className="font-sans font-extrabold text-lg text-gray-900">Email Care</h3>
-              <p className="text-xs text-gray-500 mt-1">24/7 priority response inbox</p>
-            </div>
-            <div className="pt-1">
-              <span className="font-sans font-extrabold text-lg text-[#D81B60] block">support@tohaykids.com</span>
-              <span className="text-[11px] text-gray-500 font-medium block mt-1">
-                Average reply time: within 2 hours
-              </span>
-            </div>
-          </div>
-          <a
-            href="mailto:support@tohaykids.com"
-            className="w-full bg-[#D81B60] hover:bg-[#C2185B] text-white font-extrabold text-xs uppercase tracking-wider py-3 rounded-xl flex items-center justify-center gap-2 shadow-2xs transition-colors"
-          >
-            <Mail className="w-4 h-4" />
-            <span>Send Email</span>
-          </a>
-        </div>
-
-        {/* Card 3: Pan-India Online Delivery */}
-        <div className="bg-white p-6 rounded-3xl border border-pink-100 shadow-2xs hover:shadow-md transition-all space-y-4 flex flex-col justify-between">
-          <div className="space-y-3">
-            <div className="w-12 h-12 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center shrink-0 shadow-2xs">
-              <Truck className="w-6 h-6" />
-            </div>
-            <div>
-              <h3 className="font-sans font-extrabold text-lg text-gray-900">Pan-India Delivery</h3>
-              <p className="text-xs text-gray-500 mt-1">Direct to your doorstep</p>
-            </div>
-            <div className="pt-1 text-xs text-gray-600 font-medium leading-relaxed">
-              <span className="font-extrabold text-gray-900 block">Express Doorstep Shipping</span>
-              <span>Delivering across 28,000+ pin codes all over India</span>
-            </div>
-          </div>
-          <Link
-            to="/track-order"
-            className="w-full bg-gray-900 hover:bg-black text-white font-extrabold text-xs uppercase tracking-wider py-3 rounded-xl flex items-center justify-center gap-2 shadow-2xs transition-colors"
-          >
-            <Truck className="w-4 h-4" />
-            <span>Track Your Order</span>
-          </Link>
-        </div>
-      </div>
-
-      {/* 3. Form & Live WhatsApp Assistant Container */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        {/* Left Form (7 Cols) */}
-        <div className="lg:col-span-7 bg-white p-6 sm:p-8 rounded-3xl border border-pink-100 shadow-2xs space-y-6">
-          <div className="space-y-1">
-            <h3 className="font-sans font-extrabold text-2xl text-[#1E293B]">Send Us a Message</h3>
-            <p className="text-xs text-gray-500 font-medium">
-              Fill in your details and our kids styling concierge will get back to you within 2 hours.
+      {/* 3. Main 2-Column Section: Info on Left & Form on Right */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-start pt-2">
+        
+        {/* LEFT COLUMN: Contact & Concierge Information (5 Cols) */}
+        <div className="lg:col-span-5 bg-white p-6 sm:p-8 rounded-3xl border border-pink-100/90 shadow-xs space-y-6">
+          <div className="space-y-1 border-b border-pink-100 pb-4">
+            <h2 className="text-lg sm:text-xl font-extrabold text-gray-800">
+              Customer Support Channels
+            </h2>
+            <p className="text-xs sm:text-sm text-gray-600 font-normal">
+              Direct assistance for sizing, styling, and deliveries
             </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4 text-xs">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="font-extrabold text-gray-800 block mb-1">Your Full Name *</label>
+          {/* Contact Details List */}
+          <div className="space-y-5">
+            {/* Phone & WhatsApp Support */}
+            <div className="flex items-start gap-3.5">
+              <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 border border-emerald-100">
+                <Phone className="w-4 h-4" />
+              </div>
+              <div className="space-y-0.5">
+                <span className="text-[11px] uppercase tracking-wider font-bold text-gray-600 block">
+                  Call & WhatsApp
+                </span>
+                <a
+                  href="https://wa.me/919876543210"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-base font-extrabold text-emerald-600 hover:text-emerald-700 block transition-colors"
+                >
+                  +91 98765 43210
+                </a>
+                <p className="text-xs text-gray-600 flex items-center gap-1.5 pt-0.5 font-normal">
+                  <Clock className="w-3.5 h-3.5 text-gray-400" />
+                  <span>Mon – Sat: 10:00 AM – 7:00 PM IST</span>
+                </p>
+              </div>
+            </div>
+
+            {/* Direct WhatsApp Action Button */}
+            <div className="pl-13.5">
+              <a
+                href="https://wa.me/919876543210"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 bg-[#25D366] hover:bg-[#1EBE5D] text-white font-bold text-xs uppercase tracking-wider px-5 py-2.5 rounded-xl shadow-xs transition-all hover:scale-102"
+              >
+                <MessageCircle className="w-4 h-4" />
+                <span>Chat on WhatsApp</span>
+              </a>
+            </div>
+
+            {/* Email Support */}
+            <div className="flex items-start gap-3.5 pt-1">
+              <div className="w-10 h-10 rounded-xl bg-pink-50 text-[#D81B60] flex items-center justify-center shrink-0 border border-pink-100">
+                <Mail className="w-4 h-4" />
+              </div>
+              <div className="space-y-0.5">
+                <span className="text-[11px] uppercase tracking-wider font-bold text-gray-600 block">
+                  Email Support
+                </span>
+                <a
+                  href="mailto:care@tohaykids.com"
+                  className="text-base font-extrabold text-[#D81B60] hover:text-[#C2185B] block transition-colors"
+                >
+                  care@tohaykids.com
+                </a>
+                <p className="text-xs text-gray-600 font-normal">
+                  support@tohaykids.com • Response within 2–4 hours
+                </p>
+              </div>
+            </div>
+
+            {/* Pan-India Express Delivery */}
+            <div className="flex items-start gap-3.5 pt-1">
+              <div className="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center shrink-0 border border-purple-100">
+                <Truck className="w-4 h-4" />
+              </div>
+              <div className="space-y-0.5">
+                <span className="text-[11px] uppercase tracking-wider font-bold text-gray-600 block">
+                  Pan-India Shipping
+                </span>
+                <p className="text-sm font-bold text-gray-800">
+                  Express Delivery in 3–5 Business Days
+                </p>
+                <p className="text-xs text-gray-600 font-normal">
+                  Insured doorstep dispatch across 28,000+ pin codes
+                </p>
+              </div>
+            </div>
+
+            {/* Order Assurance */}
+            <div className="flex items-start gap-3.5 pt-1">
+              <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0 border border-amber-100">
+                <ShieldCheck className="w-4 h-4" />
+              </div>
+              <div className="space-y-0.5">
+                <span className="text-[11px] uppercase tracking-wider font-bold text-gray-600 block">
+                  Parent Promise
+                </span>
+                <p className="text-sm font-bold text-gray-800">
+                  7-Day Hassle-Free Size Exchange
+                </p>
+                <p className="text-xs text-gray-600 font-normal">
+                  100% skin-safe mulmul linings on every outfit
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Social Channels with Authentic Vibrant Brand Colors (NO GRAY) */}
+          <div className="pt-4 border-t border-pink-100 space-y-3">
+            <span className="text-xs font-bold text-gray-800 uppercase tracking-wider block">
+              Follow Us on Social Media
+            </span>
+            <div className="flex items-center gap-3">
+              <a
+                href="https://www.instagram.com/tohay_kids?stkn=ZDhxaG9lamJuajN3"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-10 h-10 bg-gradient-to-tr from-[#F58529] via-[#DD2A7B] to-[#8134AF] text-white rounded-full flex items-center justify-center shadow-xs hover:scale-110 transition-transform"
+                aria-label="Instagram"
+              >
+                <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                  <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
+                </svg>
+              </a>
+              <a
+                href="#"
+                className="w-10 h-10 bg-[#1877F2] text-white rounded-full flex items-center justify-center shadow-xs hover:scale-110 transition-transform"
+                aria-label="Facebook"
+              >
+                <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                  <path d="M9 8H6v4h3v12h5V12h3.642L18 8h-4V6.333C14 5.374 14.5 5 15.5 5H18V0h-3.808C10.592 0 9 1.583 9 4.615V8z" />
+                </svg>
+              </a>
+              <a
+                href="#"
+                className="w-10 h-10 bg-[#FF0000] text-white rounded-full flex items-center justify-center shadow-xs hover:scale-110 transition-transform"
+                aria-label="Youtube"
+              >
+                <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                  <path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z" />
+                </svg>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        {/* RIGHT COLUMN: Contact Form with Clean Labels and Inputs (7 Cols) */}
+        <div className="lg:col-span-7 bg-white p-6 sm:p-10 rounded-3xl border border-pink-100/90 shadow-xs space-y-6">
+          <div className="space-y-1 border-b border-pink-100 pb-4">
+            <h2 className="text-lg sm:text-xl font-extrabold text-gray-800">
+              Send Us a Message
+            </h2>
+            <p className="text-xs sm:text-sm text-gray-600 font-normal">
+              Fill in your details below and our team will get in touch shortly.
+            </p>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-5 text-sm">
+            {/* Name & Phone */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+              <div className="space-y-1.5">
+                <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide">
+                  Full Name <span className="text-[#D81B60] font-normal">*</span>
+                </label>
                 <input
                   type="text"
                   required
                   placeholder="e.g. Priya Sharma"
                   value={formState.name}
                   onChange={(e) => setFormState({ ...formState, name: e.target.value })}
-                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-[#D81B60] focus:bg-white text-gray-800 font-semibold"
+                  className="w-full px-4 py-3.5 bg-pink-50/20 hover:bg-white focus:bg-white border border-pink-100 focus:border-[#D81B60] focus:ring-3 focus:ring-pink-50 rounded-xl text-sm text-gray-800 placeholder:text-gray-400 font-normal transition-all outline-none"
                 />
               </div>
 
-              <div>
-                <label className="font-extrabold text-gray-800 block mb-1">Mobile Number *</label>
+              <div className="space-y-1.5">
+                <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide">
+                  Mobile Number <span className="text-[#D81B60] font-normal">*</span>
+                </label>
                 <input
                   type="tel"
                   required
                   placeholder="+91 98765 43210"
                   value={formState.phone}
                   onChange={(e) => setFormState({ ...formState, phone: e.target.value })}
-                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-[#D81B60] focus:bg-white text-gray-800 font-semibold font-mono"
+                  className="w-full px-4 py-3.5 bg-pink-50/20 hover:bg-white focus:bg-white border border-pink-100 focus:border-[#D81B60] focus:ring-3 focus:ring-pink-50 rounded-xl text-sm text-gray-800 placeholder:text-gray-400 font-normal transition-all outline-none"
                 />
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="font-extrabold text-gray-800 block mb-1">Email Address *</label>
+            {/* Email & Subject */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+              <div className="space-y-1.5">
+                <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide">
+                  Email Address <span className="text-[#D81B60] font-normal">*</span>
+                </label>
                 <input
                   type="email"
                   required
-                  placeholder="priya@domain.com"
+                  placeholder="priya@example.com"
                   value={formState.email}
                   onChange={(e) => setFormState({ ...formState, email: e.target.value })}
-                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-[#D81B60] focus:bg-white text-gray-800 font-semibold"
+                  className="w-full px-4 py-3.5 bg-pink-50/20 hover:bg-white focus:bg-white border border-pink-100 focus:border-[#D81B60] focus:ring-3 focus:ring-pink-50 rounded-xl text-sm text-gray-800 placeholder:text-gray-400 font-normal transition-all outline-none"
                 />
               </div>
 
-              <div>
-                <label className="font-extrabold text-gray-800 block mb-1">Subject *</label>
+              <div className="space-y-1.5">
+                <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide">
+                  Subject <span className="text-[#D81B60] font-normal">*</span>
+                </label>
                 <select
                   value={formState.subject}
                   onChange={(e) => setFormState({ ...formState, subject: e.target.value })}
-                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-[#D81B60] focus:bg-white text-gray-800 font-semibold"
+                  className="w-full px-4 py-3.5 bg-pink-50/20 hover:bg-white focus:bg-white border border-pink-100 focus:border-[#D81B60] focus:ring-3 focus:ring-pink-50 rounded-xl text-sm text-gray-800 font-normal transition-all outline-none cursor-pointer"
                 >
                   <option value="Sizing & Fit Advice">Sizing & Fit Advice</option>
                   <option value="Order Status & Delivery">Order Status & Delivery</option>
-                  <option value="Custom Sibling Outfit Order">Custom Sibling Outfit Order</option>
-                  <option value="Returns & Exchange">Returns & Exchange</option>
-                  <option value="Bulk / Wholesale Inquiry">Bulk / Wholesale Inquiry</option>
+                  <option value="Sibling Matching Sets Inquiry">Sibling Matching Sets Inquiry</option>
+                  <option value="Returns & Exchanges">Returns & Exchanges</option>
+                  <option value="Custom Bulk Inquiry">Custom Bulk Inquiry</option>
+                  <option value="General Question">General Question</option>
                 </select>
               </div>
             </div>
 
-            <div>
-              <label className="font-extrabold text-gray-800 block mb-1">How Can We Help You? *</label>
+            {/* Message Area */}
+            <div className="space-y-1.5">
+              <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide">
+                How Can We Help You? <span className="text-[#D81B60] font-normal">*</span>
+              </label>
               <textarea
-                rows={4}
+                rows={5}
                 required
-                placeholder="Tell us about your requirements or question..."
+                placeholder="Write your question, child's age, or specific outfit requirement here..."
                 value={formState.message}
                 onChange={(e) => setFormState({ ...formState, message: e.target.value })}
-                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-[#D81B60] focus:bg-white text-gray-800 font-semibold"
+                className="w-full px-4 py-3.5 bg-pink-50/20 hover:bg-white focus:bg-white border border-pink-100 focus:border-[#D81B60] focus:ring-3 focus:ring-pink-50 rounded-xl text-sm text-gray-800 placeholder:text-gray-400 font-normal transition-all outline-none resize-y"
               />
             </div>
 
+            {/* Submit Button */}
             <button
               type="submit"
-              className="w-full bg-[#D81B60] hover:bg-[#C2185B] text-white font-extrabold text-xs uppercase tracking-wider py-3.5 rounded-xl flex items-center justify-center gap-2 shadow-2xs transition-all cursor-pointer"
+              className="w-full sm:w-auto bg-[#D81B60] hover:bg-[#C2185B] text-white font-bold text-xs uppercase tracking-wider py-3.5 px-8 rounded-xl flex items-center justify-center gap-2 shadow-xs hover:shadow-md transition-all cursor-pointer active:scale-99"
             >
               <Send className="w-4 h-4" />
               <span>SEND MESSAGE</span>
             </button>
           </form>
 
+          {/* Success Message Banner */}
           {submitted && (
-            <div className="p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 font-extrabold text-xs rounded-2xl flex items-center gap-2">
+            <div className="p-4 bg-emerald-50 border border-emerald-200/70 text-emerald-800 font-medium text-xs sm:text-sm rounded-2xl flex items-center gap-3">
               <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
-              <span>Thank you! Your message has been sent successfully. Our team will contact you within 2 hours.</span>
+              <span>Thank you! Your message has been received. Our concierge team will reach out to you within 2 hours.</span>
             </div>
           )}
         </div>
 
-        {/* Right Side Widgets (5 Cols) */}
-        <div className="lg:col-span-5 space-y-6">
-          {/* Live WhatsApp Concierge Widget */}
-          <div className="bg-gradient-to-br from-emerald-50 to-pink-50/50 p-6 rounded-3xl border border-emerald-200/80 shadow-2xs space-y-4">
-            <div className="flex items-center gap-2 text-emerald-700 font-extrabold text-xs">
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-              <span>ONLINE NOW • RESPOUNDS IN &lt; 5 MINS</span>
-            </div>
-
-            <div className="space-y-1">
-              <h4 className="font-sans font-extrabold text-xl text-gray-900">Need Sizing Help Right Now?</h4>
-              <p className="text-xs text-gray-600 leading-relaxed font-medium">
-                Our kids ethnic wear specialists are online on WhatsApp to share real photos, video fabric preview, and precise size recommendations.
-              </p>
-            </div>
-
-            <a
-              href="https://wa.me/919876543210"
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center gap-2 bg-[#25D366] hover:bg-[#1EBE5D] text-white font-extrabold text-xs uppercase tracking-wider px-6 py-3 rounded-xl shadow-2xs transition-colors w-full justify-center"
-            >
-              <MessageCircle className="w-4 h-4" />
-              <span>START WHATSAPP CHAT</span>
-            </a>
-          </div>
-
-          {/* Quick Track Order Widget */}
-          <div className="bg-white p-6 rounded-3xl border border-pink-100 shadow-2xs space-y-3">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-pink-50 text-[#D81B60] flex items-center justify-center shrink-0 shadow-2xs">
-                <PackageCheck className="w-5 h-5" />
-              </div>
-              <div>
-                <h4 className="font-sans font-extrabold text-base text-gray-900">Already Placed an Order?</h4>
-                <p className="text-xs text-gray-500 font-medium">Track live shipping and delivery status</p>
-              </div>
-            </div>
-            <Link
-              to="/track-order"
-              className="w-full bg-gray-50 hover:bg-gray-100 text-[#D81B60] font-extrabold text-xs uppercase tracking-wider py-3 rounded-xl flex items-center justify-center gap-2 border border-pink-100 transition-colors block text-center"
-            >
-              <span>TRACK YOUR ORDER</span>
-              <span>&rarr;</span>
-            </Link>
-          </div>
-        </div>
       </div>
 
-      {/* 4. FAQ Accordion Section */}
-      <div className="space-y-6 pt-4 border-t border-gray-200">
-        <div className="text-center space-y-1.5">
-          <h2 className="font-sans font-extrabold text-2xl sm:text-3xl text-[#1E293B]">
-            Frequently Asked Questions
-          </h2>
-          <div className="flex items-center justify-center text-[#D81B60] opacity-60">
-            <div className="w-12 h-0.5 bg-[#D81B60] rounded-full" />
-          </div>
-        </div>
-
-        <div className="max-w-3xl mx-auto space-y-3">
-          {faqs.map((faq, idx) => {
-            const isOpen = activeFaq === idx;
-            return (
-              <div
-                key={idx}
-                className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-2xs transition-all"
-              >
-                <button
-                  type="button"
-                  onClick={() => toggleFaq(idx)}
-                  className="w-full flex items-center justify-between p-4 sm:p-5 text-left font-extrabold text-xs sm:text-sm text-gray-900 hover:text-[#D81B60] transition-colors cursor-pointer"
-                >
-                  <span>{faq.q}</span>
-                  <ChevronDown className={`w-4 h-4 shrink-0 transition-transform ${isOpen ? 'rotate-180 text-[#D81B60]' : 'text-gray-400'}`} />
-                </button>
-                {isOpen && (
-                  <div className="px-4 pb-5 sm:px-5 text-xs text-gray-600 leading-relaxed font-normal border-t border-gray-100 pt-3">
-                    {faq.a}
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      </div>
     </div>
   );
 }

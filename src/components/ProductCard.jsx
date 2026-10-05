@@ -211,15 +211,18 @@ export default function ProductCard({ product }) {
         {/* Price & Colors Row */}
         <div>
           <div className="flex items-baseline justify-between gap-2 mb-1.5">
-            <div className="flex items-baseline gap-2">
-              <span className="text-sm md:text-base font-extrabold text-gray-900 font-mono">
-                {hasPriceRange
-                  ? `₹${minPrice.toLocaleString('en-IN')} - ₹${maxPrice.toLocaleString('en-IN')}`
-                  : `₹${Number(product.price || minPrice || 0).toLocaleString('en-IN')}`}
+            <div className="flex items-baseline flex-wrap gap-1.5">
+              <span className="text-sm md:text-base font-extrabold text-gray-900 font-mono whitespace-nowrap">
+                ₹{Number(displayPrice).toLocaleString('en-IN')}
               </span>
-              {product.mrp && product.mrp > (hasPriceRange ? minPrice : product.price) && (
-                <span className="text-xs text-gray-400 line-through font-mono">
+              {product.mrp && product.mrp > displayPrice && (
+                <span className="text-xs text-gray-400 line-through font-mono whitespace-nowrap">
                   ₹{Number(product.mrp).toLocaleString('en-IN')}
+                </span>
+              )}
+              {discountPercent > 0 && (
+                <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-1 py-0.5 rounded whitespace-nowrap">
+                  {discountPercent}% OFF
                 </span>
               )}
             </div>

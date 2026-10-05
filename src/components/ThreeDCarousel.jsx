@@ -144,14 +144,10 @@ export default function ThreeDCarousel({ items = [], autoPlay = true, interval =
               className="absolute w-[240px] sm:w-[280px] md:w-[310px] transition-all duration-500 ease-out cursor-pointer rounded-3xl"
             >
               <div
-                className={`relative bg-white rounded-3xl overflow-hidden border transition-all duration-300 isolate ${isCenter
+                className={`relative bg-white rounded-3xl overflow-hidden border transition-all duration-300 ${isCenter
                     ? 'border-pink-300 shadow-2xl shadow-pink-500/20 ring-4 ring-pink-100'
                     : 'border-gray-200/80 shadow-lg hover:border-pink-200'
                   }`}
-                style={{
-                  WebkitMaskImage: '-webkit-radial-gradient(white, black)',
-                  isolation: 'isolate',
-                }}
               >
                 {/* Product Image Container */}
                 <div
@@ -162,11 +158,7 @@ export default function ThreeDCarousel({ items = [], autoPlay = true, interval =
                       navigate(`/product/${item.id || item._id}`);
                     }
                   }}
-                  className="relative aspect-[4/5] bg-pink-50/40 rounded-t-3xl overflow-hidden group cursor-pointer isolate"
-                  style={{
-                    WebkitMaskImage: '-webkit-radial-gradient(white, black)',
-                    isolation: 'isolate',
-                  }}
+                  className="relative aspect-[4/5] bg-pink-50/40 rounded-t-3xl overflow-hidden group cursor-pointer"
                 >
                   <img
                     src={formatImageUrl(currentImgSrc)}

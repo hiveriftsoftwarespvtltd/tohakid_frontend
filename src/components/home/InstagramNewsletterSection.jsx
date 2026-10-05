@@ -20,7 +20,7 @@ export default function InstagramNewsletterSection() {
   const [shoppableLook, setShoppableLook] = useState(null);
   const [lookSelectedSize, setLookSelectedSize] = useState('');
 
-  const instagramBanner = usePageBanner('Homepage Instagram Gallery', 'Little Moments.\nBig Memories.', 'Follow us for styling inspiration, new launches & little celebrations.', p1, 'https://instagram.com');
+  const instagramBanner = usePageBanner('Homepage Instagram Gallery', 'Little Moments.\nBig Memories.', 'Follow us for styling inspiration, new launches & little celebrations.', p1, 'https://www.instagram.com/tohay_kids?stkn=ZDhxaG9lamJuajN3');
   const instagramPhotos = (instagramBanner.additionalImages && instagramBanner.additionalImages.length > 0)
     ? instagramBanner.additionalImages
     : [p1, p2, p3, p4, p5, p6, p7, p8];
@@ -46,7 +46,7 @@ export default function InstagramNewsletterSection() {
       {/* Left Card: Little Moments. Big Memories. (7 Cols) */}
       <div className="lg:col-span-7 bg-[#FFF0F5] rounded-3xl p-5 sm:p-6 border border-pink-200/60 flex flex-col sm:flex-row items-center justify-between gap-6 overflow-hidden shadow-2xs">
         <div className="space-y-3 sm:max-w-[45%] text-center sm:text-left">
-          <h3 className="font-serif text-2xl sm:text-3xl font-normal text-gray-900 leading-tight whitespace-pre-line">
+          <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 leading-tight whitespace-pre-line">
             {instagramBanner.title}
           </h3>
           <p className="text-xs text-gray-600 font-normal leading-relaxed">
@@ -54,7 +54,7 @@ export default function InstagramNewsletterSection() {
           </p>
           <div className="pt-1">
             <a
-              href={instagramBanner.link || 'https://instagram.com'}
+              href={instagramBanner.link || 'https://www.instagram.com/tohay_kids?stkn=ZDhxaG9lamJuajN3'}
               target="_blank"
               rel="noreferrer"
               className="inline-block bg-[#D81B60] hover:bg-[#B5124E] text-white font-bold text-[10px] sm:text-[11px] uppercase tracking-wider px-5 py-2.5 rounded-lg shadow-2xs transition-all transform hover:-translate-y-0.5"

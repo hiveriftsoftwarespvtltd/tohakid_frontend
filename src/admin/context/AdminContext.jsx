@@ -24,6 +24,7 @@ import { paymentService } from '../../services/paymentService';
 import { userService } from '../../services/userService';
 import { adminService } from '../../services/adminService';
 import { authService } from '../../services/authService';
+import { genderCardService } from '../../services/genderCardService';
 
 const AdminContext = createContext();
 
@@ -38,6 +39,7 @@ export const AdminProvider = ({ children }) => {
   const [couponsList, setCouponsList] = useState([]);
   const [returnsList, setReturnsList] = useState([]);
   const [bannersList, setBannersList] = useState([]);
+  const [genderCardsList, setGenderCardsList] = useState([]);
   const [transactionsList, setTransactionsList] = useState([]);
   const [notificationsList, setNotificationsList] = useState([]);
   const [analyticsMetrics, setAnalyticsMetrics] = useState({
@@ -148,6 +150,12 @@ export const AdminProvider = ({ children }) => {
       // 7. Load Banners
       const banRes = await bannerService.getBanners();
       if (Array.isArray(banRes?.data)) setBannersList(banRes.data);
+
+      // 7b. Load Gender Collection Cards
+      try {
+        const gcRes = await genderCardService.getGenderCards();
+        if (Array.isArray(gcRes?.data)) setGenderCardsList(gcRes.data);
+      } catch (err) { }
 
       // 8. Load Returns
       const retRes = await returnService.getAllAdminReturns();
@@ -550,6 +558,70 @@ export const AdminProvider = ({ children }) => {
     window.dispatchEvent(new CustomEvent('banners_updated'));
   };
 
+  // Dedicated Gender Collection Cards
+  const addGenderCard = async (cardData) => {
+    try {
+      const res = await genderCardService.createGenderCard(cardData);
+      if (res?.data) {
+        setGenderCardsList((prev) => {
+          const exists = prev.some((c) => c.slotKey === res.data.slotKey || c.id === res.data.id);
+          if (exists) {
+            return prev.map((c) => (c.slotKey === res.data.slotKey || c.id === res.data.id ? res.data : c));
+          }
+          return [...prev, res.data];
+        });
+        showToast('Gender Card saved successfully!');
+        window.dispatchEvent(new CustomEvent('gender_cards_updated'));
+        return;
+      }
+    } catch (err) { }
+
+    const created = {
+      id: `gc-${Date.now()}`,
+      status: 'Active',
+      ...cardData,
+    };
+    setGenderCardsList((prev) => {
+      const exists = prev.some((c) => c.slotKey === created.slotKey);
+      if (exists) {
+        return prev.map((c) => (c.slotKey === created.slotKey ? created : c));
+      }
+      return [...prev, created];
+    });
+    showToast('Gender Card saved successfully!');
+    window.dispatchEvent(new CustomEvent('gender_cards_updated'));
+  };
+
+  const updateGenderCard = async (id, updatedFields) => {
+    const cardId = id || updatedFields._id || updatedFields.id || updatedFields.slotKey;
+    try {
+      const res = await genderCardService.updateGenderCard(cardId, updatedFields);
+      if (res?.data) {
+        setGenderCardsList((prev) =>
+          prev.map((c) => (c.id === cardId || c._id === cardId || c.slotKey === updatedFields.slotKey ? res.data : c))
+        );
+        showToast('Gender Card updated successfully!');
+        window.dispatchEvent(new CustomEvent('gender_cards_updated'));
+        return;
+      }
+    } catch (err) { }
+
+    setGenderCardsList((prev) =>
+      prev.map((c) => (c.id === cardId || c._id === cardId || c.slotKey === updatedFields.slotKey ? { ...c, ...updatedFields } : c))
+    );
+    showToast('Gender Card updated successfully!');
+    window.dispatchEvent(new CustomEvent('gender_cards_updated'));
+  };
+
+  const deleteGenderCard = async (id) => {
+    try {
+      await genderCardService.deleteGenderCard(id);
+    } catch (err) { }
+    setGenderCardsList((prev) => prev.filter((c) => c.id !== id && c._id !== id && c.slotKey !== id));
+    showToast('Gender Card reset to default.');
+    window.dispatchEvent(new CustomEvent('gender_cards_updated'));
+  };
+
   // Returns
   const updateReturnStatus = async (returnId, newStatus) => {
     try {
@@ -595,6 +667,7 @@ export const AdminProvider = ({ children }) => {
         couponsList,
         returnsList,
         bannersList,
+        genderCardsList,
         transactionsList,
         notificationsList,
         analyticsMetrics,
@@ -630,6 +703,9 @@ export const AdminProvider = ({ children }) => {
         addBanner,
         updateBanner,
         deleteBanner,
+        addGenderCard,
+        updateGenderCard,
+        deleteGenderCard,
         updateReturnStatus,
         markAllNotificationsRead,
         refreshBackendData: fetchAdminBackendData,

@@ -1129,7 +1129,7 @@ export const faqs = [
     id: 3,
     category: 'Shipping & Delivery',
     q: 'What is the delivery timeline?',
-    a: 'Standard delivery takes 2 to 4 business days across India. We also provide express 2-day delivery for major metro cities. Real-time SMS and WhatsApp tracking updates are sent once your parcel is dispatched.'
+    a: 'Standard delivery takes 3 to 5 business days across India. Real-time SMS and WhatsApp tracking updates are sent once your parcel is dispatched.'
   },
   {
     id: 4,

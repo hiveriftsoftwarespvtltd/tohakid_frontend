@@ -29,6 +29,7 @@ import ContactPage from './pages/ContactPage';
 import ProfilePage from './pages/ProfilePage';
 import LoginPage from './pages/LoginPage';
 import FaqPage from './pages/FaqPage';
+import SizeGuidePage from './pages/SizeGuidePage';
 
 // Admin Layout & Pages
 import AdminLayout from './admin/layouts/AdminLayout';
@@ -149,9 +150,8 @@ function InitialSiteLoader() {
 
   return (
     <div
-      className={`fixed inset-0 z-[99999] bg-[#FFFDFC] flex flex-col items-center justify-center transition-all duration-400 ease-out select-none ${
-        isFading ? 'opacity-0 pointer-events-none scale-98' : 'opacity-100 scale-100'
-      }`}
+      className={`fixed inset-0 z-[99999] bg-[#FFFDFC] flex flex-col items-center justify-center transition-all duration-500 ease-out select-none ${isFading ? 'opacity-0 pointer-events-none scale-[0.98]' : 'opacity-100 scale-100'
+        }`}
     >
       <TohayLoader size="xl" text="Welcome to Tohay Kids Festive..." />
     </div>
@@ -214,9 +214,9 @@ export default function App() {
             <Route path="/boys" element={<BoysPage />} />
             <Route path="/girls" element={<GirlsPage />} />
             <Route path="/siblings" element={<SiblingsPage />} />
-            {/* <Route path="/collections" element={<CollectionsPage />} /> */}
+            <Route path="/shop-by-age" element={<ShopByAgePage />} />
+            <Route path="/sale" element={<SalePage />} />
             <Route path="/collections" element={<Navigate to="/" replace />} />
-            {/* <Route path="/sale" element={<SalePage />} /> */}
             <Route path="/product/:id" element={<ProductDetailPage />} />
             <Route path="/wishlist" element={<WishlistPage />} />
             <Route path="/cart" element={<CartPage />} />
@@ -232,9 +232,15 @@ export default function App() {
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<LoginPage />} />
             <Route path="/track-order" element={<TrackOrderPage />} />
+            <Route path="/size-guide" element={<SizeGuidePage />} />
+            <Route path="/size-chart" element={<SizeGuidePage />} />
             <Route path="/about-us" element={<AboutPage />} />
+            <Route path="/about" element={<AboutPage />} />
             <Route path="/contact-us" element={<ContactPage />} />
+            <Route path="/contact" element={<ContactPage />} />
+            <Route path="/support" element={<ContactPage />} />
             <Route path="/faqs" element={<FaqPage />} />
+            <Route path="/faq" element={<FaqPage />} />
             <Route path="/help" element={<FaqPage />} />
             <Route path="*" element={<HomePage />} />
           </Route>

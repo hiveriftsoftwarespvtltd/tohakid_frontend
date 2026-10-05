@@ -169,8 +169,8 @@ export default function ShopByAgePage() {
               key={card.id}
               onClick={() => handleAgeCardSelect(card.id)}
               className={`relative rounded-3xl p-6 border-2 transition-all duration-300 cursor-pointer shadow-2xs flex justify-between items-center overflow-hidden ${isSelected
-                  ? 'border-[#D81B60] ring-4 ring-pink-200 scale-101 bg-white'
-                  : 'hover:border-pink-300'
+                ? 'border-[#D81B60] ring-4 ring-pink-200 scale-101 bg-white'
+                : 'hover:border-pink-300'
                 }`}
               style={{ backgroundColor: isSelected ? '#FFFFFF' : card.bgColor }}
             >
@@ -186,8 +186,8 @@ export default function ShopByAgePage() {
                 <button
                   type="button"
                   className={`text-xs font-extrabold px-5 py-2.5 rounded-xl uppercase tracking-wider transition-all w-fit cursor-pointer shadow-2xs ${isSelected
-                      ? 'bg-[#D81B60] text-white'
-                      : 'bg-white text-gray-800 border border-gray-200 hover:bg-gray-50'
+                    ? 'bg-[#D81B60] text-white'
+                    : 'bg-white text-gray-800 border border-gray-200 hover:bg-gray-50'
                     }`}
                 >
                   {isSelected ? 'SELECTED' : 'SHOP NOW'}
@@ -208,10 +208,16 @@ export default function ShopByAgePage() {
           <button
             type="button"
             onClick={() => setIsMobileFilterOpen(true)}
-            className="lg:hidden flex items-center gap-2 bg-pink-50 border border-pink-200 text-[#D81B60] px-3.5 py-2 rounded-xl text-xs font-bold shrink-0 shadow-2xs"
+            className="flex items-center gap-2 bg-pink-50 hover:bg-pink-100 border border-pink-200 text-[#D81B60] px-3.5 py-2 rounded-xl text-xs font-bold shrink-0 shadow-2xs cursor-pointer transition-all active:scale-95"
+            title="Open Filters"
           >
             <SlidersHorizontal className="w-3.5 h-3.5" />
             <span>Filters</span>
+            {filters.subcategories?.length > 0 && (
+              <span className="w-5 h-5 rounded-full bg-[#D81B60] text-white text-[10px] font-extrabold flex items-center justify-center">
+                {filters.subcategories.length}
+              </span>
+            )}
           </button>
           <div className="flex items-center gap-2 sm:hidden">
             <span className="text-xs font-bold text-gray-500 shrink-0">Sort by:</span>
@@ -254,6 +260,7 @@ export default function ShopByAgePage() {
             filters={filters}
             setFilters={setFilters}
             resetFilters={resetFilters}
+            isShopByAgePage={true}
             isOpenMobile={isMobileFilterOpen}
             setIsOpenMobile={setIsMobileFilterOpen}
           />
@@ -292,8 +299,8 @@ export default function ShopByAgePage() {
                         window.scrollTo({ top: 300, behavior: 'smooth' });
                       }}
                       className={`w-9 h-9 rounded-full text-xs font-extrabold flex items-center justify-center transition-all cursor-pointer ${currentPage === pageNum
-                          ? 'bg-[#D81B60] text-white shadow-xs'
-                          : 'bg-white hover:bg-gray-100 text-gray-700 border border-gray-200'
+                        ? 'bg-[#D81B60] text-white shadow-xs'
+                        : 'bg-white hover:bg-gray-100 text-gray-700 border border-gray-200'
                         }`}
                     >
                       {pageNum}

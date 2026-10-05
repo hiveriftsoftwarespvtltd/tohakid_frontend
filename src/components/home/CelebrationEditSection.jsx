@@ -32,7 +32,7 @@ export default function CelebrationEditSection() {
 
         {/* Middle Text Content */}
         <div className="w-full lg:w-1/3 text-center lg:text-left space-y-3 px-2">
-          <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl font-normal text-gray-900 leading-tight">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 leading-tight">
             {celebrationBanner.title}
           </h2>
           <p className="text-xs sm:text-sm text-gray-600 font-normal max-w-md mx-auto lg:mx-0 leading-relaxed">

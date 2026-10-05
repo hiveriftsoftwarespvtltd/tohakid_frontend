@@ -10,8 +10,8 @@ import { userService } from '../services/userService';
 import { bannerService } from '../services/bannerService';
 import { categoryService } from '../services/categoryService';
 import { couponService } from '../services/couponService';
-import { categoriesList as fallbackCategories } from '../data/products';
 import { enrichProductWithVariants } from '../utils/variantStorage';
+import { genderCardService } from '../services/genderCardService';
 
 const ShopContext = createContext();
 
@@ -33,11 +33,18 @@ const defaultUserData = {
 
 const defaultAddressesData = [];
 const defaultOrdersData = [];
+const defaultCategoriesData = [
+  { id: 'cat-new', name: 'New Arrivals', slug: 'new-arrivals', status: 'Active' },
+  { id: 'cat-boys', name: 'Boys', slug: 'boys', status: 'Active' },
+  { id: 'cat-girls', name: 'Girls', slug: 'girls', status: 'Active' },
+  { id: 'cat-siblings', name: 'Siblings', slug: 'siblings', status: 'Active' },
+];
 
 export const ShopProvider = ({ children }) => {
   const [products, setProducts] = useState(fallbackProducts);
   const [banners, setBanners] = useState([]);
-  const [categoriesList, setCategoriesList] = useState(fallbackCategories);
+  const [genderCards, setGenderCards] = useState([]);
+  const [categoriesList, setCategoriesList] = useState(defaultCategoriesData);
   const [cart, setCart] = useState(() => {
     const saved = localStorage.getItem('tohay_cart');
     return saved ? JSON.parse(saved) : [];
@@ -102,7 +109,7 @@ export const ShopProvider = ({ children }) => {
         if (Array.isArray(prodRes?.data)) {
           setProducts(prodRes.data.map(enrichProductWithVariants));
         }
-      } catch (err) {}
+      } catch (err) { }
     };
 
     const handleCategoryUpdate = async () => {
@@ -111,7 +118,7 @@ export const ShopProvider = ({ children }) => {
         if (Array.isArray(catRes?.data) && catRes.data.length > 0) {
           setCategoriesList(catRes.data);
         }
-      } catch (err) {}
+      } catch (err) { }
     };
 
     const handleBannerUpdate = async () => {
@@ -120,18 +127,29 @@ export const ShopProvider = ({ children }) => {
         if (Array.isArray(banRes?.data)) {
           setBanners(banRes.data);
         }
-      } catch (err) {}
+      } catch (err) { }
+    };
+
+    const handleGenderCardsUpdate = async () => {
+      try {
+        const gcRes = await genderCardService.getGenderCards();
+        if (Array.isArray(gcRes?.data)) {
+          setGenderCards(gcRes.data);
+        }
+      } catch (err) { }
     };
 
     window.addEventListener('products_updated', handleProductUpdate);
     window.addEventListener('variants_updated', handleProductUpdate);
     window.addEventListener('categories_updated', handleCategoryUpdate);
     window.addEventListener('banners_updated', handleBannerUpdate);
+    window.addEventListener('gender_cards_updated', handleGenderCardsUpdate);
     return () => {
       window.removeEventListener('products_updated', handleProductUpdate);
       window.removeEventListener('variants_updated', handleProductUpdate);
       window.removeEventListener('categories_updated', handleCategoryUpdate);
       window.removeEventListener('banners_updated', handleBannerUpdate);
+      window.removeEventListener('gender_cards_updated', handleGenderCardsUpdate);
     };
   }, []);
 
@@ -146,8 +164,13 @@ export const ShopProvider = ({ children }) => {
       // 1b. Load promotional banners
       try {
         const banRes = await bannerService.getBanners();
-        if (Array.isArray(banRes?.data)) {
-          setBanners(banRes.data);
+        if (Array.isArray(banRes?.data) && banRes.data.length > 0) {
+          // Only set banners that have a real image URL — otherwise keep [] so
+          // the hero carousel continues showing local fallback images instead of blank
+          const bannersWithImages = banRes.data.filter(
+            (b) => !!(b.imageUrl || b.image)
+          );
+          setBanners(bannersWithImages.length > 0 ? bannersWithImages : banRes.data);
         }
       } catch (err) { }
 
@@ -157,7 +180,15 @@ export const ShopProvider = ({ children }) => {
         if (Array.isArray(catRes?.data) && catRes.data.length > 0) {
           setCategoriesList(catRes.data);
         }
-      } catch (err) {}
+      } catch (err) { }
+
+      // 1d. Load gender collection cards
+      try {
+        const gcRes = await genderCardService.getGenderCards();
+        if (Array.isArray(gcRes?.data)) {
+          setGenderCards(gcRes.data);
+        }
+      } catch (err) { }
 
       // 2. Check active user session if token exists
       if (localStorage.getItem('tohay_access_token')) {
@@ -602,6 +633,7 @@ export const ShopProvider = ({ children }) => {
       value={{
         products,
         banners,
+        genderCards,
         categoriesList,
         setCategoriesList,
         cart,

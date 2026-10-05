@@ -1,13 +1,13 @@
-// Local Development Server URL (Active):
+// Backend API Base URL
 export const API_BASE_URL =
-  // import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+  import.meta.env.VITE_API_BASE_URL || 'https://api.tohay.in/api';
 
-// Production Live Server URL (Commented Out):
-// export const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || 'https://toha.buxaa.in/toha_api/api';
+// Fallback / Local Development URL:
+// export const API_BASE_URL = 'http://localhost:5000/api';
 
 export default {
   API_BASE_URL,
 };
+
 
   

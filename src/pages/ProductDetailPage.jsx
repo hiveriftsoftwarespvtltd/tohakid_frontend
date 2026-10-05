@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import {
   Star, Heart, ShoppingBag, Truck, ShieldCheck, RefreshCw,
@@ -105,6 +105,69 @@ export default function ProductDetailPage() {
     setActiveImage(idx);
   };
 
+  // Touch Swipe tracking refs for mobile image slider
+  const touchStartXRef = useRef(null);
+  const touchStartYRef = useRef(null);
+  const isSwipingRef = useRef(false);
+
+  const handlePrevImage = (e) => {
+    if (e) e.stopPropagation();
+    setZoomPos({ x: 50, y: 50, isHovered: false });
+    setActiveImage((prev) => (prev === 0 ? images.length - 1 : prev - 1));
+  };
+
+  const handleNextImage = (e) => {
+    if (e) e.stopPropagation();
+    setZoomPos({ x: 50, y: 50, isHovered: false });
+    setActiveImage((prev) => (prev + 1) % images.length);
+  };
+
+  const handleTouchStart = (e) => {
+    touchStartXRef.current = e.touches[0].clientX;
+    touchStartYRef.current = e.touches[0].clientY;
+    isSwipingRef.current = false;
+  };
+
+  const handleTouchMove = (e) => {
+    if (touchStartXRef.current === null || touchStartYRef.current === null) return;
+    const diffX = touchStartXRef.current - e.touches[0].clientX;
+    const diffY = touchStartYRef.current - e.touches[0].clientY;
+
+    if (Math.abs(diffX) > 10 && Math.abs(diffX) > Math.abs(diffY)) {
+      isSwipingRef.current = true;
+    }
+  };
+
+  const handleTouchEnd = (e) => {
+    if (touchStartXRef.current === null) return;
+    const touchEndX = e.changedTouches[0].clientX;
+    const diffX = touchStartXRef.current - touchEndX;
+    const minSwipeDistance = 35; // 35px threshold
+
+    if (Math.abs(diffX) > minSwipeDistance && images.length > 1) {
+      if (diffX > 0) {
+        // Swiped left -> Next photograph
+        handleNextImage();
+      } else {
+        // Swiped right -> Previous photograph
+        handlePrevImage();
+      }
+    }
+
+    touchStartXRef.current = null;
+    touchStartYRef.current = null;
+    setTimeout(() => {
+      isSwipingRef.current = false;
+    }, 150);
+  };
+
+  const handleMainImageClick = (e) => {
+    if (isSwipingRef.current) return;
+    if (e.target.closest('.no-zoom-trigger')) return;
+    setLightboxScale(1);
+    setIsZoomModalOpen(true);
+  };
+
   useEffect(() => {
     if (displaySizes && displaySizes.length > 0) {
       // Prioritize first in-stock size if available
@@ -189,7 +252,7 @@ export default function ProductDetailPage() {
     if (pincode.trim().length === 6 && /^\d+$/.test(pincode)) {
       setPincodeStatus({
         valid: true,
-        message: 'Delivery available! Estimated delivery in 3 to 4 Days (Express Shipping).'
+        message: 'Delivery available! Estimated delivery in 3 to 5 business days.'
       });
     } else {
       setPincodeStatus({
@@ -258,19 +321,27 @@ export default function ProductDetailPage() {
             ))}
           </div>
 
-          {/* Large Main Image with Interactive Magnifier Lens & Lightbox trigger */}
+          {/* Large Main Image with Interactive Magnifier Lens & Touch Swipe Slider */}
           <div
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
             onMouseMove={handleMouseMove}
             onMouseLeave={handleMouseLeave}
-            onClick={() => {
-              setLightboxScale(1);
-              setIsZoomModalOpen(true);
-            }}
-            className="relative flex-1 aspect-[3/4] rounded-2xl sm:rounded-3xl overflow-hidden bg-pink-50/50 border border-pink-100 shadow-xs cursor-zoom-in group select-none"
+            onClick={handleMainImageClick}
+            className="relative flex-1 aspect-[3/4] rounded-2xl sm:rounded-3xl overflow-hidden bg-pink-50/50 border border-pink-100 shadow-xs cursor-zoom-in group select-none touch-pan-y"
           >
+            {/* Image Slide Counter Badge (e.g. 1 / 4) */}
+            {images.length > 1 && (
+              <div className="absolute top-2.5 left-2.5 sm:top-4 sm:left-4 bg-black/55 backdrop-blur-xs text-white text-[10px] sm:text-xs font-bold px-2.5 py-1 rounded-full z-10 pointer-events-none select-none shadow-sm">
+                {activeImage + 1} / {images.length}
+              </div>
+            )}
+
             <img
+              key={activeImage}
               src={formatImageUrl(images[activeImage])}
-              alt={product.name}
+              alt={`${product.name} view ${activeImage + 1}`}
               style={{
                 transformOrigin: `${zoomPos.x}% ${zoomPos.y}%`,
                 transform: (zoomPos.isHovered && typeof window !== 'undefined' && window.innerWidth >= 768) ? 'scale(2.4)' : 'scale(1)'
@@ -284,46 +355,60 @@ export default function ProductDetailPage() {
               <span>{zoomPos.isHovered ? 'Hovering & Zooming Fabric' : 'Click for Fullscreen Zoom'}</span>
             </div>
 
+            {/* Mobile Swipe Pagination Dots Indicator */}
+            {images.length > 1 && (
+              <div className="no-zoom-trigger absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-1.5 z-20 bg-black/40 backdrop-blur-xs px-2.5 py-1 rounded-full sm:hidden pointer-events-auto">
+                {images.map((_, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleSelectImage(idx);
+                    }}
+                    className={`rounded-full transition-all duration-300 cursor-pointer ${
+                      activeImage === idx
+                        ? 'w-2.5 h-2 bg-[#D81B60]'
+                        : 'w-1.5 h-1.5 bg-white/70 hover:bg-white'
+                    }`}
+                    aria-label={`Go to photograph ${idx + 1}`}
+                  />
+                ))}
+              </div>
+            )}
+
             {/* Left Image Navigation Arrow Button */}
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleSelectImage(activeImage === 0 ? images.length - 1 : activeImage - 1);
-              }}
-              onTouchStart={(e) => e.stopPropagation()}
-              onPointerDown={(e) => e.stopPropagation()}
-              className="absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white/95 hover:bg-white text-[#D81B60] shadow-md flex items-center justify-center transition-all z-20 cursor-pointer hover:scale-105 border border-pink-100/80 active:scale-95"
-              aria-label="Previous Image"
-            >
-              <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5 stroke-[2.5]" />
-            </button>
+            {images.length > 1 && (
+              <button
+                type="button"
+                onClick={handlePrevImage}
+                className="no-zoom-trigger absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white/95 hover:bg-white text-[#D81B60] shadow-md flex items-center justify-center transition-all z-20 cursor-pointer hover:scale-105 border border-pink-100/80 active:scale-95"
+                aria-label="Previous Image"
+              >
+                <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5 stroke-[2.5]" />
+              </button>
+            )}
 
             {/* Right Image Navigation Arrow Button */}
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleSelectImage((activeImage + 1) % images.length);
-              }}
-              onTouchStart={(e) => e.stopPropagation()}
-              onPointerDown={(e) => e.stopPropagation()}
-              className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white/95 hover:bg-white text-[#D81B60] shadow-md flex items-center justify-center transition-all z-20 cursor-pointer hover:scale-105 border border-pink-100/80 active:scale-95"
-              aria-label="Next Image"
-            >
-              <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 stroke-[2.5]" />
-            </button>
+            {images.length > 1 && (
+              <button
+                type="button"
+                onClick={handleNextImage}
+                className="no-zoom-trigger absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white/95 hover:bg-white text-[#D81B60] shadow-md flex items-center justify-center transition-all z-20 cursor-pointer hover:scale-105 border border-pink-100/80 active:scale-95"
+                aria-label="Next Image"
+              >
+                <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 stroke-[2.5]" />
+              </button>
+            )}
 
             {/* Wishlist Floating Button */}
             <button
               type="button"
               onClick={(e) => {
                 e.stopPropagation();
-                toggleWishlist(product.id);
+                toggleWishlist(product.id || product._id);
               }}
-              onTouchStart={(e) => e.stopPropagation()}
-              onPointerDown={(e) => e.stopPropagation()}
-              className="absolute top-2.5 right-2.5 sm:top-4 sm:right-4 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white/90 backdrop-blur-xs flex items-center justify-center text-gray-700 hover:text-pink-600 shadow-md hover:scale-105 transition-all z-10 cursor-pointer"
+              className="no-zoom-trigger absolute top-2.5 right-2.5 sm:top-4 sm:right-4 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white/90 backdrop-blur-xs flex items-center justify-center text-gray-700 hover:text-pink-600 shadow-md hover:scale-105 transition-all z-20 cursor-pointer"
               aria-label="Wishlist"
             >
               <Heart className={`w-4 h-4 sm:w-5 sm:h-5 ${isLiked ? 'text-pink-600 fill-pink-600' : ''}`} />
@@ -683,8 +768,13 @@ export default function ProductDetailPage() {
               </div>
             </div>
 
-            {/* Main Lightbox Image View with Pan & Scale */}
-            <div className="relative flex-1 w-full flex items-center justify-center overflow-hidden my-2 cursor-grab active:cursor-grabbing">
+            {/* Main Lightbox Image View with Pan, Scale & Touch Swipe */}
+            <div
+              onTouchStart={handleTouchStart}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={handleTouchEnd}
+              className="relative flex-1 w-full flex items-center justify-center overflow-hidden my-2 cursor-grab active:cursor-grabbing touch-pan-y"
+            >
               {/* Left Image Navigation Arrow */}
               {images.length > 1 && (
                 <button

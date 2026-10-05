@@ -1,15 +1,52 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
-import { usePageBanner } from '../../utils/usePageBanner';
+import { useShop } from '../../context/ShopContext';
+import { formatImageUrl } from '../../utils/imageUtils';
 import one1 from '../../assets/one1.png';
 import two2 from '../../assets/two2.png';
 import three3 from '../../assets/three3.png';
 
 export default function GenderCategoriesSection() {
-  const girlsBanner = usePageBanner('Homepage Girls Card', 'Girls', 'Elegant ethnic styles for every little celebration.', one1, '/girls');
-  const boysBanner = usePageBanner('Homepage Boys Card', 'Boys', 'Smart, stylish & comfortable looks for every occasion.', two2, '/boys');
-  const siblingsBanner = usePageBanner('Homepage Siblings Card', 'Siblings', 'Matching styles made for unforgettable moments.', three3, '/siblings');
+  const { genderCards, banners } = useShop();
+
+  const getCardData = (slotKey, defaultTitle, defaultSubtitle, defaultImage, defaultLink, defaultBtn) => {
+    // 1. Look in dedicated genderCards collection
+    const matchGC = (genderCards || []).find(
+      (c) => c && c.slotKey && c.slotKey.trim().toLowerCase() === slotKey.trim().toLowerCase() && c.status !== 'Inactive'
+    );
+    // 2. Fallback to banners collection if not yet migrated
+    const matchBanner = matchGC || (banners || []).find(
+      (b) => b && b.placement && b.placement.trim().toLowerCase() === slotKey.trim().toLowerCase() && b.status !== 'Inactive'
+    );
+
+    const card = matchGC || matchBanner;
+    if (card) {
+      const rawImage = card.imageUrl || card.image;
+      const isPlaceholder = !rawImage || rawImage.includes('unsplash') || rawImage.includes('photo-1622290291468');
+      const finalImage = isPlaceholder ? defaultImage : (formatImageUrl(rawImage) || defaultImage);
+
+      return {
+        title: card.title || defaultTitle,
+        subtitle: card.subtitle || defaultSubtitle,
+        image: finalImage,
+        btnPrimaryText: card.btnPrimaryText || defaultBtn,
+        link: card.btnPrimaryLink || card.link || defaultLink,
+      };
+    }
+
+    return {
+      title: defaultTitle,
+      subtitle: defaultSubtitle,
+      image: defaultImage,
+      btnPrimaryText: defaultBtn,
+      link: defaultLink,
+    };
+  };
+
+  const girlsBanner = getCardData('Homepage Girls Card', 'Girls', 'Elegant ethnic styles for every little celebration.', one1, '/girls', 'EXPLORE');
+  const boysBanner = getCardData('Homepage Boys Card', 'Boys', 'Smart, stylish & comfortable looks for every occasion.', two2, '/boys', 'EXPLORE');
+  const siblingsBanner = getCardData('Homepage Siblings Card', 'Siblings', 'Matching styles made for unforgettable moments.', three3, '/siblings', 'TWINNING');
 
   return (
     <section className="max-w-[1600px] mx-auto px-4">

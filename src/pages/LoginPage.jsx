@@ -365,7 +365,7 @@ export default function LoginPage() {
                     Shopping Primarily For
                   </label>
                   <div className="grid grid-cols-3 gap-2">
-                    {['Girl 🎀', 'Boy 🧢', 'Both ✨'].map((opt) => {
+                    {['Girl ', 'Boy 🧢', 'Both '].map((opt) => {
                       const val = opt.split(' ')[0];
                       const isSel = parentChoice === val;
                       return (

@@ -24,7 +24,7 @@ export default function AdminInstagramSection() {
   const [formState, setFormState] = useState({
     title: 'Little Moments.\nBig Memories.',
     subtitle: 'Follow us for styling inspiration, new launches & little celebrations.',
-    link: 'https://instagram.com',
+    link: 'https://www.instagram.com/tohay_kids?stkn=ZDhxaG9lamJuajN3',
     btnText: 'FOLLOW US @TOHAYKIDS',
     photos: defaultPhotos,
     cardId: null

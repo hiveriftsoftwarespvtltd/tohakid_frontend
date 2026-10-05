@@ -42,8 +42,7 @@ export default function Logo({
       />
       {showTagline && (
         <span
-          className={`font-serif italic font-bold text-[#C2185B] group-hover:text-[#D81B60] transition-colors duration-300 mt-0.5 select-none whitespace-nowrap leading-tight bg-transparent ${taglineSizeClasses[size] || taglineSizeClasses.normal} ${taglineClassName}`}
-          style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+          className={`font-sans font-bold text-[#C2185B] group-hover:text-[#D81B60] transition-colors duration-300 mt-0.5 select-none whitespace-nowrap leading-tight bg-transparent ${taglineSizeClasses[size] || taglineSizeClasses.normal} ${taglineClassName}`}
         >
           Elegance for Little Dreamers
         </span>
