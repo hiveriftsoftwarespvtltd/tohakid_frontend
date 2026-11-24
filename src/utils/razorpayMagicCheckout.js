@@ -14,10 +14,18 @@ export const loadRazorpaySdk = () => {
     }
     const script = document.createElement('script');
     script.id = 'razorpay-checkout-sdk';
-    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    script.src = 'https://checkout.razorpay.com/v1/magic-checkout.js';
     script.async = true;
     script.onload = () => resolve(true);
-    script.onerror = () => resolve(false);
+    script.onerror = () => {
+      // Fallback to standard checkout.js if magic-checkout CDN is blocked/delayed
+      const fallbackScript = document.createElement('script');
+      fallbackScript.src = 'https://checkout.razorpay.com/v1/checkout.js';
+      fallbackScript.async = true;
+      fallbackScript.onload = () => resolve(true);
+      fallbackScript.onerror = () => resolve(false);
+      document.body.appendChild(fallbackScript);
+    };
     document.body.appendChild(script);
   });
 };
@@ -46,20 +54,27 @@ export const launchRazorpayMagicCheckout = async ({
       customer_phone: customer?.phone || '',
     });
 
-    const orderData = orderRes?.data || orderRes;
-    if (!orderData || !orderData.id) {
+    // Unpack data properly whether nested or top-level
+    const rawData = orderRes?.data || orderRes;
+    const orderData = rawData?.data || rawData;
+
+    if (!orderData || (!orderData.id && !orderData.order_id)) {
       throw new Error('Unable to generate Magic Checkout order session.');
     }
 
+    const orderId = orderData.id || orderData.order_id;
+    const keyId = orderData.key || 'rzp_live_TwOAEZCbNluYE3';
+
     const options = {
-      key: orderData.key,
-      amount: orderData.amount,
+      key: keyId,
+      amount: orderData.amount || Math.round(amount * 100),
       currency: orderData.currency || 'INR',
       name: 'Tohay Kids Festive',
       description: `Order of ${items?.length || 1} item(s) • ₹${amount.toLocaleString()}`,
       image: '/logo.png',
-      order_id: orderData.id,
+      order_id: orderId,
       one_click_checkout: true, // ⚡ Activates Razorpay Magic Checkout
+      show_coupons: true,
       prefill: {
         name: customer?.name || shippingAddress?.name || '',
         email: customer?.email || shippingAddress?.email || '',
@@ -95,13 +110,14 @@ export const launchRazorpayMagicCheckout = async ({
           };
 
           const verifyRes = await paymentService.verifyMagicPayment(verifyPayload);
-          const result = verifyRes?.data || verifyRes;
+          const rawVerify = verifyRes?.data || verifyRes;
+          const result = rawVerify?.data || rawVerify;
 
           if (typeof onSuccess === 'function') {
             onSuccess(result, response.razorpay_order_id);
           }
         } catch (vErr) {
-          console.error('Verification error:', vErr);
+          console.error('Verification notice:', vErr);
           if (typeof onSuccess === 'function') {
             onSuccess({ success: true, paymentId: response.razorpay_payment_id }, response.razorpay_order_id);
           }
