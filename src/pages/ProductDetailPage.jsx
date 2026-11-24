@@ -3,7 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import {
   Star, Heart, ShoppingBag, Truck, ShieldCheck, RefreshCw,
   Ruler, Share2, Check, MapPin, ChevronRight, Tag, Info,
-  ZoomIn, ZoomOut, Maximize2, X, ChevronLeft
+  ZoomIn, ZoomOut, Maximize2, X, ChevronLeft, Zap
 } from 'lucide-react';
 import { useShop } from '../context/ShopContext';
 import Swal from 'sweetalert2';
@@ -13,6 +13,7 @@ import { formatImageUrl } from '../utils/imageUtils';
 import { productService } from '../services/productService';
 import { enrichProductWithVariants, findMatchedVariant, isProductSizeAvailable } from '../utils/variantStorage';
 import { getSizeAgeLabel, getSizeCompactLabel, getFullProductSizeList } from '../utils/sizeConstants';
+import { launchRazorpayMagicCheckout } from '../utils/razorpayMagicCheckout';
 
 export default function ProductDetailPage() {
   const { id } = useParams();
@@ -267,20 +268,63 @@ export default function ProductDetailPage() {
     });
   };
 
+  const [isLaunchingMagic, setIsLaunchingMagic] = useState(false);
+
   const handleBuyNow = async () => {
     if (!product) return;
     if (!isCurrentSizeAvailable) {
       showToast('Selected size is out of stock.');
       return;
     }
-    await addToCart(product, selectedSize, quantity, {
-      price: currentPrice,
-      mrp: currentMrp,
-      child1Size: product.isSiblingSet ? child1Size : null,
-      child2Size: product.isSiblingSet ? child2Size : null,
+
+    setIsLaunchingMagic(true);
+    const subtotal = currentPrice * quantity;
+    const shipping = subtotal >= freeShippingThreshold ? 0 : 99;
+    const total = subtotal + shipping;
+    const defaultAddr = addresses?.find((a) => a.isDefault) || addresses?.[0] || null;
+
+    const singleItem = [
+      {
+        productId: product.id || product._id,
+        name: product.name,
+        price: currentPrice,
+        qty: quantity,
+        size: selectedSize || 'Standard',
+        child1Size: product.isSiblingSet ? child1Size : null,
+        child2Size: product.isSiblingSet ? child2Size : null,
+        image: formatImageUrl(product.images?.[0] || product.image || ''),
+      },
+    ];
+
+    await launchRazorpayMagicCheckout({
+      amount: total,
+      items: singleItem,
+      customer: {
+        name: user?.name || defaultAddr?.name || '',
+        email: user?.email || '',
+        phone: user?.phone?.replace('+91', '').trim() || defaultAddr?.phone || '',
+      },
+      shippingAddress: defaultAddr,
+      onSuccess: async (result, rzpOrderId) => {
+        setIsLaunchingMagic(false);
+        await clearCart();
+        await refreshOrders();
+        Swal.fire({
+          icon: 'success',
+          title: '🎉 Order Placed Successfully!',
+          text: `Thank you! Your order #${result?.order?.id || rzpOrderId} has been confirmed.`,
+          confirmButtonColor: '#D81B60',
+        }).then(() => {
+          navigate('/track-order');
+        });
+      },
+      onDismiss: () => {
+        setIsLaunchingMagic(false);
+      },
+      onError: () => {
+        setIsLaunchingMagic(false);
+      },
     });
-    setIsCartOpen(false);
-    navigate('/checkout');
   };
 
   const handleShare = () => {
@@ -621,13 +665,21 @@ export default function ProductDetailPage() {
             <button
               type="button"
               onClick={handleBuyNow}
-              disabled={!isCurrentSizeAvailable}
-              className={`w-full font-extrabold py-3 sm:py-3.5 px-4 sm:px-6 rounded-xl sm:rounded-2xl text-xs sm:text-sm transition-all shadow-sm ${isCurrentSizeAvailable
-                  ? 'bg-gray-900 hover:bg-black text-white cursor-pointer active:scale-98'
+              disabled={!isCurrentSizeAvailable || isLaunchingMagic}
+              className={`w-full font-extrabold py-3 sm:py-3.5 px-4 sm:px-6 rounded-xl sm:rounded-2xl text-xs sm:text-sm transition-all shadow-sm flex items-center justify-center gap-2 ${
+                isCurrentSizeAvailable
+                  ? 'bg-gray-900 hover:bg-black text-white cursor-pointer active:scale-98 disabled:opacity-60'
                   : 'bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed'
-                }`}
+              }`}
             >
-              {isCurrentSizeAvailable ? 'Buy Now' : 'Unavailable in this Size'}
+              <Zap className="w-4 h-4 fill-amber-400 text-amber-400" />
+              <span>
+                {isLaunchingMagic
+                  ? 'Opening Magic Checkout...'
+                  : isCurrentSizeAvailable
+                  ? 'Buy Now (1-Click Checkout)'
+                  : 'Unavailable in this Size'}
+              </span>
             </button>
           </div>
 

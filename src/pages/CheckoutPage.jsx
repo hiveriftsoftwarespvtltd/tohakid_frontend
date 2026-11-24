@@ -233,6 +233,7 @@ export default function CheckoutPage() {
         description: `Order of ${cart.length} item(s) • ₹${cartTotal.toLocaleString()}`,
         image: '/logo.png',
         order_id: rzpData.id,
+        one_click_checkout: true,
         prefill: {
           name: formData.fullName,
           email: formData.email,

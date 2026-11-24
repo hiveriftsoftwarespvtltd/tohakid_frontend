@@ -11,11 +11,13 @@ import {
   ArrowLeft, 
   CheckCircle2, 
   ShieldCheck, 
-  Sparkles
+  Sparkles,
+  Zap
 } from 'lucide-react';
 import Swal from 'sweetalert2';
 import { useShop } from '../context/ShopContext';
 import { formatImageUrl } from '../utils/imageUtils';
+import { launchRazorpayMagicCheckout } from '../utils/razorpayMagicCheckout';
 
 export default function CartDrawer({ isPageMode = false }) {
   const {
@@ -45,6 +47,7 @@ export default function CartDrawer({ isPageMode = false }) {
 
   const [inputCoupon, setInputCoupon] = useState('');
   const [couponAlert, setCouponAlert] = useState(null);
+  const [isLaunchingMagic, setIsLaunchingMagic] = useState(false);
   const pushedOverlayRef = useRef(false);
   const skipHistoryBackRef = useRef(false);
   const navigate = useNavigate();
@@ -145,6 +148,56 @@ export default function CartDrawer({ isPageMode = false }) {
       return;
     }
     navigate('/checkout');
+  };
+
+  const handleMagicCheckout = async () => {
+    if (cart.length === 0) return;
+    setIsLaunchingMagic(true);
+
+    const defaultAddr = addresses?.find((a) => a.isDefault) || addresses?.[0] || null;
+    const preparedItems = cart.map((item) => ({
+      productId: item.product?.id || item.productId || 'P1001',
+      name: item.product?.name || item.name || 'Festive Outfit',
+      price: item.price || item.product?.price || 0,
+      qty: item.qty || 1,
+      size: item.size || 'Standard',
+      image: formatImageUrl(item.product?.images?.[0] || item.product?.image || item.image || ''),
+    }));
+
+    await launchRazorpayMagicCheckout({
+      amount: cartTotal,
+      items: preparedItems,
+      customer: {
+        name: user?.name || defaultAddr?.name || '',
+        email: user?.email || '',
+        phone: user?.phone?.replace('+91', '').trim() || defaultAddr?.phone || '',
+      },
+      shippingAddress: defaultAddr,
+      notes: {
+        couponCode: couponCode || '',
+      },
+      onSuccess: async (result, rzpOrderId) => {
+        setIsLaunchingMagic(false);
+        await clearCart();
+        await refreshOrders();
+        setIsCartOpen(false);
+        Swal.fire({
+          icon: 'success',
+          title: '🎉 Order Placed Successfully!',
+          text: `Thank you! Your order #${result?.order?.id || rzpOrderId} has been confirmed.`,
+          confirmButtonColor: '#D81B60',
+        }).then(() => {
+          navigate('/track-order');
+        });
+      },
+      onDismiss: () => {
+        setIsLaunchingMagic(false);
+        showToast('Checkout paused. Your items are safe in bag.');
+      },
+      onError: () => {
+        setIsLaunchingMagic(false);
+      },
+    });
   };
 
   const freeShippingProgress = Math.min(100, Math.round((cartSubtotal / freeShippingThreshold) * 100));
@@ -451,19 +504,29 @@ export default function CartDrawer({ isPageMode = false }) {
                     </div>
                   </div>
 
-                  {/* Checkout CTA Button */}
+                  {/* Magic 1-Click Checkout CTA Button */}
+                  <button
+                    type="button"
+                    disabled={isLaunchingMagic}
+                    onClick={handleMagicCheckout}
+                    className="w-full bg-[#D81B60] hover:bg-[#C2185B] text-white font-extrabold py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all cursor-pointer active:scale-98 disabled:opacity-60"
+                  >
+                    <Zap className="w-4 h-4 fill-white" />
+                    <span>{isLaunchingMagic ? 'Opening Magic Checkout...' : '1-Click Magic Checkout'}</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </button>
+
                   <button
                     type="button"
                     onClick={handleProceedCheckout}
-                    className="w-full bg-[#D81B60] hover:bg-[#C2185B] text-white font-extrabold py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all cursor-pointer active:scale-98"
+                    className="w-full text-[11px] font-bold text-gray-500 hover:text-[#D81B60] py-1 transition-colors cursor-pointer"
                   >
-                    <span>Proceed to Checkout</span>
-                    <ArrowRight className="w-4 h-4" />
+                    Or continue with Standard Address Form →
                   </button>
 
                   <div className="flex items-center justify-center gap-1.5 text-[11px] text-gray-400 font-medium pt-1">
                     <ShieldCheck className="w-4 h-4 text-emerald-500" />
-                    <span>100% Safe & Secure Payment Guarantee</span>
+                    <span>Secured by Razorpay Magic Checkout • Pre-filled Address</span>
                   </div>
                 </div>
               </div>
