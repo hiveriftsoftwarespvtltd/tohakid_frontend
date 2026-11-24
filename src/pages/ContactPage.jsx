@@ -79,12 +79,12 @@ export default function ContactPage() {
                   Call & WhatsApp
                 </span>
                 <a
-                  href="https://wa.me/919876543210"
+                  href="https://wa.me/919261874142"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-base font-extrabold text-emerald-600 hover:text-emerald-700 block transition-colors"
                 >
-                  +91 98765 43210
+                  +91 92618 74142
                 </a>
                 <p className="text-xs text-gray-600 flex items-center gap-1.5 pt-0.5 font-normal">
                   <Clock className="w-3.5 h-3.5 text-gray-400" />
@@ -96,7 +96,7 @@ export default function ContactPage() {
             {/* Direct WhatsApp Action Button */}
             <div className="pl-13.5">
               <a
-                href="https://wa.me/919876543210"
+                href="https://wa.me/919261874142"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 bg-[#25D366] hover:bg-[#1EBE5D] text-white font-bold text-xs uppercase tracking-wider px-5 py-2.5 rounded-xl shadow-xs transition-all hover:scale-102"
@@ -116,13 +116,13 @@ export default function ContactPage() {
                   Email Support
                 </span>
                 <a
-                  href="mailto:care@tohaykids.com"
+                  href="mailto:tohaykids@gmail.com"
                   className="text-base font-extrabold text-[#D81B60] hover:text-[#C2185B] block transition-colors"
                 >
-                  care@tohaykids.com
+                  tohaykids@gmail.com
                 </a>
                 <p className="text-xs text-gray-600 font-normal">
-                  support@tohaykids.com • Response within 2–4 hours
+                  tohaykids@gmail.com • Response within 2–4 hours
                 </p>
               </div>
             </div>
@@ -238,7 +238,7 @@ export default function ContactPage() {
                 <input
                   type="tel"
                   required
-                  placeholder="+91 98765 43210"
+                  placeholder="+91 92618 74142"
                   value={formState.phone}
                   onChange={(e) => setFormState({ ...formState, phone: e.target.value })}
                   className="w-full px-4 py-3.5 bg-pink-50/20 hover:bg-white focus:bg-white border border-pink-100 focus:border-[#D81B60] focus:ring-3 focus:ring-pink-50 rounded-xl text-sm text-gray-800 placeholder:text-gray-400 font-normal transition-all outline-none"

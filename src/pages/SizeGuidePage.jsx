@@ -4,6 +4,7 @@ import {
   Ruler, ChevronRight, CheckCircle2, Info, ShieldAlert,
   MoveHorizontal, MessageSquare, ArrowRight, Heart
 } from 'lucide-react';
+import { GIRLS_KURTI_AFGANI_DATA, BOYS_KURTA_PAJAMA_DATA } from '../utils/sizeConstants';
 
 export default function SizeGuidePage() {
   const [selectedChart, setSelectedChart] = useState('girls-kurti'); // 'girls-kurti' | 'boys-kurta'
@@ -11,37 +12,10 @@ export default function SizeGuidePage() {
   const [selectedSizeRow, setSelectedSizeRow] = useState(null);
 
   // 1. Alia Kurti with Afgani Size Chart Data (in inches)
-  const girlsKurtiAfganiData = [
-    { size: '14', age: '1-2 Years', chest: 20.5, length: 16.5, sleeve: 10.5, pants: 14, waist: 14, hip: 21 },
-    { size: '16', age: '2-3 Years', chest: 20.5, length: 18, sleeve: 10.5, pants: 16, waist: 15, hip: 23 },
-    { size: '18', age: '3-4 Years', chest: 21, length: 19.25, sleeve: 11, pants: 18, waist: 16, hip: 25 },
-    { size: '20', age: '4-5 Years', chest: 22, length: 20.25, sleeve: 11, pants: 20, waist: 17, hip: 26.5 },
-    { size: '22', age: '5-6 Years', chest: 23, length: 22, sleeve: 11.5, pants: 22, waist: 18, hip: 27 },
-    { size: '24', age: '6-7 Years', chest: 24, length: 23.5, sleeve: 12, pants: 24, waist: 19, hip: 31 },
-    { size: '26', age: '7-8 Years', chest: 26, length: 25, sleeve: 12.5, pants: 26, waist: 20, hip: 32 },
-    { size: '28', age: '8-9 Years', chest: 28, length: 27, sleeve: 13, pants: 28, waist: 21, hip: 32 },
-    { size: '30', age: '9-10 Years', chest: 30, length: 29, sleeve: 13.5, pants: 30, waist: 22, hip: 34 },
-    { size: '32', age: '11-12 Years', chest: 32, length: 31, sleeve: 14, pants: 32, waist: 23, hip: 36 },
-    { size: '34', age: '13-14 Years', chest: 34, length: 33, sleeve: 14.5, pants: 34, waist: 24, hip: 38 },
-    { size: '36', age: '14-15 Years', chest: 36, length: 35.5, sleeve: 16.5, pants: 36, waist: 25, hip: 40 },
-    { size: '38', age: '15-16 Years', chest: 38, length: 37.5, sleeve: 17, pants: 38, waist: 26, hip: 42 }
-  ];
+  const girlsKurtiAfganiData = GIRLS_KURTI_AFGANI_DATA;
 
   // 2. Boys Kurta & Pajama Size Chart Data (in inches)
-  const boysKurtaPajamaData = [
-    { size: '14', age: '1-2 Years', chest: 20.5, length: 15.5, sleeve: 11, pajama: 15 },
-    { size: '16', age: '2-3 Years', chest: 20.5, length: 17, sleeve: 12, pajama: 16.5 },
-    { size: '18', age: '3-4 Years', chest: 21, length: 18.5, sleeve: 13, pajama: 18.5 },
-    { size: '20', age: '4-5 Years', chest: 22, length: 20, sleeve: 13.5, pajama: 20.5 },
-    { size: '22', age: '5-6 Years', chest: 23, length: 21.5, sleeve: 14.5, pajama: 22.5 },
-    { size: '24', age: '6-7 Years', chest: 24, length: 22.5, sleeve: 15, pajama: 24.5 },
-    { size: '26', age: '7-8 Years', chest: 26, length: 24.5, sleeve: 16, pajama: 26.5 },
-    { size: '28', age: '8-9 Years', chest: 28, length: 26, sleeve: 17, pajama: 28.5 },
-    { size: '30', age: '9-10 Years', chest: 30, length: 28, sleeve: 17.5, pajama: 30.5 },
-    { size: '32', age: '11-12 Years', chest: 32, length: 29.5, sleeve: 18.5, pajama: 32.5 },
-    { size: '34', age: '13-14 Years', chest: 34, length: 30.5, sleeve: 20, pajama: 34.5 },
-    { size: '36', age: '15-16 Years', chest: 36, length: 34, sleeve: 21, pajama: 36.5 }
-  ];
+  const boysKurtaPajamaData = BOYS_KURTA_PAJAMA_DATA;
 
   const formatVal = (val) => {
     if (unit === 'cm') {
@@ -73,7 +47,7 @@ export default function SizeGuidePage() {
             Tohay Kids Size Guide
           </h1>
           <p className="text-xs sm:text-base text-pink-100 max-w-2xl mx-auto font-medium">
-            Find the perfect royal fit for your little ones. All outfits include +2 inch inner seam margins for effortless growing room.
+            Find the perfect royal fit for your little ones.
           </p>
         </div>
 
@@ -90,11 +64,10 @@ export default function SizeGuidePage() {
                   setSelectedChart('girls-kurti');
                   setSelectedSizeRow(null);
                 }}
-                className={`flex-1 sm:flex-initial py-2.5 px-5 rounded-xl text-xs font-extrabold transition-all cursor-pointer text-center ${
-                  selectedChart === 'girls-kurti'
-                    ? 'bg-white text-[#D81B60] shadow-xs'
-                    : 'text-gray-600 hover:text-gray-900'
-                }`}
+                className={`flex-1 sm:flex-initial py-2.5 px-5 rounded-xl text-xs font-extrabold transition-all cursor-pointer text-center ${selectedChart === 'girls-kurti'
+                  ? 'bg-white text-[#D81B60] shadow-xs'
+                  : 'text-gray-600 hover:text-gray-900'
+                  }`}
               >
                 Alia Kurti with Afgani (Girls)
               </button>
@@ -105,11 +78,10 @@ export default function SizeGuidePage() {
                   setSelectedChart('boys-kurta');
                   setSelectedSizeRow(null);
                 }}
-                className={`flex-1 sm:flex-initial py-2.5 px-5 rounded-xl text-xs font-extrabold transition-all cursor-pointer text-center ${
-                  selectedChart === 'boys-kurta'
-                    ? 'bg-white text-[#0284C7] shadow-xs'
-                    : 'text-gray-600 hover:text-gray-900'
-                }`}
+                className={`flex-1 sm:flex-initial py-2.5 px-5 rounded-xl text-xs font-extrabold transition-all cursor-pointer text-center ${selectedChart === 'boys-kurta'
+                  ? 'bg-white text-[#0284C7] shadow-xs'
+                  : 'text-gray-600 hover:text-gray-900'
+                  }`}
               >
                 Kurta & Pajama (Boys)
               </button>
@@ -122,26 +94,24 @@ export default function SizeGuidePage() {
                 <button
                   type="button"
                   onClick={() => setUnit('in')}
-                  className={`px-3 py-1 rounded-lg transition-all cursor-pointer ${
-                    unit === 'in'
-                      ? selectedChart === 'boys-kurta'
-                        ? 'bg-white text-[#0284C7] shadow-xs font-extrabold'
-                        : 'bg-white text-[#D81B60] shadow-xs font-extrabold'
-                      : 'text-gray-500 hover:text-gray-800'
-                  }`}
+                  className={`px-3 py-1 rounded-lg transition-all cursor-pointer ${unit === 'in'
+                    ? selectedChart === 'boys-kurta'
+                      ? 'bg-white text-[#0284C7] shadow-xs font-extrabold'
+                      : 'bg-white text-[#D81B60] shadow-xs font-extrabold'
+                    : 'text-gray-500 hover:text-gray-800'
+                    }`}
                 >
                   Inches (in)
                 </button>
                 <button
                   type="button"
                   onClick={() => setUnit('cm')}
-                  className={`px-3 py-1 rounded-lg transition-all cursor-pointer ${
-                    unit === 'cm'
-                      ? selectedChart === 'boys-kurta'
-                        ? 'bg-white text-[#0284C7] shadow-xs font-extrabold'
-                        : 'bg-white text-[#D81B60] shadow-xs font-extrabold'
-                      : 'text-gray-500 hover:text-gray-800'
-                  }`}
+                  className={`px-3 py-1 rounded-lg transition-all cursor-pointer ${unit === 'cm'
+                    ? selectedChart === 'boys-kurta'
+                      ? 'bg-white text-[#0284C7] shadow-xs font-extrabold'
+                      : 'bg-white text-[#D81B60] shadow-xs font-extrabold'
+                    : 'text-gray-500 hover:text-gray-800'
+                    }`}
                 >
                   Centimeters (cm)
                 </button>
@@ -163,13 +133,13 @@ export default function SizeGuidePage() {
             <div className="overflow-x-auto no-scrollbar">
               {selectedChart === 'boys-kurta' ? (
                 /* Boys Kurta & Pajama Table */
-                <table className="w-full text-center border-collapse text-xs sm:text-sm min-w-[500px]">
+                <table className="w-full text-center border-collapse text-xs sm:text-sm min-w-[550px]">
                   <thead>
                     <tr className="border-b border-sky-200 bg-sky-50 text-[#0369A1] font-extrabold">
-                      <th className="p-3 bg-sky-100/95 text-[#0369A1] font-black uppercase border-r border-sky-200 sticky left-0 z-20 min-w-[70px]">
-                        SIZE
+                      <th className="p-3 bg-sky-100/95 text-[#0369A1] font-black uppercase border-r border-sky-200 sticky left-0 z-20 min-w-[80px]">
+                        NUMERIC SIZE (INCHES)
                       </th>
-                      <th className="p-3 border-r border-sky-100">EST. AGE</th>
+                      <th className="p-3 border-r border-sky-100 min-w-[120px] bg-sky-50/90 text-[#0369A1] font-extrabold">APPROXIMATE AGE</th>
                       <th className="p-3 border-r border-sky-100">CHEST</th>
                       <th className="p-3 border-r border-sky-100">KURTA LENGTH</th>
                       <th className="p-3 border-r border-sky-100">SLEEVE</th>
@@ -184,16 +154,15 @@ export default function SizeGuidePage() {
                         <tr
                           key={row.size}
                           onClick={() => setSelectedSizeRow(isSelected ? null : row.size)}
-                          className={`transition-colors cursor-pointer ${
-                            isSelected
-                              ? 'bg-sky-100/80 font-bold text-sky-950'
-                              : idx % 2 === 0 ? 'bg-white' : 'bg-gray-50/40'
-                          } hover:bg-sky-50/70`}
+                          className={`transition-colors cursor-pointer ${isSelected
+                            ? 'bg-sky-100/80 font-bold text-sky-950'
+                            : idx % 2 === 0 ? 'bg-white' : 'bg-gray-50/40'
+                            } hover:bg-sky-50/70`}
                         >
-                          <td className="p-3 font-mono font-black text-xs text-[#0284C7] bg-inherit border-r border-sky-100 sticky left-0 z-10 shadow-[2px_0_5px_rgba(0,0,0,0.04)]">
-                            {row.size}
+                          <td className="p-3 font-mono font-black text-xs sm:text-sm text-[#0284C7] bg-inherit border-r border-sky-100 sticky left-0 z-10 shadow-[2px_0_5px_rgba(0,0,0,0.04)]">
+                            Size {row.size}
                           </td>
-                          <td className="p-3 border-r border-gray-100 text-xs font-semibold text-gray-500">
+                          <td className="p-3 border-r border-gray-100 text-xs sm:text-sm font-bold text-sky-900 whitespace-nowrap bg-sky-50/30">
                             {row.age}
                           </td>
                           <td className="p-3 border-r border-gray-100 font-semibold text-gray-800">
@@ -215,13 +184,13 @@ export default function SizeGuidePage() {
                 </table>
               ) : (
                 /* Girls Alia Kurti with Afgani Table */
-                <table className="w-full text-center border-collapse text-xs sm:text-sm min-w-[620px]">
+                <table className="w-full text-center border-collapse text-xs sm:text-sm min-w-[650px]">
                   <thead>
                     <tr className="border-b border-pink-200 bg-pink-50 text-[#8E1B46] font-extrabold">
-                      <th className="p-3 bg-pink-100/95 text-[#8E1B46] font-black uppercase border-r border-pink-200 sticky left-0 z-20 min-w-[70px]">
-                        SIZE
+                      <th className="p-3 bg-pink-100/95 text-[#8E1B46] font-black uppercase border-r border-pink-200 sticky left-0 z-20 min-w-[80px]">
+                        NUMERIC SIZE (INCHES)
                       </th>
-                      <th className="p-3 border-r border-pink-100">EST. AGE</th>
+                      <th className="p-3 border-r border-pink-100 min-w-[120px] bg-pink-50/90 text-[#8E1B46] font-extrabold">APPROXIMATE AGE</th>
                       <th className="p-3 border-r border-pink-100">CHEST</th>
                       <th className="p-3 border-r border-pink-100">KURTI LENGTH</th>
                       <th className="p-3 border-r border-pink-200">SLEEVE</th>
@@ -238,16 +207,15 @@ export default function SizeGuidePage() {
                         <tr
                           key={row.size}
                           onClick={() => setSelectedSizeRow(isSelected ? null : row.size)}
-                          className={`transition-colors cursor-pointer ${
-                            isSelected
-                              ? 'bg-pink-100/80 font-bold text-pink-950'
-                              : idx % 2 === 0 ? 'bg-white' : 'bg-gray-50/40'
-                          } hover:bg-pink-50/70`}
+                          className={`transition-colors cursor-pointer ${isSelected
+                            ? 'bg-pink-100/80 font-bold text-pink-950'
+                            : idx % 2 === 0 ? 'bg-white' : 'bg-gray-50/40'
+                            } hover:bg-pink-50/70`}
                         >
-                          <td className="p-3 font-mono font-black text-xs text-[#D81B60] bg-inherit border-r border-pink-100 sticky left-0 z-10 shadow-[2px_0_5px_rgba(0,0,0,0.04)]">
-                            {row.size}
+                          <td className="p-3 font-mono font-black text-xs sm:text-sm text-[#D81B60] bg-inherit border-r border-pink-100 sticky left-0 z-10 shadow-[2px_0_5px_rgba(0,0,0,0.04)]">
+                            Size {row.size}
                           </td>
-                          <td className="p-3 border-r border-gray-100 text-xs font-semibold text-gray-500">
+                          <td className="p-3 border-r border-gray-100 text-xs sm:text-sm font-bold text-pink-900 whitespace-nowrap bg-pink-50/30">
                             {row.age}
                           </td>
                           <td className="p-3 border-r border-gray-100 font-semibold text-gray-800">
@@ -278,23 +246,7 @@ export default function SizeGuidePage() {
           </div>
 
           {/* Important Footnotes */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs pt-1">
-            {selectedChart === 'girls-kurti' && (
-              <div className="p-3.5 bg-amber-50/80 border border-amber-200/90 rounded-2xl flex items-start gap-2.5 text-amber-900">
-                <Info className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
-                <p className="text-xs leading-relaxed">
-                  <strong>* Waist Measurement:</strong> Un-stretched elastic waist. Expands equal to hip size when worn for comfort.
-                </p>
-              </div>
-            )}
 
-            <div className="p-3.5 bg-emerald-50/80 border border-emerald-200/90 rounded-2xl flex items-start gap-2.5 text-emerald-800">
-              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-              <p className="text-xs leading-relaxed">
-                <strong>+2 Inch Inner Margin:</strong> Extra inner seam margins included for easy alterations as your child grows!
-              </p>
-            </div>
-          </div>
         </div>
 
         {/* How to Measure Section */}
@@ -379,7 +331,7 @@ export default function SizeGuidePage() {
           </Link>
 
           <a
-            href="https://wa.me/919876543210"
+            href="https://wa.me/919261874142"
             target="_blank"
             rel="noreferrer"
             className="p-5 bg-gradient-to-br from-emerald-50 to-emerald-100/60 rounded-2xl border border-emerald-200/80 hover:shadow-md transition-all group flex items-center justify-between"

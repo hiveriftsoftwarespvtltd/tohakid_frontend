@@ -543,7 +543,22 @@ export const ShopProvider = ({ children }) => {
     showToast('Logged out successfully');
   };
 
-  const createOrder = async (orderPayload) => {
+  const refreshOrders = async () => {
+    if (!localStorage.getItem('tohay_access_token')) return [];
+    try {
+      const res = await orderService.getMyOrders();
+      if (res?.data && Array.isArray(res.data)) {
+        setOrders(res.data);
+        return res.data;
+      }
+    } catch (err) {
+      console.warn('Refresh orders warning:', err);
+    }
+    return orders;
+  };
+
+  const createOrder = async (orderPayload, options = {}) => {
+    const { deferCartClear = false, requireBackend = false } = options;
     try {
       const payloadWithCartItems = {
         items: cart.map((item) => {
@@ -568,11 +583,20 @@ export const ShopProvider = ({ children }) => {
       const res = await orderService.createOrder(payloadWithCartItems);
       const createdOrder = res?.data || res?.order;
       if (createdOrder) {
-        setOrders((prev) => [createdOrder, ...prev]);
-        clearCart();
+        setOrders((prev) => [createdOrder, ...prev.filter((o) => (o.id || o._id) !== (createdOrder.id || createdOrder._id))]);
+        if (!deferCartClear) {
+          clearCart();
+        }
         return { success: true, order: createdOrder };
       }
+
+      if (requireBackend) {
+        throw new Error(res?.message || 'Unable to create order on server.');
+      }
     } catch (err) {
+      if (requireBackend) {
+        throw err;
+      }
       console.warn('Backend order creation warning:', err);
     }
 
@@ -580,8 +604,8 @@ export const ShopProvider = ({ children }) => {
     const fallbackOrder = {
       id: randomId,
       customerName: orderPayload.shippingAddress?.name || user?.name || 'Valued Parent',
-      customerEmail: orderPayload.shippingAddress?.email || user?.email || 'parent@tohaykids.com',
-      customerPhone: orderPayload.shippingAddress?.phone || user?.phone || '+91 98765 43210',
+      customerEmail: orderPayload.shippingAddress?.email || user?.email || 'tohaykids@gmail.com',
+      customerPhone: orderPayload.shippingAddress?.phone || user?.phone || '+91 92618 74142',
       items: cart.map((item) => ({
         product: item.product,
         productId: item.product?.id || item.productId,
@@ -595,8 +619,8 @@ export const ShopProvider = ({ children }) => {
       shipping: shippingFee,
       tax: Math.round(cartSubtotal * 0.05),
       totalAmount: cartTotal,
-      paymentMethod: orderPayload.paymentMethod || 'COD',
-      paymentStatus: orderPayload.paymentMethod === 'COD' ? 'Pending' : 'Paid',
+      paymentMethod: orderPayload.paymentMethod || 'Online (Prepaid)',
+      paymentStatus: 'Paid',
       orderStatus: 'Placed',
       shippingAddress: orderPayload.shippingAddress,
       timeline: [
@@ -610,7 +634,9 @@ export const ShopProvider = ({ children }) => {
     };
 
     setOrders((prev) => [fallbackOrder, ...prev]);
-    clearCart();
+    if (!deferCartClear) {
+      clearCart();
+    }
     return { success: true, order: fallbackOrder };
   };
 
@@ -649,6 +675,7 @@ export const ShopProvider = ({ children }) => {
         deleteAddress,
         setDefaultAddress,
         orders,
+        refreshOrders,
         createOrder,
         addToCart,
         removeFromCart,

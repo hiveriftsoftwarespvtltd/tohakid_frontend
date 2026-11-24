@@ -230,7 +230,7 @@ export default function GirlsPage() {
               <span>Need Help?</span>
             </div>
             <p className="text-gray-600">We're here for you.</p>
-            <a href="https://wa.me/919876543210" target="_blank" rel="noreferrer" className="inline-block font-extrabold text-[#D81B60] hover:underline">
+            <a href="https://wa.me/919261874142" target="_blank" rel="noreferrer" className="inline-block font-extrabold text-[#D81B60] hover:underline">
               Chat with us &rarr;
             </a>
           </div>

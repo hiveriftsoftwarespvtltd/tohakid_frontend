@@ -162,7 +162,7 @@ export default function InstagramNewsletterSection() {
 
         <div className="pt-2 border-t border-gray-100 flex items-center justify-between text-xs">
           <a
-            href="https://wa.me/919876543210"
+            href="https://wa.me/919261874142"
             target="_blank"
             rel="noreferrer"
             className="inline-flex items-center gap-1.5 font-bold text-emerald-600 hover:text-emerald-700 text-xs"

@@ -1117,7 +1117,7 @@ export const faqs = [
     id: 1,
     category: 'Sizing & Fit',
     q: 'How do I pick the right size for my child?',
-    a: 'We provide an age-based sizing chart on every product detail page. Our kids ethnic wear features flexible inner seam margins (+2 inches) and elasticated waistbands so your child stays comfortable all day.'
+    a: 'We provide an age-based sizing chart on every product detail page. Our kids ethnic wear features comfortable tailored stitching and elasticated waistbands so your child stays comfortable all day.'
   },
   {
     id: 2,
@@ -1133,9 +1133,9 @@ export const faqs = [
   },
   {
     id: 4,
-    category: 'Payment & COD',
-    q: 'Is Cash on Delivery (COD) available?',
-    a: 'Yes! Cash on Delivery (COD) is available on all pin codes across India.'
+    category: 'Payments',
+    q: 'What payment methods do you accept?',
+    a: 'We accept 100% secure online payments via UPI (Google Pay, PhonePe, Paytm), Credit & Debit Cards (Visa, Mastercard, RuPay), Net Banking, and Wallets through Razorpay.'
   },
   {
     id: 5,

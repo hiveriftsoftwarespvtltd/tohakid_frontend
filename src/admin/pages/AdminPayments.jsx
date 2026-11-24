@@ -28,7 +28,7 @@ export default function AdminPayments() {
   // 1. Dynamic Online / UPI Settlement
   const onlineSettlementTotal = useMemo(() => {
     return tableData
-      .filter((t) => (t.status || '').toLowerCase() === 'successful' && !(t.paymentMethod || '').toLowerCase().includes('cash'))
+      .filter((t) => (t.status || '').toLowerCase() === 'successful')
       .reduce((sum, t) => sum + Number(t.amount || 0), 0);
   }, [tableData]);
 
@@ -39,14 +39,7 @@ export default function AdminPayments() {
       .reduce((sum, t) => sum + Number(t.amount || 0), 0);
   }, [tableData]);
 
-  // 3. Dynamic Cash on Delivery Total
-  const codTotal = useMemo(() => {
-    return tableData
-      .filter((t) => (t.paymentMethod || '').toLowerCase().includes('cash') || (t.paymentMethod || '').toLowerCase().includes('cod'))
-      .reduce((sum, t) => sum + Number(t.amount || 0), 0);
-  }, [tableData]);
-
-  // 4. Dynamic Refunded Total
+  // 3. Dynamic Refunded Total
   const refundedTotal = useMemo(() => {
     return tableData
       .filter((t) => (t.status || '').toLowerCase() === 'refunded' || (t.status || '').toLowerCase() === 'cancelled')
@@ -106,7 +99,7 @@ export default function AdminPayments() {
       </div>
 
       {/* Payment Gateway Cards - 100% Dynamic */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="bg-white p-5 rounded-3xl border border-pink-100/80 shadow-2xs space-y-2">
           <div className="flex justify-between items-center text-xs font-bold text-gray-500">
             <span>Online / UPI Settlement</span>
@@ -123,15 +116,6 @@ export default function AdminPayments() {
           </div>
           <p className="font-black text-2xl text-gray-900">₹{cardSettlementTotal.toLocaleString('en-IN')}</p>
           <p className="text-[10px] text-gray-400 font-semibold">Credit & Debit Cards</p>
-        </div>
-
-        <div className="bg-white p-5 rounded-3xl border border-pink-100/80 shadow-2xs space-y-2">
-          <div className="flex justify-between items-center text-xs font-bold text-gray-500">
-            <span>Cash on Delivery (COD)</span>
-            <span className="text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full font-extrabold">Live</span>
-          </div>
-          <p className="font-black text-2xl text-gray-900">₹{codTotal.toLocaleString('en-IN')}</p>
-          <p className="text-[10px] text-gray-400 font-semibold">Collected on Doorstep</p>
         </div>
 
         <div className="bg-white p-5 rounded-3xl border border-pink-100/80 shadow-2xs space-y-2">

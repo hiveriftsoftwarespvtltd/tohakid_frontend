@@ -19,7 +19,7 @@ export default function AdminSettings() {
     standardShippingFee: storeSettings.standardShippingFee,
     gstTaxRate: storeSettings.gstTaxRate,
     adminName: storeSettings.adminProfile?.name || 'Admin',
-    adminEmail: storeSettings.adminProfile?.email || 'admin@tohaykids.com',
+    adminEmail: storeSettings.adminProfile?.email || 'tohaykids@gmail.com',
     currentPassword: '',
     newPassword: '',
     confirmPassword: ''

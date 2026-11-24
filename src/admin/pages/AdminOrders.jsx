@@ -141,7 +141,7 @@ export default function AdminOrders() {
           >
             <option value="All">All Payments</option>
             <option value="Successful">Successful</option>
-            <option value="Pending">Pending COD</option>
+            <option value="Pending">Pending</option>
             <option value="Refunded">Refunded</option>
           </select>
         </div>

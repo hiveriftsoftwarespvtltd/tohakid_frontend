@@ -61,7 +61,7 @@ export default function InvoiceModal({ isOpen, onClose, order }) {
               <span className="font-heading font-extrabold text-2xl text-[#D81B60]">tohay KIDS</span>
               <p className="text-[11px] text-gray-500 font-semibold mt-0.5">Tohay Kids Heritage Apparel Pvt. Ltd.</p>
               <p className="text-[10px] text-gray-400">GSTIN: 27AAAAA0000A1Z5 | PAN: ABCDE1234F</p>
-              <p className="text-[10px] text-gray-400">Support: care@tohaykids.com | +91 98765 43210</p>
+              <p className="text-[10px] text-gray-400">Support: tohaykids@gmail.com | +91 92618 74142</p>
             </div>
 
             <div className="text-right space-y-1">
@@ -69,7 +69,7 @@ export default function InvoiceModal({ isOpen, onClose, order }) {
                 INVOICE #{order.id || order._id}
               </span>
               <p className="text-[11px] text-gray-500 font-mono">Date: {formattedDate}</p>
-              <p className="text-[11px] text-gray-500">Payment: <strong>{order.paymentMethod || 'COD'}</strong></p>
+              <p className="text-[11px] text-gray-500">Payment: <strong>{order.paymentMethod || 'Online (Prepaid)'}</strong></p>
             </div>
           </div>
 

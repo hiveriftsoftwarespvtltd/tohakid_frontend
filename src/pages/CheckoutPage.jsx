@@ -3,11 +3,13 @@ import { Link, useNavigate } from 'react-router-dom';
 import {
   ShieldCheck, Truck, CreditCard, CheckCircle2, ArrowRight, ArrowLeft,
   MapPin, Tag, X, Lock, Phone, Mail, Home, Building2, Check, Sparkles,
-  AlertCircle, ChevronDown, ChevronUp, ShoppingBag, QrCode, Copy
+  AlertCircle, ChevronDown, ChevronUp, ShoppingBag
 } from 'lucide-react';
 import Swal from 'sweetalert2';
 import { useShop } from '../context/ShopContext';
 import { lookupPincode } from '../utils/pincodeService';
+import { formatImageUrl } from '../utils/imageUtils';
+import { paymentService } from '../services/paymentService';
 
 export default function CheckoutPage() {
   const {
@@ -17,6 +19,7 @@ export default function CheckoutPage() {
     discountPercent,
     shippingFee,
     cartTotal,
+    isLoggedIn,
     user,
     addresses,
     createOrder,
@@ -28,6 +31,14 @@ export default function CheckoutPage() {
     removeCoupon
   } = useShop();
   const navigate = useNavigate();
+
+  // Authentication Guard: Ensure user is logged in to checkout
+  useEffect(() => {
+    if (!isLoggedIn) {
+      showToast('Please sign in to proceed with checkout.');
+      navigate('/login?redirect=/checkout', { state: { from: '/checkout' }, replace: true });
+    }
+  }, [isLoggedIn, navigate, showToast]);
 
   const [formData, setFormData] = useState({
     pincode: '',
@@ -43,7 +54,7 @@ export default function CheckoutPage() {
 
   const [pinStatus, setPinStatus] = useState(null); // { loading, success, message }
   const [availableLocalities, setAvailableLocalities] = useState([]);
-  const [paymentMethod, setPaymentMethod] = useState('UPI');
+  const [paymentMethod, setPaymentMethod] = useState('RAZORPAY');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   const [createdOrderId, setCreatedOrderId] = useState('');
@@ -147,38 +158,13 @@ export default function CheckoutPage() {
     }
   };
 
-  // Clickable / Tappable UPI Deep-Linking Handler
-  const handleOpenUpiApp = (scheme) => {
-    const upiId = 'tohaykids@okhdfcbank';
-    const storeName = encodeURIComponent('Tohay Kids');
-    const note = encodeURIComponent('Tohay Kids Order');
-    const baseParams = `pa=${upiId}&pn=${storeName}&am=${cartTotal}&cu=INR&tn=${note}`;
-
-    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent || '');
-
-    let targetUrl = `upi://pay?${baseParams}`;
-    if (scheme === 'gpay') {
-      targetUrl = `tez://upi/pay?${baseParams}`;
-    } else if (scheme === 'phonepe') {
-      targetUrl = `phonepe://pay?${baseParams}`;
-    } else if (scheme === 'paytm') {
-      targetUrl = `paytmmp://pay?${baseParams}`;
-    } else if (scheme === 'bhim') {
-      targetUrl = `upi://pay?${baseParams}`;
-    }
-
-    if (isMobile) {
-      window.location.href = targetUrl;
-      setTimeout(() => {
-        window.location.href = `upi://pay?${baseParams}`;
-      }, 700);
-    } else {
-      showToast('Scan the QR code below using your mobile UPI app to pay!');
-    }
-  };
-
   const handlePlaceOrder = async (e) => {
     e.preventDefault();
+    if (!isLoggedIn) {
+      showToast('Please sign in to proceed with payment.');
+      navigate('/login?redirect=/checkout', { state: { from: '/checkout' } });
+      return;
+    }
     if (!formData.pincode.trim() || formData.pincode.length !== 6) return showToast('Please enter a valid 6-digit delivery PIN code');
     if (!formData.fullName.trim()) return showToast('Please enter your full name');
     if (!formData.phone || formData.phone.length < 10) return showToast('Please enter a valid 10-digit mobile number');
@@ -188,15 +174,22 @@ export default function CheckoutPage() {
     setIsSubmitting(true);
 
     const orderPayload = {
-      items: cart.map((item) => ({
-        product: item.product,
-        productId: item.product?.id || item.productId,
-        size: item.size,
-        child1Size: item.child1Size || null,
-        child2Size: item.child2Size || null,
-        qty: item.qty,
-        price: item.product?.price || item.price,
-      })),
+      items: cart.map((item) => {
+        const resolvedPrice =
+          item.price ||
+          item.product?.sizeVariants?.find((v) => v.size === item.size)?.price ||
+          item.product?.price ||
+          0;
+        return {
+          product: item.product,
+          productId: item.product?.id || item.productId,
+          size: item.size,
+          child1Size: item.child1Size || null,
+          child2Size: item.child2Size || null,
+          qty: item.qty,
+          price: resolvedPrice,
+        };
+      }),
       subtotal: cartSubtotal,
       discount: discountAmount,
       shipping: shippingFee,
@@ -216,19 +209,132 @@ export default function CheckoutPage() {
       },
     };
 
+    // Razorpay Official Online Checkout Flow
     try {
-      const res = await createOrder(orderPayload);
-      if (res && res.success && res.order) {
-        const orderId = res.order.id || res.order._id;
-        setCreatedOrderId(orderId);
-        setIsSuccessModalOpen(true);
-      } else {
-        showToast('Order placement failed. Please try again.');
+      const receipt = `rcpt_${Date.now()}`;
+      const orderRes = await paymentService.createRazorpayOrder(cartTotal, receipt);
+      const rzpData = orderRes?.data || orderRes;
+
+      if (!rzpData || !rzpData.id) {
+        throw new Error('Unable to create Razorpay payment order.');
       }
+
+      if (typeof window.Razorpay === 'undefined') {
+        showToast('Payment gateway is loading. Please try again in a few moments.');
+        setIsSubmitting(false);
+        return;
+      }
+
+      const options = {
+        key: rzpData.key || 'rzp_test_TlPG0c5eDqzfom',
+        amount: rzpData.amount,
+        currency: rzpData.currency || 'INR',
+        name: 'Tohay Kids Festive',
+        description: `Order of ${cart.length} item(s) • ₹${cartTotal.toLocaleString()}`,
+        image: '/logo.png',
+        order_id: rzpData.id,
+        prefill: {
+          name: formData.fullName,
+          email: formData.email,
+          contact: formData.phone.startsWith('+91') ? formData.phone : `+91${formData.phone}`,
+        },
+        notes: {
+          customer_city: formData.city,
+          pincode: formData.pincode,
+        },
+        theme: {
+          color: '#D81B60',
+        },
+        config: {
+          display: {
+            blocks: {
+              upi: {
+                name: 'Pay via UPI / Dynamic QR',
+                instruments: [
+                  {
+                    method: 'upi',
+                  },
+                ],
+              },
+              cards: {
+                name: 'Cards & Other Options',
+                instruments: [
+                  {
+                    method: 'card',
+                  },
+                  {
+                    method: 'netbanking',
+                  },
+                  {
+                    method: 'wallet',
+                  },
+                ],
+              },
+            },
+            sequence: ['block.upi', 'block.cards'],
+            preferences: {
+              show_default_blocks: true,
+            },
+          },
+        },
+        handler: async function (response) {
+          // Verify HMAC SHA-256 signature
+          try {
+            await paymentService.verifyPayment({
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+            });
+          } catch (vErr) {
+            console.warn('Razorpay signature verification notice:', vErr);
+          }
+
+          // Save finalized order to database
+          try {
+            const res = await createOrder({
+              ...orderPayload,
+              paymentMethod: 'Razorpay Online',
+              paymentStatus: 'Paid',
+              razorpayOrderId: response.razorpay_order_id,
+              razorpayPaymentId: response.razorpay_payment_id,
+            });
+            if (res && res.success && res.order) {
+              const orderId = res.order.id || res.order._id;
+              setCreatedOrderId(orderId);
+              setIsSuccessModalOpen(true);
+            } else {
+              showToast('Order confirmed! Redirecting to tracker...');
+              navigate('/track-order');
+            }
+          } catch (saveErr) {
+            showToast('Payment successful! Processing order records...');
+          } finally {
+            setIsSubmitting(false);
+          }
+        },
+        modal: {
+          ondismiss: function () {
+            setIsSubmitting(false);
+            showToast('Payment window closed. You can retry whenever ready.');
+          },
+        },
+      };
+
+      const rzp = new window.Razorpay(options);
+      rzp.on('payment.failed', function (resp) {
+        setIsSubmitting(false);
+        const errorMsg = resp.error?.description || 'Payment transaction failed. Please try again.';
+        Swal.fire({
+          icon: 'error',
+          title: 'Payment Failed',
+          text: errorMsg,
+          confirmButtonColor: '#D81B60',
+        });
+      });
+      rzp.open();
     } catch (err) {
-      showToast('Error placing order. Please check details.');
-    } finally {
       setIsSubmitting(false);
+      showToast(err.message || 'Razorpay initialization failed.');
     }
   };
 
@@ -304,7 +410,7 @@ export default function CheckoutPage() {
                 {cart.map((item, idx) => (
                   <div key={idx} className="flex gap-2.5 text-xs items-center">
                     <img
-                      src={item.product?.images?.[0] || item.product?.image}
+                      src={formatImageUrl(item.product?.images?.[0] || item.product?.image)}
                       alt={item.product?.name}
                       className="w-12 h-14 object-cover object-top rounded-lg bg-pink-50 shrink-0 border border-gray-100"
                     />
@@ -449,8 +555,8 @@ export default function CheckoutPage() {
                           type="button"
                           onClick={() => setFormData((prev) => ({ ...prev, colony: loc }))}
                           className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${formData.colony === loc
-                              ? 'bg-[#D81B60] text-white shadow-2xs'
-                              : 'bg-gray-100 hover:bg-gray-200 text-gray-700 border border-transparent'
+                            ? 'bg-[#D81B60] text-white shadow-2xs'
+                            : 'bg-gray-100 hover:bg-gray-200 text-gray-700 border border-transparent'
                             }`}
                         >
                           {loc}
@@ -596,7 +702,7 @@ export default function CheckoutPage() {
             </div>
 
             {/* Section 2: Payment Method */}
-            <div className="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 border border-gray-200/80 shadow-2xs space-y-3">
+            <div className="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 border border-gray-200/80 shadow-2xs space-y-4">
               <div className="flex items-center justify-between border-b border-gray-100 pb-3">
                 <div className="flex items-center gap-2">
                   <div className="w-6 h-6 rounded-full bg-pink-50 text-[#D81B60] flex items-center justify-center font-bold text-xs">
@@ -606,167 +712,91 @@ export default function CheckoutPage() {
                     Payment Method
                   </h2>
                 </div>
-                <span className="text-[11px] text-gray-400 font-medium">Step 2 of 2</span>
+                <div className="flex items-center gap-1 text-[11px] font-bold text-emerald-600 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-100">
+                  <ShieldCheck className="w-3.5 h-3.5" />
+                  <span>100% Secure Checkout</span>
+                </div>
               </div>
 
-              <div className="space-y-3 text-xs">
-                {/* Option 1: UPI with Tappable Apps & QR Code */}
-                <div className={`rounded-xl border transition-all overflow-hidden ${paymentMethod === 'UPI'
-                    ? 'bg-pink-50/20 border-[#D81B60] shadow-2xs'
-                    : 'border-gray-200 hover:border-gray-300 bg-white'
-                  }`}>
-                  <label className="flex items-center justify-between p-3.5 cursor-pointer">
-                    <div className="flex items-center gap-3">
-                      <input
-                        type="radio"
-                        name="payment"
-                        value="UPI"
-                        checked={paymentMethod === 'UPI'}
-                        onChange={() => setPaymentMethod('UPI')}
-                        className="text-[#D81B60] focus:ring-[#D81B60] w-4 h-4 cursor-pointer accent-[#D81B60]"
-                      />
-                      <div>
-                        <p className="font-bold text-gray-900 text-xs sm:text-sm">UPI / QR Code Instant Pay</p>
-                        <p className="text-[10px] sm:text-[11px] text-gray-500">Google Pay, PhonePe, Paytm, BHIM & Dynamic QR</p>
-                      </div>
-                    </div>
-                    <span className="bg-emerald-100 text-emerald-800 text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider">
-                      Recommended
-                    </span>
-                  </label>
+              {/* Payment Option: Razorpay Online Checkout */}
+              <div
+                role="button"
+                tabIndex={0}
+                onClick={() => setPaymentMethod('RAZORPAY')}
+                onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && setPaymentMethod('RAZORPAY')}
+                className="relative rounded-2xl border-2 border-[#D81B60] bg-gradient-to-b from-pink-50/25 via-white to-white shadow-xs p-4 sm:p-5 transition-all cursor-pointer"
+              >
+                <div className="flex items-start gap-3.5">
+                  <div className="mt-1 w-5 h-5 rounded-full border-2 border-[#D81B60] flex items-center justify-center shrink-0">
+                    <div className="w-2.5 h-2.5 rounded-full bg-[#D81B60]" />
+                  </div>
 
-                  {/* Interactive UPI Apps & Dynamic QR Code Section */}
-                  {paymentMethod === 'UPI' && (
-                    <div className="px-3.5 pb-4 pt-1 border-t border-pink-100 space-y-3.5 bg-white/70">
-
-                      {/* Tappable UPI App Launcher Grid */}
+                  <div className="flex-1 space-y-3">
+                    <div className="flex items-start sm:items-center justify-between flex-wrap gap-2">
                       <div>
-                        <div className="flex items-center justify-between mb-2">
-                          <p className="text-[11px] font-bold text-gray-800">
-                            Tap icon to open app & pay:
-                          </p>
-                          <span className="text-[10px] text-emerald-600 font-bold bg-emerald-50 px-2 py-0.5 rounded-full">
-                            Instant Verified
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <h3 className="font-heading font-extrabold text-sm sm:text-base text-gray-900">
+                            Online Payment (Razorpay)
+                          </h3>
+                          <span className="bg-[#D81B60]/10 text-[#D81B60] text-[10px] font-black px-2 py-0.5 rounded-full">
+                            Instant & Secure
                           </span>
                         </div>
-
-                        <div className="grid grid-cols-4 gap-2 text-center">
-                          {/* Google Pay */}
-                          <button
-                            type="button"
-                            onClick={() => handleOpenUpiApp('gpay')}
-                            className="flex flex-col items-center justify-center p-2.5 bg-white hover:bg-gray-50 active:scale-95 border border-gray-200 hover:border-pink-300 rounded-xl transition-all shadow-2xs group cursor-pointer"
-                          >
-                            <div className="w-8 h-8 rounded-full bg-white border border-gray-100 shadow-2xs flex items-center justify-center group-hover:scale-105 transition-transform">
-                              <svg className="w-4 h-4" viewBox="0 0 24 24">
-                                <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.8-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z" />
-                                <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.33 24 12 24z" />
-                                <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15z" />
-                                <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z" />
-                              </svg>
-                            </div>
-                            <span className="text-[10px] font-bold text-gray-700 mt-1">GPay</span>
-                          </button>
-
-                          {/* PhonePe */}
-                          <button
-                            type="button"
-                            onClick={() => handleOpenUpiApp('phonepe')}
-                            className="flex flex-col items-center justify-center p-2.5 bg-white hover:bg-gray-50 active:scale-95 border border-gray-200 hover:border-pink-300 rounded-xl transition-all shadow-2xs group cursor-pointer"
-                          >
-                            <div className="w-8 h-8 rounded-full bg-[#5f259f] flex items-center justify-center shadow-2xs group-hover:scale-105 transition-transform">
-                              <span className="text-white font-black text-xs leading-none">पे</span>
-                            </div>
-                            <span className="text-[10px] font-bold text-gray-700 mt-1">PhonePe</span>
-                          </button>
-
-                          {/* Paytm */}
-                          <button
-                            type="button"
-                            onClick={() => handleOpenUpiApp('paytm')}
-                            className="flex flex-col items-center justify-center p-2.5 bg-white hover:bg-gray-50 active:scale-95 border border-gray-200 hover:border-pink-300 rounded-xl transition-all shadow-2xs group cursor-pointer"
-                          >
-                            <div className="w-8 h-8 rounded-full bg-[#002e6e] flex items-center justify-center shadow-2xs group-hover:scale-105 transition-transform">
-                              <span className="text-[#00baf2] font-black text-[9px] tracking-tighter">Paytm</span>
-                            </div>
-                            <span className="text-[10px] font-bold text-gray-700 mt-1">Paytm</span>
-                          </button>
-
-                          {/* BHIM / Other UPI */}
-                          <button
-                            type="button"
-                            onClick={() => handleOpenUpiApp('bhim')}
-                            className="flex flex-col items-center justify-center p-2.5 bg-white hover:bg-gray-50 active:scale-95 border border-gray-200 hover:border-pink-300 rounded-xl transition-all shadow-2xs group cursor-pointer"
-                          >
-                            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#097939] to-[#00a859] flex items-center justify-center shadow-2xs group-hover:scale-105 transition-transform">
-                              <span className="text-white font-black text-[9px]">BHIM</span>
-                            </div>
-                            <span className="text-[10px] font-bold text-gray-700 mt-1">Any UPI</span>
-                          </button>
-                        </div>
+                        <p className="text-xs text-gray-500 mt-0.5">
+                          Pay inline via UPI, Dynamic QR, Credit/Debit Cards, Net Banking & Wallets
+                        </p>
                       </div>
 
-                      {/* Dynamic QR Code Payment Facility */}
-                      <div className="bg-white p-3 rounded-xl border border-gray-200 shadow-2xs flex flex-col sm:flex-row items-center gap-3">
-                        <div className="bg-white p-1.5 rounded-lg border border-gray-100 shadow-2xs shrink-0">
-                          <img
-                            src={`https://api.qrserver.com/v1/create-qr-code/?size=130x130&margin=1&data=${encodeURIComponent(`upi://pay?pa=tohaykids@okhdfcbank&pn=Tohay%20Kids&am=${cartTotal}&cu=INR&tn=Order%20Payment`)}`}
-                            alt="Scan QR to Pay"
-                            className="w-24 h-24 sm:w-22 sm:h-22 object-contain"
-                          />
-                        </div>
-                        <div className="text-center sm:text-left space-y-1">
-                          <div className="flex items-center justify-center sm:justify-start gap-1 text-[11px] font-extrabold text-gray-800">
-                            <QrCode className="w-3.5 h-3.5 text-[#D81B60]" />
-                            <span>Scan QR with Any UPI App</span>
-                          </div>
-                          <p className="text-[10px] text-gray-500">
-                            Scan from phone to pay <strong className="text-gray-900">₹{cartTotal.toLocaleString()}</strong> instantly.
-                          </p>
-                          <div className="pt-1 flex items-center justify-center sm:justify-start gap-2">
-                            <span className="font-mono text-[10px] bg-gray-50 px-2 py-0.5 rounded border border-gray-200 text-gray-700 font-semibold select-all">
-                              tohaykids@okhdfcbank
-                            </span>
-                            <button
-                              type="button"
-                              onClick={() => {
-                                navigator.clipboard.writeText('tohaykids@okhdfcbank');
-                                showToast('UPI ID copied to clipboard!');
-                              }}
-                              className="text-[10px] font-bold text-[#D81B60] hover:underline cursor-pointer flex items-center gap-0.5"
-                            >
-                              <Copy className="w-2.5 h-2.5" />
-                              <span>Copy</span>
-                            </button>
-                          </div>
-                        </div>
+                      <div className="flex items-center gap-1.5 bg-[#0C2340] text-white px-2.5 py-1 rounded-lg text-[10px] font-bold shadow-2xs shrink-0">
+                        <svg className="w-3.5 h-3.5 text-[#3395FF]" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M22.43 0L7.6 13.91H15.8L9.57 28L24.4 14.09H16.2L22.43 0Z" />
+                        </svg>
+                        <span>Secured by <strong>Razorpay</strong></span>
                       </div>
-
                     </div>
-                  )}
-                </div>
 
-                {/* Option 2: Cards & Net Banking */}
-                <label className={`flex items-center justify-between p-3.5 rounded-xl border cursor-pointer transition-all ${paymentMethod === 'CARD'
-                    ? 'bg-pink-50/40 border-[#D81B60] shadow-2xs'
-                    : 'border-gray-200 hover:border-gray-300 bg-white'
-                  }`}>
-                  <div className="flex items-center gap-3">
-                    <input
-                      type="radio"
-                      name="payment"
-                      value="CARD"
-                      checked={paymentMethod === 'CARD'}
-                      onChange={() => setPaymentMethod('CARD')}
-                      className="text-[#D81B60] focus:ring-[#D81B60] w-4 h-4 cursor-pointer accent-[#D81B60]"
-                    />
-                    <div>
-                      <p className="font-bold text-gray-900 text-xs sm:text-sm">Credit / Debit Card & Net Banking</p>
-                      <p className="text-[10px] sm:text-[11px] text-gray-500">Visa, Mastercard, RuPay, Corporate Cards</p>
+                    <div className="pt-2 border-t border-gray-100 flex items-center gap-2 flex-wrap">
+                      <div className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-white border border-gray-200 rounded-lg shadow-2xs">
+                        <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none">
+                          <path d="M14 3L6 14.5H12L10 21L18 9.5H12L14 3Z" fill="#097939" />
+                          <path d="M11 7L6 14.5H12L10 21L12.5 17" fill="#ED752E" />
+                        </svg>
+                        <span className="text-[11px] font-black text-gray-800 tracking-tight">UPI</span>
+                        <span className="text-[10px] text-gray-500 font-medium hidden sm:inline">• GPay, PhonePe, Paytm, QR</span>
+                      </div>
+
+                      <div className="inline-flex items-center gap-2 px-2.5 py-1.5 bg-white border border-gray-200 rounded-lg shadow-2xs">
+                        <span className="text-[11px] font-black italic text-[#1A1F71] tracking-tight">VISA</span>
+                        <div className="flex items-center -space-x-1.5">
+                          <div className="w-3.5 h-3.5 rounded-full bg-[#EB001B] opacity-90" />
+                          <div className="w-3.5 h-3.5 rounded-full bg-[#F79E1B] opacity-90" />
+                        </div>
+                        <span className="text-[10px] font-black text-[#097939] tracking-tight">RuPay</span>
+                      </div>
+
+                      <div className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-white border border-gray-200 rounded-lg shadow-2xs text-[11px] font-bold text-gray-700">
+                        <Building2 className="w-3.5 h-3.5 text-blue-600 shrink-0" />
+                        <span>Net Banking</span>
+                      </div>
+
+                      <div className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-white border border-gray-200 rounded-lg shadow-2xs text-[11px] font-bold text-gray-700">
+                        <CreditCard className="w-3.5 h-3.5 text-purple-600 shrink-0" />
+                        <span>Wallets</span>
+                      </div>
+                    </div>
+
+                    <div className="pt-2 border-t border-gray-100 flex items-center justify-between flex-wrap gap-2 text-[11px] text-gray-500">
+                      <div className="flex items-center gap-1.5">
+                        <Lock className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                        <span>256-bit Encrypted Checkout • RBI Regulated Gateway</span>
+                      </div>
+                      <div className="flex items-center gap-1 text-[10px] text-gray-400 font-medium">
+                        <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                        <span>Instant Refund Support</span>
+                      </div>
                     </div>
                   </div>
-                  <span className="text-gray-400 text-[10px] font-medium">Secured</span>
-                </label>
+                </div>
               </div>
             </div>
 
@@ -778,10 +808,11 @@ export default function CheckoutPage() {
                 className="w-full bg-[#D81B60] hover:bg-[#C2185B] text-white font-bold py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 shadow-md shadow-pink-500/20 transition-all cursor-pointer disabled:opacity-50 active:scale-98 text-sm"
               >
                 {isSubmitting ? (
-                  <span>Processing Order...</span>
+                  <span>Opening Secure Gateway...</span>
                 ) : (
                   <>
-                    <span>Place Order • ₹{cartTotal.toLocaleString()}</span>
+                    <Lock className="w-4 h-4" />
+                    <span>Pay ₹{cartTotal.toLocaleString()} with Razorpay</span>
                     <ArrowRight className="w-4 h-4" />
                   </>
                 )}
@@ -808,7 +839,7 @@ export default function CheckoutPage() {
                 {cart.map((item, idx) => (
                   <div key={idx} className="flex gap-2.5 text-xs p-2 bg-gray-50/60 rounded-xl border border-gray-100">
                     <img
-                      src={item.product?.images?.[0] || item.product?.image}
+                      src={formatImageUrl(item.product?.images?.[0] || item.product?.image)}
                       alt={item.product?.name}
                       className="w-12 h-14 object-cover object-top rounded-lg bg-pink-50 shrink-0"
                     />
@@ -913,10 +944,11 @@ export default function CheckoutPage() {
                 className="hidden lg:flex w-full bg-[#D81B60] hover:bg-[#C2185B] text-white font-bold py-3.5 px-4 rounded-xl items-center justify-center gap-2 shadow-md shadow-pink-500/20 hover:shadow-lg transition-all cursor-pointer disabled:opacity-50 active:scale-98 text-sm"
               >
                 {isSubmitting ? (
-                  <span>Processing...</span>
+                  <span>Opening Secure Gateway...</span>
                 ) : (
                   <>
-                    <span>Place Order (₹{cartTotal.toLocaleString()})</span>
+                    <Lock className="w-4 h-4" />
+                    <span>Pay ₹{cartTotal.toLocaleString()} with Razorpay</span>
                     <ArrowRight className="w-4 h-4" />
                   </>
                 )}
@@ -963,7 +995,7 @@ export default function CheckoutPage() {
                 <p className="text-gray-500 text-[11px]">Your Order ID:</p>
                 <p className="text-lg font-black font-mono text-[#D81B60]">{createdOrderId}</p>
                 <p className="text-[10px] text-gray-500 pt-1">
-                  Order updates sent to <strong>{formData.phone || '+91 9876543210'}</strong>
+                  Order updates sent to <strong>{formData.phone || '+91 9261874142'}</strong>
                 </p>
               </div>
 

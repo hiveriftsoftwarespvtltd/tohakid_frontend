@@ -94,7 +94,7 @@ export default function AdminLoginPage() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="admin@tohaykids.com"
+                placeholder="tohaykids@gmail.com"
                 className="w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-2xl text-xs font-semibold text-gray-900 focus:bg-white focus:border-[#D81B60] focus:ring-2 focus:ring-pink-100 transition-all outline-none"
               />
             </div>

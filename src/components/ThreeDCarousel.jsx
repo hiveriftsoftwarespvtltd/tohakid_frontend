@@ -67,10 +67,11 @@ export default function ThreeDCarousel({ items = [], autoPlay = true, interval =
     }
 
     // 3D Coverflow Matrix Calculations
+    // Keep center card at 1:1 scale (translateZ=0, scale=1) so Chrome does not upscale-blur the image or text
     const rotateY = offset === 0 ? 0 : offset < 0 ? 32 : -32;
-    const translateX = offset * 220; // horizontal separation
-    const translateZ = offset === 0 ? 120 : -140 * absOffset;
-    const scale = offset === 0 ? 1.05 : 0.82 - absOffset * 0.05;
+    const translateX = offset * 230; // horizontal separation
+    const translateZ = offset === 0 ? 0 : -140 * absOffset;
+    const scale = offset === 0 ? 1 : 0.78 - (absOffset - 1) * 0.08;
     const opacity = offset === 0 ? 1 : Math.max(0.4, 0.85 - absOffset * 0.25);
     const zIndex = 30 - absOffset * 10;
 
@@ -93,7 +94,7 @@ export default function ThreeDCarousel({ items = [], autoPlay = true, interval =
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[350px] sm:w-[550px] h-[300px] bg-gradient-to-r from-pink-200/40 via-purple-200/30 to-pink-200/40 rounded-full blur-3xl pointer-events-none" />
 
       {/* 3D Stage Container */}
-      <div className="relative h-[420px] sm:h-[480px] md:h-[520px] flex items-center justify-center">
+      <div className="relative h-[480px] sm:h-[540px] md:h-[590px] flex items-center justify-center">
         {items.map((item, idx) => {
           const isCenter = idx === activeIndex;
           const isWishlisted = wishlist.some((w) => (w.id || w._id) === (item.id || item._id));
@@ -141,7 +142,7 @@ export default function ThreeDCarousel({ items = [], autoPlay = true, interval =
                 }
               }}
               style={style}
-              className="absolute w-[240px] sm:w-[280px] md:w-[310px] transition-all duration-500 ease-out cursor-pointer rounded-3xl"
+              className="absolute w-[270px] sm:w-[315px] md:w-[350px] transition-all duration-500 ease-out cursor-pointer rounded-3xl"
             >
               <div
                 className={`relative bg-white rounded-3xl overflow-hidden border transition-all duration-300 ${isCenter
@@ -158,12 +159,12 @@ export default function ThreeDCarousel({ items = [], autoPlay = true, interval =
                       navigate(`/product/${item.id || item._id}`);
                     }
                   }}
-                  className="relative aspect-[4/5] bg-pink-50/40 rounded-t-3xl overflow-hidden group cursor-pointer"
+                  className="relative aspect-[3/4] bg-pink-50/40 rounded-t-3xl overflow-hidden group cursor-pointer"
                 >
                   <img
                     src={formatImageUrl(currentImgSrc)}
                     alt={item.name}
-                    className="w-full h-full object-cover rounded-t-3xl transition-transform duration-700 ease-out group-hover:scale-105 will-change-transform"
+                    className="w-full h-full object-cover object-top origin-top rounded-t-3xl transition-transform duration-700 ease-out group-hover:scale-105"
                   />
 
                   {/* Left & Right Image Navigation Buttons directly on Image (Only on hover if multiple images) */}
@@ -271,7 +272,7 @@ export default function ThreeDCarousel({ items = [], autoPlay = true, interval =
       )}
 
       {/* Pagination Dots Indicator */}
-      <div className="flex items-center justify-center gap-2 pt-4 z-40 relative">
+      <div className="flex items-center justify-center gap-2 pt-6 z-40 relative">
         {items.map((_, idx) => (
           <button
             key={idx}

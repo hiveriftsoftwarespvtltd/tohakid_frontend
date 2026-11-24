@@ -174,8 +174,8 @@ export const adminOrdersData = [
     shipping: 99,
     tax: 145,
     totalAmount: 3143,
-    paymentMethod: 'Cash on Delivery',
-    paymentStatus: 'Pending',
+    paymentMethod: 'UPI (Google Pay)',
+    paymentStatus: 'Successful',
     orderStatus: 'Delivered',
     shippingAddress: {
       flat: 'B-405, Horizon Towers',
@@ -185,11 +185,11 @@ export const adminOrdersData = [
       pincode: '380054'
     },
     timeline: [
-      { status: 'Placed', date: '2026-08-12 11:20 AM', completed: true, note: 'Order placed COD' },
+      { status: 'Placed', date: '2026-08-12 11:20 AM', completed: true, note: 'Order placed via UPI' },
       { status: 'Confirmed', date: '2026-08-12 11:25 AM', completed: true, note: 'Phone verification done' },
       { status: 'Processing', date: '2026-08-12 02:00 PM', completed: true, note: 'Packed' },
       { status: 'Shipped', date: '2026-08-13 09:00 AM', completed: true, note: 'Shipped via Delhivery' },
-      { status: 'Delivered', date: '2026-08-14 02:30 PM', completed: true, note: 'Delivered & Cash Collected' }
+      { status: 'Delivered', date: '2026-08-14 02:30 PM', completed: true, note: 'Delivered to Customer' }
     ]
   },
   {
@@ -264,7 +264,7 @@ export const adminCustomersData = [
     id: 'cust-101',
     name: 'Ananya Sharma',
     email: 'ananya.sharma@gmail.com',
-    phone: '+91 98765 43210',
+    phone: '+91 92618 74142',
     ordersCount: 6,
     totalSpent: 18450,
     lastOrderDate: '2026-08-10',
@@ -526,7 +526,7 @@ export const adminTransactionsData = [
     id: 'TXN-99102',
     orderId: 'TH-10493',
     customerName: 'Rohan Verma',
-    paymentMethod: 'Cash on Delivery',
+    paymentMethod: 'UPI (Google Pay)',
     amount: 3143,
     status: 'Successful',
     date: '2026-08-14 02:30 PM'
@@ -598,10 +598,9 @@ export const adminAnalyticsMetrics = {
     { category: 'Accessories', sales: 33500, percentage: 9 }
   ],
   paymentMethodSplit: [
-    { method: 'UPI (GPay / PhonePe)', percentage: 54, amount: 188190 },
-    { method: 'Credit/Debit Card', percentage: 26, amount: 90610 },
-    { method: 'Cash on Delivery', percentage: 14, amount: 48790 },
-    { method: 'Net Banking & Wallets', percentage: 6, amount: 20910 }
+    { method: 'UPI (GPay / PhonePe)', percentage: 62, amount: 216070 },
+    { method: 'Credit/Debit Card', percentage: 28, amount: 97580 },
+    { method: 'Net Banking & Wallets', percentage: 10, amount: 34850 }
   ],
   salesTrend5: {
     'Today': [

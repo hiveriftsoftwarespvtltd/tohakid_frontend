@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, Ruler, CheckCircle2, ShieldAlert, Info, MoveHorizontal, ChevronRight } from 'lucide-react';
+import { GIRLS_KURTI_AFGANI_DATA, BOYS_KURTA_PAJAMA_DATA } from '../utils/sizeConstants';
 
 export default function SizeGuideModal({ isOpen, onClose, category = '', product = null }) {
   const [activeTab, setActiveTab] = useState('chart'); // 'chart' | 'measuring'
@@ -24,37 +25,10 @@ export default function SizeGuideModal({ isOpen, onClose, category = '', product
   if (!isOpen) return null;
 
   // 1. Alia Kurti with Afgani Size Chart Data (in inches)
-  const girlsKurtiAfganiData = [
-    { size: '14', chest: 20.5, length: 16.5, sleeve: 10.5, pants: 14, waist: 14, hip: 21 },
-    { size: '16', chest: 20.5, length: 18, sleeve: 10.5, pants: 16, waist: 15, hip: 23 },
-    { size: '18', chest: 21, length: 19.25, sleeve: 11, pants: 18, waist: 16, hip: 25 },
-    { size: '20', chest: 22, length: 20.25, sleeve: 11, pants: 20, waist: 17, hip: 26.5 },
-    { size: '22', chest: 23, length: 22, sleeve: 11.5, pants: 22, waist: 18, hip: 27 },
-    { size: '24', chest: 24, length: 23.5, sleeve: 12, pants: 24, waist: 19, hip: 31 },
-    { size: '26', chest: 26, length: 25, sleeve: 12.5, pants: 26, waist: 20, hip: 32 },
-    { size: '28', chest: 28, length: 27, sleeve: 13, pants: 28, waist: 21, hip: 32 },
-    { size: '30', chest: 30, length: 29, sleeve: 13.5, pants: 30, waist: 22, hip: 34 },
-    { size: '32', chest: 32, length: 31, sleeve: 14, pants: 32, waist: 23, hip: 36 },
-    { size: '34', chest: 34, length: 33, sleeve: 14.5, pants: 34, waist: 24, hip: 38 },
-    { size: '36', chest: 36, length: 35.5, sleeve: 16.5, pants: 36, waist: 25, hip: 40 },
-    { size: '38', chest: 38, length: 37.5, sleeve: 17, pants: 38, waist: 26, hip: 42 },
-  ];
+  const girlsKurtiAfganiData = GIRLS_KURTI_AFGANI_DATA;
 
   // 2. Boys Kurta & Pajama Size Chart Data (in inches)
-  const boysKurtaPajamaData = [
-    { size: '14', chest: 20.5, length: 15.5, sleeve: 11, pajama: 15 },
-    { size: '16', chest: 20.5, length: 17, sleeve: 12, pajama: 16.5 },
-    { size: '18', chest: 21, length: 18.5, sleeve: 13, pajama: 18.5 },
-    { size: '20', chest: 22, length: 20, sleeve: 13.5, pajama: 20.5 },
-    { size: '22', chest: 23, length: 21.5, sleeve: 14.5, pajama: 22.5 },
-    { size: '24', chest: 24, length: 22.5, sleeve: 15, pajama: 24.5 },
-    { size: '26', chest: 26, length: 24.5, sleeve: 16, pajama: 26.5 },
-    { size: '28', chest: 28, length: 26, sleeve: 17, pajama: 28.5 },
-    { size: '30', chest: 30, length: 28, sleeve: 17.5, pajama: 30.5 },
-    { size: '32', chest: 32, length: 29.5, sleeve: 18.5, pajama: 32.5 },
-    { size: '34', chest: 34, length: 30.5, sleeve: 20, pajama: 34.5 },
-    { size: '36', chest: 36, length: 34, sleeve: 21, pajama: 36.5 },
-  ];
+  const boysKurtaPajamaData = BOYS_KURTA_PAJAMA_DATA;
 
   const formatVal = (val) => {
     if (unit === 'cm') {
@@ -216,11 +190,14 @@ export default function SizeGuideModal({ isOpen, onClose, category = '', product
                   
                   {selectedChart === 'boys-kurta' ? (
                     /* Boys Kurta & Pajama Table */
-                    <table className="w-full text-center border-collapse text-[11px] sm:text-xs min-w-[380px]">
+                    <table className="w-full text-center border-collapse text-[11px] sm:text-xs min-w-[480px]">
                       <thead className="sticky top-0 z-30 shadow-2xs">
                         <tr className="border-b border-sky-200 bg-sky-50 text-[#0369A1] font-extrabold">
-                          <th className="p-2 sm:p-2.5 bg-sky-100/95 text-[#0369A1] font-black uppercase border-r border-sky-200 sticky left-0 z-40 min-w-[55px] shadow-[2px_0_5px_rgba(0,0,0,0.05)]">
+                          <th className="p-2 sm:p-2.5 bg-sky-100/95 text-[#0369A1] font-black uppercase border-r border-sky-200 sticky left-0 z-40 min-w-[70px] shadow-[2px_0_5px_rgba(0,0,0,0.05)]">
                             SIZE
+                          </th>
+                          <th className="p-2 sm:p-2.5 border-r border-sky-100 min-w-[100px] text-[#0369A1] font-extrabold bg-sky-50/90">
+                            APPROX. AGE
                           </th>
                           <th className="p-2 sm:p-2.5 border-r border-sky-100 min-w-[65px]">CHEST</th>
                           <th className="p-2 sm:p-2.5 border-r border-sky-100 min-w-[75px]">KURTA LEN</th>
@@ -243,7 +220,10 @@ export default function SizeGuideModal({ isOpen, onClose, category = '', product
                               } hover:bg-sky-50/50`}
                             >
                               <td className="p-2 sm:p-2.5 font-mono font-black text-xs text-[#0284C7] bg-inherit border-r border-sky-100 sticky left-0 z-20 shadow-[2px_0_5px_rgba(0,0,0,0.05)]">
-                                {row.size}
+                                Size {row.size}
+                              </td>
+                              <td className="p-2 sm:p-2.5 border-r border-sky-100 font-bold text-sky-900 text-[11px] whitespace-nowrap bg-sky-50/40">
+                                {row.age}
                               </td>
                               <td className="p-2 sm:p-2.5 border-r border-gray-100 font-semibold text-gray-800">
                                 {formatVal(row.chest)}
@@ -264,11 +244,14 @@ export default function SizeGuideModal({ isOpen, onClose, category = '', product
                     </table>
                   ) : (
                     /* Girls Alia Kurti with Afgani Table */
-                    <table className="w-full text-center border-collapse text-[11px] sm:text-xs min-w-[480px]">
+                    <table className="w-full text-center border-collapse text-[11px] sm:text-xs min-w-[560px]">
                       <thead className="sticky top-0 z-30 shadow-2xs">
                         <tr className="border-b border-pink-200 bg-pink-50 text-[#8E1B46] font-extrabold">
-                          <th className="p-2 sm:p-2.5 bg-pink-100/95 text-[#8E1B46] font-black uppercase border-r border-pink-200 sticky left-0 z-40 min-w-[55px] shadow-[2px_0_5px_rgba(0,0,0,0.05)]">
+                          <th className="p-2 sm:p-2.5 bg-pink-100/95 text-[#8E1B46] font-black uppercase border-r border-pink-200 sticky left-0 z-40 min-w-[70px] shadow-[2px_0_5px_rgba(0,0,0,0.05)]">
                             SIZE
+                          </th>
+                          <th className="p-2 sm:p-2.5 border-r border-pink-100 min-w-[100px] text-[#8E1B46] font-extrabold bg-pink-50/90">
+                            APPROX. AGE
                           </th>
                           <th className="p-2 sm:p-2.5 border-r border-pink-100 min-w-[65px]">CHEST</th>
                           <th className="p-2 sm:p-2.5 border-r border-pink-100 min-w-[70px]">LENGTH</th>
@@ -293,7 +276,10 @@ export default function SizeGuideModal({ isOpen, onClose, category = '', product
                               } hover:bg-pink-50/50`}
                             >
                               <td className="p-2 sm:p-2.5 font-mono font-black text-xs text-[#D81B60] bg-inherit border-r border-pink-100 sticky left-0 z-20 shadow-[2px_0_5px_rgba(0,0,0,0.05)]">
-                                {row.size}
+                                Size {row.size}
+                              </td>
+                              <td className="p-2 sm:p-2.5 border-r border-pink-100 font-bold text-pink-900 text-[11px] whitespace-nowrap bg-pink-50/40">
+                                {row.age}
                               </td>
                               <td className="p-2 sm:p-2.5 border-r border-gray-100 font-semibold text-gray-800">
                                 {formatVal(row.chest)}
@@ -324,23 +310,14 @@ export default function SizeGuideModal({ isOpen, onClose, category = '', product
               </div>
 
               {/* Informative Notes in Compact Clean Cards */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-                {selectedChart === 'girls-kurti' && (
-                  <div className="p-2.5 bg-amber-50/80 border border-amber-200/90 rounded-xl flex items-start gap-2 text-amber-900">
-                    <Info className="w-3.5 h-3.5 text-amber-600 shrink-0 mt-0.5" />
-                    <p className="text-[10px] sm:text-[11px] leading-relaxed">
-                      <strong>* Waist Measurement:</strong> Un-stretched elastic waist. Expands equal to hip size when worn.
-                    </p>
-                  </div>
-                )}
-
-                <div className="p-2.5 bg-emerald-50/80 border border-emerald-200/90 rounded-xl flex items-start gap-2 text-emerald-800">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
+              {selectedChart === 'girls-kurti' && (
+                <div className="p-2.5 bg-amber-50/80 border border-amber-200/90 rounded-xl flex items-start gap-2 text-amber-900 text-xs">
+                  <Info className="w-3.5 h-3.5 text-amber-600 shrink-0 mt-0.5" />
                   <p className="text-[10px] sm:text-[11px] leading-relaxed">
-                    <strong>+2 Inch Inner Margin:</strong> Extra inner seam margins included for easy alterations as your child grows!
+                    <strong>* Waist Measurement:</strong> Un-stretched elastic waist. Expands equal to hip size when worn.
                   </p>
                 </div>
-              </div>
+              )}
 
             </div>
           )}

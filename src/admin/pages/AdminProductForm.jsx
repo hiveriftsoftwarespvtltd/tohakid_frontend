@@ -8,6 +8,7 @@ import { useAdmin } from '../context/AdminContext';
 import { compressImage, compressImageToFile } from '../../utils/imageCompressor';
 import { uploadService } from '../../services/uploadService';
 import { saveProductVariants, getProductVariants, enrichProductWithVariants } from '../../utils/variantStorage';
+import { ADMIN_YEAR_SIZES } from '../../utils/sizeConstants';
 
 export default function AdminProductForm() {
   const { id } = useParams();
@@ -617,10 +618,7 @@ export default function AdminProductForm() {
                 </label>
                 <div className="flex flex-wrap gap-2">
                   {Array.from(new Set([
-                    '0-1Y', '1-2Y', '2-3Y', '3-4Y', '4-5Y', '5-6Y', '6-7Y', '7-8Y',
-                    '8-9Y', '9-10Y', '10-11Y', '11-12Y', '12-13Y', '13-14Y', '14-15Y', '15-16Y',
-                    '0-2Y', '2-4Y', '4-6Y', '6-8Y', '8-10Y', '10-12Y', '12-14Y', '14-16Y',
-                    'Free Size', 'S', 'M', 'L', 'XL',
+                    ...ADMIN_YEAR_SIZES,
                     ...(formData.sizes || [])
                   ])).map((s) => {
                     const isSel = (formData.sizes || []).includes(s);

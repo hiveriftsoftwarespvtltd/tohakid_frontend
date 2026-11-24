@@ -104,3 +104,33 @@ export const findMatchedVariant = (sizeVariants, targetSize) => {
   const targetNorm = normalizeSizeKey(targetSize);
   return sizeVariants.find((v) => normalizeSizeKey(v.size) === targetNorm) || null;
 };
+
+/**
+ * Checks whether a given size is currently selectable / in stock on a product.
+ */
+export const isProductSizeAvailable = (product, sizeName) => {
+  if (!product || !sizeName) return false;
+  const targetNorm = normalizeSizeKey(sizeName);
+
+  const hasExplicitSizes = Array.isArray(product.sizes) && product.sizes.length > 0;
+  const inSizesList = hasExplicitSizes
+    ? product.sizes.some((s) => normalizeSizeKey(s) === targetNorm)
+    : false;
+
+  if (hasExplicitSizes && !inSizesList) return false;
+
+  const hasVariants = Array.isArray(product.sizeVariants) && product.sizeVariants.length > 0;
+  if (hasVariants) {
+    const v = findMatchedVariant(product.sizeVariants, sizeName);
+    if (v) {
+      return v.isAvailable !== false && Number(v.stock ?? 1) > 0;
+    }
+    return hasExplicitSizes ? (product.stock ?? 1) > 0 : false;
+  }
+
+  if (hasExplicitSizes) {
+    return (product.stock ?? 1) > 0;
+  }
+
+  return false;
+};

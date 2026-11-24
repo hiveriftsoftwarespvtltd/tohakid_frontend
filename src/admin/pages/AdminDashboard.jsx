@@ -194,8 +194,7 @@ export default function AdminDashboard() {
     }
     if (!ordersList || ordersList.length === 0) {
       return [
-        { method: 'Prepaid / Online (UPI/Cards)', percentage: 0 },
-        { method: 'Cash on Delivery (COD)', percentage: 0 }
+        { method: 'Prepaid / Online (UPI/Cards/Netbanking)', percentage: 0 }
       ];
     }
     const counts = {};

@@ -7,6 +7,7 @@ import Swal from 'sweetalert2';
 import { useAdmin } from '../context/AdminContext';
 import { compressImage, compressImageToFile } from '../../utils/imageCompressor';
 import { uploadService } from '../../services/uploadService';
+import { ADMIN_YEAR_SIZES } from '../../utils/sizeConstants';
 
 export default function AdminAddProductModal({ isOpen, onClose }) {
   const { addProduct, categoriesList } = useAdmin();
@@ -57,12 +58,7 @@ export default function AdminAddProductModal({ isOpen, onClose }) {
 
   if (!isOpen) return null;
 
-  const availableSizeOptions = [
-    '0-1Y', '1-2Y', '2-3Y', '3-4Y', '4-5Y', '5-6Y', '6-7Y', '7-8Y',
-    '8-9Y', '9-10Y', '10-11Y', '11-12Y', '12-13Y', '13-14Y', '14-15Y', '15-16Y',
-    '0-2Y', '2-4Y', '4-6Y', '6-8Y', '8-10Y', '10-12Y', '12-14Y', '14-16Y',
-    'Free Size', 'S', 'M', 'L', 'XL'
-  ];
+  const availableSizeOptions = ADMIN_YEAR_SIZES;
 
   const handleNameChange = (val) => {
     setFormData((prev) => ({

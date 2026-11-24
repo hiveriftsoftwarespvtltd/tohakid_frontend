@@ -75,6 +75,30 @@ function ProtectedProfile({ children }) {
   return children;
 }
 
+// Protected Checkout Guard
+function ProtectedCheckout({ children }) {
+  const { isLoggedIn, showToast } = useShop();
+  const location = useLocation();
+
+  useEffect(() => {
+    if (!isLoggedIn) {
+      showToast('Please sign in to proceed with checkout.');
+    }
+  }, [isLoggedIn, showToast]);
+
+  if (!isLoggedIn) {
+    const returnTarget = location.pathname + location.search;
+    return (
+      <Navigate
+        to={`/login?redirect=${encodeURIComponent(returnTarget)}`}
+        state={{ from: returnTarget }}
+        replace
+      />
+    );
+  }
+  return children;
+}
+
 // Protected Admin Portal Guard
 function ProtectedAdminRoute({ children }) {
   const adminToken = localStorage.getItem('tohay_admin_token');
@@ -109,12 +133,13 @@ function ToastBanner() {
 function MainLayout() {
   const { pathname } = useLocation();
   const isCheckout = pathname === '/checkout';
+  const isCartRoute = pathname === '/cart';
 
   return (
     <div className={`min-h-screen flex flex-col bg-[#FFFDFC] ${isCheckout ? 'pb-0' : 'pb-16 md:pb-0'}`}>
       <ScrollToTop />
       <Header />
-      <CartDrawer />
+      {!isCartRoute && <CartDrawer />}
       <ToastBanner />
       <main className="flex-1">
         <Outlet />
@@ -220,7 +245,14 @@ export default function App() {
             <Route path="/product/:id" element={<ProductDetailPage />} />
             <Route path="/wishlist" element={<WishlistPage />} />
             <Route path="/cart" element={<CartPage />} />
-            <Route path="/checkout" element={<CheckoutPage />} />
+            <Route
+              path="/checkout"
+              element={
+                <ProtectedCheckout>
+                  <CheckoutPage />
+                </ProtectedCheckout>
+              }
+            />
             <Route
               path="/profile"
               element={

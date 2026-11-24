@@ -105,7 +105,7 @@ export default function Header() {
     <header className={`sticky top-0 shadow-sm font-sans transition-all ${mobileMenuOpen ? 'z-50' : 'z-40'}`}>
 
       {/* MAIN HEADER ROW (Search | Centered Sleek Logo | Utilities) */}
-      <div className="bg-gradient-to-r from-[#FFF4F7] via-[#FFF9FB] to-[#FFF7EE] border-b border-pink-200/70 shadow-2xs backdrop-blur-md">
+      <div className="bg-gradient-to-r from-[#FCE1EB] via-[#FDF0F6] to-[#FCE3ED] border-b border-pink-200/90 shadow-2xs backdrop-blur-md transition-colors">
         <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-10 py-2 sm:py-2.5">
           <div className="grid grid-cols-3 items-center gap-2 sm:gap-4">
 
@@ -289,7 +289,7 @@ export default function Header() {
       )}
 
       {/* 3. VIBRANT THEMED CATEGORY NAVIGATION BAR */}
-      <nav className="border-t border-b border-pink-200/60 bg-gradient-to-r from-[#FFF0F5]/90 via-[#FDF4FF]/85 to-[#FFFBEB]/90 py-1 shadow-2xs backdrop-blur-md overflow-x-auto no-scrollbar">
+      <nav className="border-t border-b border-pink-200/70 bg-gradient-to-r from-[#FCE4EE]/95 via-[#FDF2F7]/90 to-[#FCE5EF]/95 py-1 shadow-2xs backdrop-blur-md overflow-x-auto no-scrollbar transition-colors">
         <div className="max-w-[1600px] mx-auto px-3 sm:px-4 flex items-center justify-center min-w-max sm:min-w-0">
           <div className="inline-flex items-center gap-1 sm:gap-1.5 p-0.5 sm:p-1 bg-white/90 backdrop-blur-md rounded-full border border-pink-200/80 shadow-xs">
             {navLinks.map((link) => (

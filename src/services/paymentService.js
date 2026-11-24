@@ -1,6 +1,7 @@
 import apiClient from './apiClient';
 
 export const paymentService = {
+  // Razorpay endpoints
   async createRazorpayOrder(amount, receipt) {
     return await apiClient.post('/payments/create-order', { amount, receipt });
   },
@@ -13,3 +14,5 @@ export const paymentService = {
     return await apiClient.get('/payments/admin/all');
   },
 };
+
+export default paymentService;

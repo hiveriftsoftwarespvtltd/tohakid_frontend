@@ -14,13 +14,21 @@ export default function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Redirect to profile or previous page if already logged in
+  // Read redirect target from URL query (?redirect=/checkout) or router state
+  const searchParams = new URLSearchParams(location.search);
+  const redirectQuery = searchParams.get('redirect');
+  const redirectState =
+    typeof location.state?.from === 'string'
+      ? location.state.from
+      : location.state?.from?.pathname;
+  const redirectTarget = redirectQuery || redirectState || '/profile';
+
+  // Redirect to target or profile if already logged in
   React.useEffect(() => {
     if (isLoggedIn) {
-      const from = location.state?.from?.pathname || '/profile';
-      navigate(from, { replace: true });
+      navigate(redirectTarget, { replace: true });
     }
-  }, [isLoggedIn, navigate, location]);
+  }, [isLoggedIn, navigate, redirectTarget]);
 
   // Mode: 'login' or 'signup'
   const isInitialSignup = location.pathname.includes('signup');
@@ -53,8 +61,7 @@ export default function LoginPage() {
     }
     const res = await loginUser(email, password);
     if (res?.success) {
-      const from = location.state?.from?.pathname || '/profile';
-      navigate(from, { replace: true });
+      navigate(redirectTarget, { replace: true });
     }
   };
 
@@ -92,7 +99,13 @@ export default function LoginPage() {
       }).then(() => {
         setPassword('');
         setAuthMode('login');
-        navigate('/login');
+        if (redirectTarget && redirectTarget !== '/profile') {
+          navigate(`/login?redirect=${encodeURIComponent(redirectTarget)}`, {
+            state: { from: redirectTarget },
+          });
+        } else {
+          navigate('/login');
+        }
       });
     }
   };
@@ -328,7 +341,7 @@ export default function LoginPage() {
                       <input
                         type="tel"
                         maxLength={10}
-                        placeholder="9876543210"
+                        placeholder="9261874142"
                         value={phone}
                         onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))}
                         className="w-full pl-10 pr-4 py-2.5 bg-gray-50/70 border border-gray-200 rounded-xl text-xs font-semibold text-gray-800 placeholder-gray-400 focus:outline-none focus:border-pink-500 focus:bg-white focus:ring-2 focus:ring-pink-100 transition-all"

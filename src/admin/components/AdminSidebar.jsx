@@ -258,7 +258,7 @@ export default function AdminSidebar() {
                 <span>Admin</span>
                 <UserCheck className="w-3 h-3 text-emerald-400 shrink-0" />
               </p>
-              <p className="text-[10px] text-slate-400 truncate">admin@tohaykids.com</p>
+              <p className="text-[10px] text-slate-400 truncate">tohaykids@gmail.com</p>
             </div>
           </div>
         </div>

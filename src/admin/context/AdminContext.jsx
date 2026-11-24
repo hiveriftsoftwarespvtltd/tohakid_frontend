@@ -55,8 +55,8 @@ export const AdminProvider = ({ children }) => {
   // Settings State
   const [storeSettings, setStoreSettings] = useState({
     storeName: 'Tohay Kids Festive Wear',
-    contactEmail: 'admin@tohaykids.com',
-    supportPhone: '+91 98765 43210',
+    contactEmail: 'tohaykids@gmail.com',
+    supportPhone: '+91 92618 74142',
     currencySymbol: '₹',
     currencyCode: 'INR',
     address: '',
@@ -65,7 +65,7 @@ export const AdminProvider = ({ children }) => {
     gstTaxRate: 5,
     adminProfile: {
       name: 'Admin (Tohay Store)',
-      email: 'admin@tohaykids.com',
+      email: 'tohaykids@gmail.com',
       role: 'Admin',
       avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80',
     },
@@ -92,7 +92,7 @@ export const AdminProvider = ({ children }) => {
       if (!localStorage.getItem('tohay_admin_token') && !localStorage.getItem('tohay_access_token')) {
         try {
           const authRes = await authService.adminLogin({
-            email: 'admin@tohaykids.com',
+            email: 'tohaykids@gmail.com',
             password: 'AdminPassword123!',
           });
           const token = authRes?.data?.accessToken || authRes?.accessToken;
@@ -236,7 +236,7 @@ export const AdminProvider = ({ children }) => {
     if (!localStorage.getItem('tohay_admin_token') && !localStorage.getItem('tohay_access_token')) {
       try {
         const authRes = await authService.adminLogin({
-          email: 'admin@tohaykids.com',
+          email: 'tohaykids@gmail.com',
           password: 'AdminPassword123!',
         });
         const token = authRes?.data?.accessToken || authRes?.accessToken;
@@ -268,7 +268,7 @@ export const AdminProvider = ({ children }) => {
     if (!localStorage.getItem('tohay_admin_token') && !localStorage.getItem('tohay_access_token')) {
       try {
         const authRes = await authService.adminLogin({
-          email: 'admin@tohaykids.com',
+          email: 'tohaykids@gmail.com',
           password: 'AdminPassword123!',
         });
         const token = authRes?.data?.accessToken || authRes?.accessToken;

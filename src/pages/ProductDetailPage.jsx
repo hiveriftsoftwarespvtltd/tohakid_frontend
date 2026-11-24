@@ -6,16 +6,31 @@ import {
   ZoomIn, ZoomOut, Maximize2, X, ChevronLeft
 } from 'lucide-react';
 import { useShop } from '../context/ShopContext';
+import Swal from 'sweetalert2';
 import ProductCard from '../components/ProductCard';
 import SizeGuideModal from '../components/SizeGuideModal';
 import { formatImageUrl } from '../utils/imageUtils';
 import { productService } from '../services/productService';
-import { enrichProductWithVariants, findMatchedVariant, normalizeSizeKey } from '../utils/variantStorage';
+import { enrichProductWithVariants, findMatchedVariant, isProductSizeAvailable } from '../utils/variantStorage';
+import { getSizeAgeLabel, getSizeCompactLabel, getFullProductSizeList } from '../utils/sizeConstants';
 
 export default function ProductDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { products, addToCart, toggleWishlist, isInWishlist, setIsCartOpen } = useShop();
+  const {
+    products,
+    addToCart,
+    toggleWishlist,
+    isInWishlist,
+    setIsCartOpen,
+    isLoggedIn,
+    user,
+    addresses,
+    freeShippingThreshold,
+    clearCart,
+    refreshOrders,
+    showToast,
+  } = useShop();
 
   const [remoteProduct, setRemoteProduct] = useState(null);
   const [variantUpdateTrigger, setVariantUpdateTrigger] = useState(0);
@@ -59,15 +74,8 @@ export default function ProductDetailPage() {
 
   const displaySizes = useMemo(() => {
     if (!product) return [];
-    // Strictly display only sizes chosen by admin
-    if (Array.isArray(product.sizes) && product.sizes.length > 0) {
-      return product.sizes;
-    }
-    if (Array.isArray(product.sizeVariants) && product.sizeVariants.length > 0) {
-      return product.sizeVariants.map((v) => v.size);
-    }
-    return [];
-  }, [product?.sizes, product?.sizeVariants]);
+    return getFullProductSizeList(product);
+  }, [product]);
 
   const images = (product?.images && product.images.length > 0)
     ? product.images
@@ -168,24 +176,22 @@ export default function ProductDetailPage() {
     setIsZoomModalOpen(true);
   };
 
+  const isSizeInStock = (sizeName) => isProductSizeAvailable(product, sizeName);
+
   useEffect(() => {
     if (displaySizes && displaySizes.length > 0) {
-      // Prioritize first in-stock size if available
-      const firstInStock = displaySizes.find((sz) => {
-        if (!product?.sizeVariants || product.sizeVariants.length === 0) return true;
-        const v = product.sizeVariants.find((vr) => vr.size === sz);
-        return v ? v.isAvailable !== false && Number(v.stock ?? 1) > 0 : true;
-      }) || displaySizes[0];
+      const availableSizes = displaySizes.filter((sz) => isProductSizeAvailable(product, sz));
+      const firstInStock = availableSizes[0] || '';
 
       setSelectedSize(firstInStock);
-      setChild1Size(displaySizes[0]);
-      setChild2Size(displaySizes[1] || displaySizes[0]);
+      setChild1Size(availableSizes[0] || '');
+      setChild2Size(availableSizes[1] || availableSizes[0] || '');
     } else {
       setSelectedSize('');
       setChild1Size('');
       setChild2Size('');
     }
-  }, [displaySizes, product?.id, product?._id]);
+  }, [displaySizes, product]);
 
   // Dynamic Size Variant Matching
   const activeVariant = useMemo(() => {
@@ -218,20 +224,9 @@ export default function ProductDetailPage() {
   }, [currentPrice, currentMrp]);
 
   const isCurrentSizeAvailable = useMemo(() => {
-    if (activeVariant) {
-      return activeVariant.isAvailable !== false && Number(activeVariant.stock ?? 1) > 0;
-    }
-    return (product?.stock ?? 1) > 0;
-  }, [activeVariant, product?.stock]);
-
-  const isSizeInStock = (sizeName) => {
-    if (!product?.sizeVariants || !Array.isArray(product.sizeVariants) || product.sizeVariants.length === 0) {
-      return true;
-    }
-    const v = findMatchedVariant(product.sizeVariants, sizeName);
-    if (!v) return true;
-    return v.isAvailable !== false && Number(v.stock ?? 1) > 0;
-  };
+    if (!selectedSize) return false;
+    return isProductSizeAvailable(product, selectedSize);
+  }, [selectedSize, product]);
 
   if (!product) {
     return (
@@ -272,9 +267,18 @@ export default function ProductDetailPage() {
     });
   };
 
-  const handleBuyNow = () => {
-    if (!isCurrentSizeAvailable) return;
-    handleAddToCart();
+  const handleBuyNow = async () => {
+    if (!product) return;
+    if (!isCurrentSizeAvailable) {
+      showToast('Selected size is out of stock.');
+      return;
+    }
+    await addToCart(product, selectedSize, quantity, {
+      price: currentPrice,
+      mrp: currentMrp,
+      child1Size: product.isSiblingSet ? child1Size : null,
+      child2Size: product.isSiblingSet ? child2Size : null,
+    });
     setIsCartOpen(false);
     navigate('/checkout');
   };
@@ -462,7 +466,7 @@ export default function ProductDetailPage() {
                   <span className="text-[11px] sm:text-xs font-bold text-gray-800 uppercase tracking-wide">Select Age / Size:</span>
                   {selectedSize && (
                     <span className="text-[11px] sm:text-xs font-extrabold text-[#D81B60]">
-                      ({selectedSize})
+                      ({selectedSize}{getSizeAgeLabel(selectedSize) ? ` • ${getSizeAgeLabel(selectedSize)}` : ''})
                     </span>
                   )}
                 </div>
@@ -478,26 +482,52 @@ export default function ProductDetailPage() {
               <div className="flex flex-wrap gap-2 sm:gap-2.5">
                 {displaySizes?.map((sz) => {
                   const inStock = isSizeInStock(sz);
+                  const compactAge = getSizeCompactLabel(sz);
+                  const isSelected = inStock && selectedSize === sz;
 
                   return (
                     <button
                       key={sz}
                       type="button"
-                      onClick={() => inStock && setSelectedSize(sz)}
+                      onClick={() => {
+                        if (inStock) setSelectedSize(sz);
+                      }}
                       disabled={!inStock}
-                      className={`min-w-[44px] sm:min-w-[50px] h-9 sm:h-10 px-3 rounded-xl text-xs font-bold transition-all relative flex items-center justify-center select-none ${selectedSize === sz
+                      aria-disabled={!inStock}
+                      className={`relative overflow-hidden min-w-[48px] sm:min-w-[56px] min-h-[40px] sm:min-h-[44px] px-2.5 py-1 rounded-xl text-xs font-bold transition-all flex flex-col items-center justify-center select-none ${
+                        isSelected
                           ? 'bg-[#D81B60] text-white shadow-md ring-2 ring-pink-300 font-extrabold scale-105 cursor-pointer'
                           : inStock
                             ? 'bg-white text-gray-800 border border-gray-200 hover:border-pink-300 hover:bg-pink-50/40 hover:text-[#D81B60] cursor-pointer'
-                            : 'bg-gray-100 text-gray-400 border border-dashed border-gray-300 cursor-not-allowed opacity-60'
-                        }`}
-                      title={!inStock ? `${sz} (Out of stock)` : sz}
+                            : 'bg-gray-50 text-gray-400 border border-gray-200 cursor-not-allowed'
+                      }`}
+                      title={!inStock ? `${sz} (Not Available)` : `${sz}${getSizeAgeLabel(sz) ? ` (${getSizeAgeLabel(sz)})` : ''}`}
                     >
-                      <span className={!inStock ? 'line-through text-gray-400' : ''}>{sz}</span>
-                      {!inStock && (
-                        <span className="absolute -top-1.5 -right-1 bg-rose-500 text-white text-[7px] font-black px-1.5 py-0.2 rounded-full uppercase tracking-tighter">
-                          Sold
+                      <span className={`leading-none ${!inStock ? 'line-through text-gray-400' : ''}`}>{sz}</span>
+                      {compactAge && (
+                        <span className={`text-[9px] font-semibold tracking-tight leading-none mt-0.5 whitespace-nowrap ${
+                          isSelected ? 'text-pink-100' : !inStock ? 'line-through text-gray-400' : 'text-gray-500'
+                        }`}>
+                          {compactAge}
                         </span>
+                      )}
+                      {!inStock && (
+                        <svg
+                          aria-hidden="true"
+                          viewBox="0 0 100 100"
+                          preserveAspectRatio="none"
+                          className="pointer-events-none absolute inset-0 w-full h-full text-rose-400/80"
+                        >
+                          <line
+                            x1="0"
+                            y1="100"
+                            x2="100"
+                            y2="0"
+                            stroke="currentColor"
+                            strokeWidth="1.5"
+                            vectorEffect="non-scaling-stroke"
+                          />
+                        </svg>
                       )}
                     </button>
                   );
@@ -522,9 +552,14 @@ export default function ProductDetailPage() {
                     onChange={(e) => setChild1Size(e.target.value)}
                     className="w-full bg-white border border-gray-300 rounded-xl p-2 font-bold text-xs"
                   >
-                    {displaySizes?.map((sz) => (
-                      <option key={sz} value={sz}>{sz}</option>
-                    ))}
+                    {displaySizes?.map((sz) => {
+                      const inStock = isSizeInStock(sz);
+                      return (
+                        <option key={sz} value={sz} disabled={!inStock}>
+                          {sz}{getSizeAgeLabel(sz) ? ` (${getSizeAgeLabel(sz)})` : ''}{!inStock ? ' — Not Available' : ''}
+                        </option>
+                      );
+                    })}
                   </select>
                 </div>
                 <div>
@@ -534,9 +569,14 @@ export default function ProductDetailPage() {
                     onChange={(e) => setChild2Size(e.target.value)}
                     className="w-full bg-white border border-gray-300 rounded-xl p-2 font-bold text-xs"
                   >
-                    {displaySizes?.map((sz) => (
-                      <option key={sz} value={sz}>{sz}</option>
-                    ))}
+                    {displaySizes?.map((sz) => {
+                      const inStock = isSizeInStock(sz);
+                      return (
+                        <option key={sz} value={sz} disabled={!inStock}>
+                          {sz}{getSizeAgeLabel(sz) ? ` (${getSizeAgeLabel(sz)})` : ''}{!inStock ? ' — Not Available' : ''}
+                        </option>
+                      );
+                    })}
                   </select>
                 </div>
               </div>
@@ -587,7 +627,7 @@ export default function ProductDetailPage() {
                   : 'bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed'
                 }`}
             >
-              {isCurrentSizeAvailable ? 'Buy Now (Express Checkout)' : 'Unavailable in this Size'}
+              {isCurrentSizeAvailable ? 'Buy Now' : 'Unavailable in this Size'}
             </button>
           </div>
 

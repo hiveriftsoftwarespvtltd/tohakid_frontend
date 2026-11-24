@@ -49,16 +49,16 @@ export default function AboutPage() {
       <section className="text-center max-w-4xl mx-auto space-y-4 px-2">
         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-pink-50 border border-pink-200/80 text-[#D81B60] text-xs font-bold uppercase tracking-widest">
           <Heart className="w-3.5 h-3.5 fill-[#D81B60]" />
-          <span>The Tohay Heritage</span>
+          <span>About TOHAY KIDS</span>
         </div>
 
         <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-gray-900 leading-tight tracking-tight">
-          Where Childhood Innocence Meets <br className="hidden sm:inline" />
-          <span className="text-[#D81B60]">Timeless Indian Craft</span>
+          Where Little Ones Deserve The Finest Blend Of <br className="hidden sm:inline" />
+          <span className="text-[#D81B60]">Tradition, Elegance & Comfort</span>
         </h1>
 
-        <p className="text-sm sm:text-base md:text-lg text-gray-600 font-normal leading-relaxed max-w-2xl mx-auto">
-          We believe festivals are made of laughter, family rituals, and carefree dancing. Every outfit we design is created so your child feels completely joyful, comfortable, and beautifully celebrated.
+        <p className="text-sm sm:text-base md:text-lg text-gray-700 font-medium leading-relaxed max-w-2xl mx-auto">
+          At TOHAY KIDS, we believe that little ones deserve the finest blend of tradition, elegance, and comfort.
         </p>
 
         <div className="flex items-center justify-center gap-3 pt-2">
@@ -97,21 +97,21 @@ export default function AboutPage() {
         {/* Right Column: Thoughtful Prose */}
         <div className="lg:col-span-6 space-y-6">
           <div className="space-y-2">
-            <span className="text-xs font-bold uppercase tracking-wider text-[#D81B60]">The Tohay Story</span>
+            <span className="text-xs font-bold uppercase tracking-wider text-[#D81B60]">About TOHAY KIDS</span>
             <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-gray-900 leading-snug">
-              Say Goodbye to Heavy, Itchy Festive Wear
+              Tradition, Elegance & Comfort For Little Celebrations
             </h2>
           </div>
 
-          <div className="space-y-4 text-sm sm:text-base text-gray-600 leading-relaxed font-normal">
-            <p>
-              For decades, children’s ethnic wear presented parents with a frustrating compromise. The garments looked stunning in family photographs, but on the inside, rough synthetic backings, scratchy zari threads, and stiff seams left kids restless, uncomfortable, and wanting to change within minutes.
+          <div className="space-y-4 text-sm sm:text-base text-gray-700 leading-relaxed font-normal">
+            <p className="text-base sm:text-lg text-gray-900 font-semibold leading-relaxed">
+              At TOHAY KIDS, we believe that little ones deserve the finest blend of tradition, elegance, and comfort.
             </p>
             <p>
-              <strong className="text-gray-900 font-semibold">Tohay Kids</strong> was founded to solve this dilemma once and for all. We re-engineered traditional Indian silhouettes—from graceful Alia Kurtis and Shararas to dapper Kurta-Dhoti sets—crafting them with second-skin soft mulmul linings, breathable textiles, and generous movement allowances.
+              We endeavour to bring thoughtfully designed premium ethnic wear for children, where traditional charm meets contemporary style.
             </p>
             <p>
-              The result? Regal Indian ethnic wear that feels as gentle and relaxed as your child's favorite cotton playtime clothes.
+              With a special emphasis on soft, breathable cotton fabrics, gentle textures, and comfortable fits, TOHAY KIDS brings together the richness of Indian traditions and the innocence of childhood.
             </p>
           </div>
 
@@ -130,7 +130,7 @@ export default function AboutPage() {
             <div className="p-4 rounded-2xl bg-[#FBF9FE] border border-purple-100 space-y-1">
               <div className="flex items-center gap-2 text-purple-600">
                 <Ruler className="w-4 h-4" />
-                <span className="font-bold text-xs sm:text-sm text-gray-900">+2" Growth Margins</span>
+                <span className="font-bold text-xs sm:text-sm text-gray-900">Relaxed Comfort Fit</span>
               </div>
               <p className="text-xs text-gray-500 leading-relaxed font-normal">
                 Concealed inner seam allowance ensures multi-season festive wear.
@@ -202,10 +202,10 @@ export default function AboutPage() {
               </div>
               <div className="space-y-1">
                 <span className="text-[11px] font-bold uppercase tracking-wider text-purple-600">Smart Multi-Season Wear</span>
-                <h3 className="text-lg sm:text-xl font-bold text-gray-900">+2" Growth Margins</h3>
+                <h3 className="text-lg sm:text-xl font-bold text-gray-900">Comfort Growth Fit</h3>
               </div>
               <p className="text-xs sm:text-sm text-gray-600 leading-relaxed font-normal">
-                Children grow in sudden spurts, but beautiful festive outfits shouldn't be worn only once. Our master pattern cutters conceal two full inches of extra fabric margin inside side seams and sleeve hems. As your child grows, a simple seam release extends the outfit for subsequent family celebrations.
+                Children grow in sudden spurts, but beautiful festive outfits shouldn't be worn only once. Our master pattern cutters design thoughtful ease and comfortable allowances inside side seams and sleeve hems so your child can enjoy the outfit for subsequent family celebrations.
               </p>
             </div>
             <div className="pt-4 border-t border-gray-100 flex items-center text-xs font-bold text-purple-600 gap-1.5">
@@ -385,7 +385,7 @@ export default function AboutPage() {
                 ))}
               </div>
               <p className="text-xs sm:text-sm text-gray-700 leading-relaxed italic font-normal">
-                "The sibling matching Kurta and Lehenga set was the star of our family wedding in Udaipur. The colors were radiant in photographs, and the +2 inch margins allowed us to easily adjust the fit for our growing boy."
+                "The sibling matching Kurta and Lehenga set was the star of our family wedding in Udaipur. The colors were radiant in photographs, and the comfortable fit allowed our boy to celebrate freely all day."
               </p>
             </div>
             <div className="pt-4 border-t border-gray-100 flex items-center justify-between">
@@ -466,7 +466,7 @@ export default function AboutPage() {
               <Lock className="w-6 h-6 stroke-[2]" />
             </div>
             <h4 className="font-bold text-xs sm:text-sm text-gray-900">100% Safe Checkout</h4>
-            <p className="text-[11px] text-gray-500 leading-relaxed">Secure encrypted payments via UPI, Cards, Netbanking & COD.</p>
+            <p className="text-[11px] text-gray-500 leading-relaxed">Secure encrypted payments via UPI, Cards, Netbanking & Wallets.</p>
           </div>
         </div>
       </section>
@@ -506,7 +506,7 @@ export default function AboutPage() {
             Shop Sibling Sets
           </Link>
           <a
-            href="https://wa.me/919876543210"
+            href="https://wa.me/919261874142"
             target="_blank"
             rel="noreferrer"
             className="bg-[#25D366] hover:bg-[#1EBE5D] text-white font-bold text-xs uppercase tracking-wider px-6 sm:px-8 py-3.5 rounded-xl shadow-sm transition-all hover:scale-102 flex items-center gap-2"

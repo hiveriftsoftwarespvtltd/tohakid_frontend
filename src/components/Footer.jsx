@@ -1,14 +1,18 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Heart, MessageCircle, Mail, Phone, Clock, Banknote, ShieldCheck } from 'lucide-react';
+import { Heart, MessageCircle, Mail, Phone, Clock } from 'lucide-react';
 import Logo from './Logo';
+import upiIcon from '../assets/payments/upi.png';
+import visaIcon from '../assets/payments/visa.png';
+import mastercardIcon from '../assets/payments/mastercard.png';
+import rupayIcon from '../assets/payments/rupay.png';
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
     <footer className="bg-gradient-to-b from-[#210616] via-[#17040F] to-[#0D0208] text-white border-t border-pink-900/50 pt-14 pb-10 font-sans shadow-2xl relative overflow-hidden">
-      
+
       {/* Subtle Ambient Decorative Glow */}
       <div className="absolute top-0 left-1/4 w-96 h-32 bg-[#D81B60]/10 blur-3xl pointer-events-none rounded-full" />
       <div className="absolute bottom-0 right-1/4 w-96 h-32 bg-[#D81B60]/5 blur-3xl pointer-events-none rounded-full" />
@@ -16,9 +20,9 @@ export default function Footer() {
       {/* Main Footer Content */}
       <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 pb-12 relative z-10">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-8 lg:gap-12">
-          
-          {/* Col 1: Brand Info & Contact (5 Cols) */}
-          <div className="lg:col-span-5 space-y-5">
+
+          {/* Col 1: Brand Info (4 Cols) */}
+          <div className="lg:col-span-4 space-y-5">
             {/* Prominent Logo on Clean Contrasting Capsule */}
             <div className="pb-1 inline-block">
               <div className="inline-flex bg-white px-4 py-2.5 rounded-2xl shadow-lg border border-pink-200/20">
@@ -31,14 +35,69 @@ export default function Footer() {
             </div>
 
             {/* Brand Story Prose with Rich High Contrast */}
-            <p className="text-sm sm:text-base text-pink-100/80 leading-relaxed max-w-md font-normal">
-              Tohay Kids is India's dedicated celebration wear boutique for little ones. Thoughtfully handcrafted with hypoallergenic soft mulmul cotton, generous +2" growth margins, and radiant festive charm.
+            <p className="text-xs sm:text-sm text-pink-100/90 leading-relaxed max-w-md font-normal">
+              At TOHAY KIDS, we believe that little ones deserve the finest blend of tradition, elegance, and comfort. Thoughtfully designed premium ethnic wear where traditional charm meets contemporary style.
             </p>
+          </div>
+
+          {/* Col 2: Shop Categories (2 Cols) */}
+          <div className="lg:col-span-2 space-y-4">
+            <h5 className="font-extrabold text-sm sm:text-base uppercase tracking-wider text-white border-b border-pink-500/25 pb-2.5">
+              Festive Wear
+            </h5>
+            <ul className="space-y-3 text-sm sm:text-base text-pink-200/75 font-medium">
+              <li>
+                <Link to="/girls" className="hover:text-white hover:translate-x-1 transition-all block">Girls Collection</Link>
+              </li>
+              <li>
+                <Link to="/boys" className="hover:text-white hover:translate-x-1 transition-all block">Boys Collection</Link>
+              </li>
+              <li>
+                <Link to="/siblings" className="hover:text-white hover:translate-x-1 transition-all block">Sibling Matching Sets</Link>
+              </li>
+              <li>
+                <Link to="/new-arrivals" className="hover:text-white hover:translate-x-1 transition-all block">New Arrivals</Link>
+              </li>
+              <li>
+                <Link to="/collections" className="hover:text-white hover:translate-x-1 transition-all block">Celebration Edit</Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Col 3: Parent Care & Policies (3 Cols) */}
+          <div className="lg:col-span-3 space-y-4">
+            <h5 className="font-extrabold text-sm sm:text-base uppercase tracking-wider text-white border-b border-pink-500/25 pb-2.5">
+              Parent Care
+            </h5>
+            <ul className="space-y-3 text-sm sm:text-base text-pink-200/75 font-medium">
+              <li>
+                <Link to="/track-order" className="hover:text-white hover:translate-x-1 transition-all block">Track Your Order</Link>
+              </li>
+              <li>
+                <Link to="/size-guide" className="hover:text-white hover:translate-x-1 transition-all block">Size Guide & Chart</Link>
+              </li>
+              <li>
+                <Link to="/faqs" className="hover:text-white hover:translate-x-1 transition-all block">FAQs & Shipping</Link>
+              </li>
+              <li>
+                <Link to="/contact-us" className="hover:text-white hover:translate-x-1 transition-all block">7-Day Easy Exchange</Link>
+              </li>
+              <li>
+                <Link to="/contact-us" className="hover:text-white hover:translate-x-1 transition-all block">Contact & Support</Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Col 4: Contact Support & Socials (Side of Parent Care - 3 Cols) */}
+          <div className="lg:col-span-3 space-y-4">
+            <h5 className="font-extrabold text-sm sm:text-base uppercase tracking-wider text-white border-b border-pink-500/25 pb-2.5">
+              Contact Support
+            </h5>
 
             {/* Direct Support Details */}
-            <div className="space-y-2.5 pt-1 text-sm sm:text-base">
+            <div className="space-y-3 pt-1 text-sm sm:text-base">
               <a
-                href="https://wa.me/919876543210"
+                href="https://wa.me/919261874142"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-3 text-pink-100 hover:text-white transition-colors font-medium group"
@@ -46,14 +105,14 @@ export default function Footer() {
                 <div className="w-7 h-7 rounded-lg bg-pink-500/15 border border-pink-500/25 flex items-center justify-center text-pink-300 group-hover:bg-[#D81B60] group-hover:text-white transition-colors shrink-0">
                   <Phone className="w-3.5 h-3.5" />
                 </div>
-                <span>+91 98765 43210 (WhatsApp Support)</span>
+                <span>+91 92618 74142 (WhatsApp Support)</span>
               </a>
 
               <div className="flex items-center gap-3 text-pink-100/90">
                 <div className="w-7 h-7 rounded-lg bg-pink-500/15 border border-pink-500/25 flex items-center justify-center text-pink-300 shrink-0">
                   <Mail className="w-3.5 h-3.5" />
                 </div>
-                <span>care@tohaykids.com</span>
+                <span>tohaykids@gmail.com</span>
               </div>
 
               <div className="flex items-center gap-3 text-pink-200/60 text-xs sm:text-sm">
@@ -98,92 +157,6 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Col 2: Shop Categories (2 Cols) */}
-          <div className="lg:col-span-2 space-y-4">
-            <h5 className="font-extrabold text-sm sm:text-base uppercase tracking-wider text-white border-b border-pink-500/25 pb-2.5">
-              Festive Wear
-            </h5>
-            <ul className="space-y-3 text-sm sm:text-base text-pink-200/75 font-medium">
-              <li>
-                <Link to="/girls" className="hover:text-white hover:translate-x-1 transition-all block">Girls Collection</Link>
-              </li>
-              <li>
-                <Link to="/boys" className="hover:text-white hover:translate-x-1 transition-all block">Boys Collection</Link>
-              </li>
-              <li>
-                <Link to="/siblings" className="hover:text-white hover:translate-x-1 transition-all block">Sibling Matching Sets</Link>
-              </li>
-              <li>
-                <Link to="/new-arrivals" className="hover:text-white hover:translate-x-1 transition-all block">New Arrivals</Link>
-              </li>
-              <li>
-                <Link to="/collections" className="hover:text-white hover:translate-x-1 transition-all block">Celebration Edit</Link>
-              </li>
-            </ul>
-          </div>
-
-          {/* Col 3: Parent Care & Policies (2.5 Cols) */}
-          <div className="lg:col-span-2 space-y-4">
-            <h5 className="font-extrabold text-sm sm:text-base uppercase tracking-wider text-white border-b border-pink-500/25 pb-2.5">
-              Parent Care
-            </h5>
-            <ul className="space-y-3 text-sm sm:text-base text-pink-200/75 font-medium">
-              <li>
-                <Link to="/track-order" className="hover:text-white hover:translate-x-1 transition-all block">Track Your Order</Link>
-              </li>
-              <li>
-                <Link to="/size-guide" className="hover:text-white hover:translate-x-1 transition-all block">Size Guide & Chart</Link>
-              </li>
-              <li>
-                <Link to="/faqs" className="hover:text-white hover:translate-x-1 transition-all block">FAQs & Shipping</Link>
-              </li>
-              <li>
-                <Link to="/contact-us" className="hover:text-white hover:translate-x-1 transition-all block">7-Day Easy Exchange</Link>
-              </li>
-              <li>
-                <Link to="/contact-us" className="hover:text-white hover:translate-x-1 transition-all block">Contact & Support</Link>
-              </li>
-            </ul>
-          </div>
-
-          {/* Col 4: About Tohay & Concierge Help (2.5 Cols) */}
-          <div className="lg:col-span-3 space-y-4">
-            <h5 className="font-extrabold text-sm sm:text-base uppercase tracking-wider text-white border-b border-pink-500/25 pb-2.5">
-              The Tohay Promise
-            </h5>
-            <ul className="space-y-3 text-sm sm:text-base text-pink-200/75 font-medium">
-              <li>
-                <Link to="/about-us" className="hover:text-white hover:translate-x-1 transition-all block">About Tohay Kids</Link>
-              </li>
-              <li>
-                <Link to="/about-us" className="hover:text-white hover:translate-x-1 transition-all block">Pure Mulmul Cotton Lining</Link>
-              </li>
-              <li>
-                <Link to="/size-guide" className="hover:text-white hover:translate-x-1 transition-all block">+2" Room to Grow Guarantee</Link>
-              </li>
-            </ul>
-
-            {/* Quick Stylist Box in Luxury Translucent Glass Style */}
-            <div className="p-4 rounded-2xl bg-white/5 border border-pink-500/20 backdrop-blur-md shadow-lg space-y-2.5 mt-4">
-              <p className="text-xs sm:text-sm font-bold text-white flex items-center gap-2">
-                <ShieldCheck className="w-4 h-4 text-[#D81B60]" />
-                <span>Need Sizing or Styling Help?</span>
-              </p>
-              <p className="text-xs sm:text-sm text-pink-200/80 leading-snug">
-                Our festive wear consultants are available on WhatsApp to assist you.
-              </p>
-              <a
-                href="https://wa.me/919876543210"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 text-xs sm:text-sm font-bold bg-[#25D366] hover:bg-[#1EBE5D] text-white px-3.5 py-2 rounded-xl shadow-sm transition-all hover:scale-102 mt-1"
-              >
-                <MessageCircle className="w-4 h-4" />
-                <span>Chat with Stylist</span>
-              </a>
-            </div>
-          </div>
-
         </div>
       </div>
 
@@ -206,35 +179,25 @@ export default function Footer() {
         </p>
 
         {/* Visual Payment Methods Badges on Clean White Cards */}
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex items-center gap-2 shrink-0 flex-wrap justify-center">
           {/* UPI Badge */}
-          <div className="h-8 px-3 bg-white rounded-lg border border-white/20 shadow-xs flex items-center gap-0.5 text-xs font-black text-slate-800" title="UPI Instant Payments">
-            <span className="text-[#00796B]">U</span>
-            <span className="text-[#E65100]">P</span>
-            <span className="text-[#00796B]">I</span>
+          <div className="h-8 px-2.5 bg-white rounded-lg border border-white/20 shadow-xs flex items-center justify-center" title="UPI Instant Payments">
+            <img src={upiIcon} alt="UPI" className="h-[18px] w-auto object-contain" />
           </div>
 
           {/* VISA Badge */}
-          <div className="h-8 px-3 bg-white rounded-lg border border-white/20 shadow-xs flex items-center justify-center" title="Visa Card">
-            <span className="font-black italic text-xs text-blue-800 tracking-tighter font-sans">VISA</span>
+          <div className="h-8 px-2.5 bg-white rounded-lg border border-white/20 shadow-xs flex items-center justify-center" title="Visa Card">
+            <img src={visaIcon} alt="Visa" className="h-3.5 w-auto object-contain" />
           </div>
 
           {/* Mastercard Badge */}
-          <div className="h-8 px-3 bg-white rounded-lg border border-white/20 shadow-xs flex items-center gap-0.5" title="Mastercard">
-            <div className="w-4 h-4 rounded-full bg-red-500 opacity-90 -mr-2" />
-            <div className="w-4 h-4 rounded-full bg-amber-400 opacity-90" />
+          <div className="h-8 px-2.5 bg-white rounded-lg border border-white/20 shadow-xs flex items-center justify-center" title="Mastercard">
+            <img src={mastercardIcon} alt="Mastercard" className="h-[18px] w-auto object-contain" />
           </div>
 
           {/* RuPay Badge */}
-          <div className="h-8 px-3 bg-white rounded-lg border border-white/20 shadow-xs flex items-center text-[11px] font-black" title="RuPay Card">
-            <span className="text-[#103E79]">Ru</span>
-            <span className="text-[#F26522]">Pay</span>
-          </div>
-
-          {/* COD Badge */}
-          <div className="h-8 px-3 bg-white rounded-lg border border-white/20 shadow-xs flex items-center gap-1.5 text-[11px] font-extrabold text-emerald-700" title="Cash on Delivery">
-            <Banknote className="w-4 h-4 text-emerald-600" />
-            <span>COD</span>
+          <div className="h-8 px-2.5 bg-white rounded-lg border border-white/20 shadow-xs flex items-center justify-center" title="RuPay Card">
+            <img src={rupayIcon} alt="RuPay" className="h-4 w-auto object-contain" />
           </div>
         </div>
       </div>

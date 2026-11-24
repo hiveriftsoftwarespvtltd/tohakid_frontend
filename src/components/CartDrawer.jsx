@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   X, 
@@ -11,12 +11,13 @@ import {
   ArrowLeft, 
   CheckCircle2, 
   ShieldCheck, 
-  Sparkles 
+  Sparkles
 } from 'lucide-react';
+import Swal from 'sweetalert2';
 import { useShop } from '../context/ShopContext';
 import { formatImageUrl } from '../utils/imageUtils';
 
-export default function CartDrawer() {
+export default function CartDrawer({ isPageMode = false }) {
   const {
     cart,
     isCartOpen,
@@ -33,16 +34,26 @@ export default function CartDrawer() {
     couponCode,
     applyCoupon,
     removeCoupon,
-    freeShippingThreshold
+    freeShippingThreshold,
+    isLoggedIn,
+    user,
+    addresses,
+    clearCart,
+    refreshOrders,
+    showToast
   } = useShop();
 
   const [inputCoupon, setInputCoupon] = useState('');
   const [couponAlert, setCouponAlert] = useState(null);
+  const pushedOverlayRef = useRef(false);
+  const skipHistoryBackRef = useRef(false);
   const navigate = useNavigate();
 
-  // 1. Strict background scroll lock: completely fixes background page and prevents any scrolling
+  const isVisible = isPageMode || isCartOpen;
+
+  // 1. Strict background scroll lock (overlay mode only)
   useEffect(() => {
-    if (!isCartOpen) return;
+    if (isPageMode || !isCartOpen) return;
 
     const scrollY = window.scrollY;
     const originalStyles = {
@@ -64,53 +75,85 @@ export default function CartDrawer() {
       document.body.style.overflow = originalStyles.overflow;
       window.scrollTo(0, scrollY);
     };
-  }, [isCartOpen]);
+  }, [isPageMode, isCartOpen]);
 
-  // 2. Hardware / Browser Back button navigation integration
+  // 2. Clean Browser/Mobile Back button support WITHOUT polluting the URL with #cart
   useEffect(() => {
-    if (!isCartOpen) return;
+    if (isPageMode || !isCartOpen) return;
 
-    let isPushed = false;
-    if (window.location.hash !== '#cart') {
-      const currentUrl = window.location.pathname + window.location.search;
-      window.history.pushState({ isCartOpen: true }, '', currentUrl + '#cart');
-      isPushed = true;
+    const cleanUrl = window.location.pathname + window.location.search;
+    if (window.location.hash === '#cart') {
+      window.history.replaceState(window.history.state, '', cleanUrl);
+    }
+
+    if (!window.history.state?.tohayCartOverlay) {
+      window.history.pushState(
+        { ...(window.history.state || {}), tohayCartOverlay: true },
+        '',
+        cleanUrl
+      );
+      pushedOverlayRef.current = true;
     }
 
     const handlePopState = () => {
+      pushedOverlayRef.current = false;
       setIsCartOpen(false);
     };
 
     window.addEventListener('popstate', handlePopState);
     return () => {
       window.removeEventListener('popstate', handlePopState);
-      if (isPushed && window.location.hash === '#cart') {
+      if (pushedOverlayRef.current && !skipHistoryBackRef.current && window.history.state?.tohayCartOverlay) {
+        pushedOverlayRef.current = false;
         window.history.back();
       }
+      skipHistoryBackRef.current = false;
     };
-  }, [isCartOpen, setIsCartOpen]);
+  }, [isPageMode, isCartOpen, setIsCartOpen]);
 
-  if (!isCartOpen) return null;
+  if (!isVisible) return null;
+
+  const closeOverlayForNavigation = () => {
+    skipHistoryBackRef.current = true;
+    pushedOverlayRef.current = false;
+    if (window.history.state?.tohayCartOverlay) {
+      const { tohayCartOverlay, ...rest } = window.history.state;
+      window.history.replaceState(rest, '', window.location.pathname + window.location.search);
+    }
+    setIsCartOpen(false);
+  };
 
   const handleClose = () => {
+    if (isPageMode) {
+      if (window.history.length > 1) {
+        navigate(-1);
+      } else {
+        navigate('/');
+      }
+      return;
+    }
     setIsCartOpen(false);
   };
 
   const handleProceedCheckout = () => {
-    if (window.location.hash === '#cart') {
-      window.history.replaceState(null, '', window.location.pathname + window.location.search);
+    if (!isPageMode) {
+      closeOverlayForNavigation();
     }
-    setIsCartOpen(false);
+    if (!isLoggedIn) {
+      showToast('Please sign in to proceed with checkout.');
+      navigate('/login?redirect=/checkout', { state: { from: '/checkout' } });
+      return;
+    }
     navigate('/checkout');
   };
 
   const freeShippingProgress = Math.min(100, Math.round((cartSubtotal / freeShippingThreshold) * 100));
   const amountNeededForFreeShipping = freeShippingThreshold - cartSubtotal;
 
-  const handleApplyCoupon = (e) => {
+  const handleApplyCoupon = async (e) => {
     e.preventDefault();
     if (!inputCoupon.trim()) return;
-    const res = applyCoupon(inputCoupon);
+    const res = await applyCoupon(inputCoupon);
     setCouponAlert(res);
     setInputCoupon('');
   };
@@ -118,8 +161,14 @@ export default function CartDrawer() {
   const isFixedDiscount = discountType === 'FIXED' || discountType === 'Fixed Amount';
 
   return (
-    <div className="fixed inset-0 z-[100] w-full h-full bg-[#FFFDFC] flex flex-col overflow-hidden animate-in fade-in duration-200">
-      {/* 1. Full-Screen Page Header with Back Button */}
+    <div
+      className={
+        isPageMode
+          ? 'w-full min-h-[75vh] bg-[#FFFDFC] flex flex-col'
+          : 'fixed inset-0 z-[100] w-full h-full bg-[#FFFDFC] flex flex-col overflow-hidden animate-in fade-in duration-200'
+      }
+    >
+      {/* 1. Page / Drawer Header with Back Button */}
       <header className="shrink-0 bg-white border-b border-pink-100 shadow-xs px-4 sm:px-8 py-3.5 flex items-center justify-between z-10">
         <div className="flex items-center gap-2 sm:gap-4">
           <button
@@ -406,7 +455,7 @@ export default function CartDrawer() {
                   <button
                     type="button"
                     onClick={handleProceedCheckout}
-                    className="w-full bg-[#D81B60] hover:bg-[#C2185B] text-white font-extrabold py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all cursor-pointer"
+                    className="w-full bg-[#D81B60] hover:bg-[#C2185B] text-white font-extrabold py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all cursor-pointer active:scale-98"
                   >
                     <span>Proceed to Checkout</span>
                     <ArrowRight className="w-4 h-4" />

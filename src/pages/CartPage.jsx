@@ -3,13 +3,16 @@ import { useShop } from '../context/ShopContext';
 import CartDrawer from '../components/CartDrawer';
 
 export default function CartPage() {
-  const { isCartOpen, setIsCartOpen } = useShop();
+  const { setIsCartOpen } = useShop();
 
+  // Keep overlay state closed when visiting the dedicated /cart route
+  // and strip any legacy #cart hash from the URL cleanly.
   useEffect(() => {
-    if (!isCartOpen) {
-      setIsCartOpen(true);
+    setIsCartOpen(false);
+    if (window.location.hash === '#cart') {
+      window.history.replaceState(null, '', window.location.pathname + window.location.search);
     }
-  }, [isCartOpen, setIsCartOpen]);
+  }, [setIsCartOpen]);
 
-  return <CartDrawer />;
+  return <CartDrawer isPageMode />;
 }
