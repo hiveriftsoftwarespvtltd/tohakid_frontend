@@ -46,13 +46,32 @@ export const launchRazorpayMagicCheckout = async ({
       throw new Error('Razorpay Checkout SDK could not load. Please check your internet connection.');
     }
 
-    const receipt = `rcpt_magic_${Date.now()}`;
-    const orderRes = await paymentService.createMagicOrder(amount, receipt, {
-      ...notes,
-      source: 'MagicCheckout',
-      customer_email: customer?.email || '',
-      customer_phone: customer?.phone || '',
+    const formattedLineItems = (items || []).map((item) => {
+      const priceInPaise = Math.round((Number(item.price) || 0) * 100);
+      return {
+        sku: String(item.productId || item.sku || 'TH-1001'),
+        variant_id: String(item.size || 'Standard'),
+        name: String(item.name || 'Kids Festive Outfit'),
+        description: item.size ? `Size: ${item.size}` : 'Festive Kids Wear',
+        price: priceInPaise,
+        offer_price: priceInPaise,
+        quantity: Number(item.qty) || 1,
+        image_url: item.image || '',
+      };
     });
+
+    const receipt = `rcpt_magic_${Date.now()}`;
+    const orderRes = await paymentService.createMagicOrder(
+      amount,
+      receipt,
+      {
+        ...notes,
+        source: 'MagicCheckout',
+        customer_email: customer?.email || '',
+        customer_phone: customer?.phone || '',
+      },
+      formattedLineItems,
+    );
 
     // Unpack data properly whether nested or top-level
     const rawData = orderRes?.data || orderRes;
@@ -75,6 +94,10 @@ export const launchRazorpayMagicCheckout = async ({
       order_id: orderId,
       one_click_checkout: true, // ⚡ Activates Razorpay Magic Checkout
       show_coupons: true,
+      line_items: formattedLineItems,
+      config: {
+        one_click_checkout: true,
+      },
       prefill: {
         name: customer?.name || shippingAddress?.name || '',
         email: customer?.email || shippingAddress?.email || '',

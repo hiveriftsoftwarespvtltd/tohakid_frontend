@@ -15,12 +15,22 @@ export const paymentService = {
   },
 
   // Razorpay Magic 1-Click Checkout endpoints
-  async createMagicOrder(amount, receipt, notes = {}) {
+  async createMagicOrder(amount, receipt, notes = {}, lineItems = []) {
     // Call /payments/create-order (universally available on backend)
     try {
-      return await apiClient.post('/payments/create-order', { amount, receipt, notes });
+      return await apiClient.post('/payments/create-order', {
+        amount,
+        receipt,
+        notes,
+        line_items: lineItems,
+      });
     } catch {
-      return await apiClient.post('/magic-checkout/create-order', { amount, receipt, notes });
+      return await apiClient.post('/magic-checkout/create-order', {
+        amount,
+        receipt,
+        notes,
+        line_items: lineItems,
+      });
     }
   },
 
